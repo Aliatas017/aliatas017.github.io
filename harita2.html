@@ -237,7 +237,7 @@
             <div class="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i data-lucide="alert-circle" class="w-8 h-8 text-red-500"></i>
             </div>
-            <h1 class="text-xl font-bold text-white mb-2">Otomatik Yükleme Başarısız</h1>
+            <h1 class="text-xl font-bold text-white mb-2">Harita Yüklenemedi</h1>
             <p class="text-slate-400 mb-6 text-xs" id="fallback-msg">
                 Belirtilen URL'den JSON çekilemedi.
             </p>
@@ -245,7 +245,7 @@
             <div class="flex flex-col gap-4 w-full">
                 <!-- Manuel URL Girişi -->
                 <div class="flex gap-2">
-                     <input type="text" id="manual-url" placeholder="JSON URL'si girin (Örn: tr.json)" class="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                     <input type="text" id="manual-url" placeholder="JSON URL'si girin" value="https://raw.githubusercontent.com/Aliatas017/aliatas017.github.io/main/tr.json" class="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
                      <button onclick="game.retryUrl()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold">Yükle</button>
                 </div>
                 
@@ -383,13 +383,11 @@
 
     <script>
         // ==========================================
-        //  AYARLAR: GITHUB LINKI
+        //  AYARLAR: GITHUB LINKI (DÜZELTİLDİ)
+        //  /refs/heads/ KISMI ÇIKARILDI, DOĞRU RAW ADRESİ
         // ==========================================
-        const MAP_DATA_URL = 'https://raw.githubusercontent.com/Aliatas017/aliatas017.github.io/main/tr.json'; // Örn: 'https://raw.githubusercontent.com/kullanici/repo/main/tr.json'
+        const MAP_DATA_URL = 'https://raw.githubusercontent.com/Aliatas017/aliatas017.github.io/main/tr.json';
         
-        // Test amaçlı (Eğer link girilmezse çalışması için bir açık kaynak linki):
-        const FALLBACK_URL = 'https://raw.githubusercontent.com/alpers/Turkey-Maps-GeoJSON/master/tr-cities-utf8.json';
-
         // --- GERÇEK KOORDİNATLI DAĞ LİSTESİ ---
         const mountainData = [
             // Doğu Anadolu
@@ -422,6 +420,9 @@
             { name: "Bozdağlar", lat: 38.35, lon: 28.10, type: "kirik" },
             { name: "Aydın Dağları", lat: 37.95, lon: 28.00, type: "kirik" },
             { name: "Menteşe", lat: 37.20, lon: 28.50, type: "kirik" },
+            { name: "Beşparmak", lat: 37.45, lon: 27.50, type: "kirik" },
+            { name: "Madranbaba", lat: 37.75, lon: 28.15, type: "kirik" },
+            { name: "Akdağ (M)", lat: 36.90, lon: 29.50, type: "kirik" }, // Muğla
 
             // Akdeniz
             { name: "Amanos", lat: 36.75, lon: 36.33, type: "kirik" },
@@ -433,17 +434,31 @@
             { name: "Aladağlar", lat: 37.80, lon: 35.15, type: "kivrim" },
             { name: "Tahtalı", lat: 38.30, lon: 36.40, type: "kivrim" },
             { name: "Binboğa", lat: 38.15, lon: 36.90, type: "kivrim" },
+            { name: "Akdağlar (A)", lat: 36.55, lon: 29.55, type: "kivrim" }, // Antalya
+            { name: "Sandras", lat: 37.05, lon: 28.85, type: "kivrim" },
+            { name: "Malatya D.", lat: 38.20, lon: 38.30, type: "kivrim" },
+            { name: "Nurhak", lat: 37.95, lon: 37.55, type: "kivrim" },
+            { name: "Genç D.", lat: 38.70, lon: 40.50, type: "kivrim" },
+            { name: "İhtiyar Şahap", lat: 38.15, lon: 42.10, type: "kivrim" },
 
-            // Karadeniz
+
+            // Karadeniz & Diğer İç Dağlar
             { name: "Küre", lat: 41.76, lon: 33.55, type: "kivrim" },
             { name: "Ilgaz", lat: 41.07, lon: 33.86, type: "kivrim" },
             { name: "Köroğlu", lat: 40.58, lon: 31.85, type: "kivrim" },
+            { name: "Bolu Dağları", lat: 40.75, lon: 31.60, type: "kivrim" },
             { name: "Canik", lat: 40.86, lon: 36.56, type: "kivrim" },
             { name: "Giresun D.", lat: 40.50, lon: 38.50, type: "kivrim" },
             { name: "Kaçkar", lat: 40.93, lon: 41.16, type: "kivrim" },
             { name: "Kop", lat: 40.02, lon: 40.52, type: "kivrim" },
             { name: "Mescit", lat: 40.50, lon: 41.20, type: "kivrim" },
-            { name: "Yalnızçam", lat: 41.00, lon: 42.20, type: "kivrim" }
+            { name: "Yalnızçam", lat: 41.00, lon: 42.20, type: "kivrim" },
+            { name: "Karçal", lat: 41.30, lon: 42.00, type: "kivrim" },
+            { name: "Karasu-Aras", lat: 40.10, lon: 41.50, type: "kivrim" },
+            { name: "Allahuekber", lat: 40.55, lon: 42.50, type: "kivrim" },
+            { name: "Tecer", lat: 39.60, lon: 37.50, type: "kivrim" },
+            { name: "Sündiken", lat: 39.95, lon: 30.90, type: "kivrim" },
+            { name: "Murat Dağı", lat: 38.95, lon: 29.60, type: "kivrim" }
         ];
 
         const game = {
@@ -461,13 +476,9 @@
             drawnLabels: [], 
 
             init: function() {
-                // Öncelikli URL'yi dene, hata verirse fallback'e geç veya manuel yüklemeyi aç
-                const url = (MAP_DATA_URL && MAP_DATA_URL !== 'tr.json') ? MAP_DATA_URL : FALLBACK_URL;
-                this.fetchMapData(url); 
+                this.fetchMapData(MAP_DATA_URL);
                 lucide.createIcons();
                 this.setupPanZoom();
-                
-                // Dosya yükleme dinleyicisi (Her ihtimale karşı)
                 document.getElementById('json-file').addEventListener('change', (e) => this.handleFileUpload(e));
             },
 
@@ -542,7 +553,6 @@
             },
 
             fetchMapData: function(url) {
-                // Yükleniyor göster
                 document.getElementById('loading-overlay').classList.remove('hidden');
                 
                 fetch(url)
@@ -557,21 +567,13 @@
                         this.start();
                     })
                     .catch(err => {
-                        console.warn("Ana URL yüklenemedi, Fallback deneniyor...", err);
-                        // Eğer ana URL başarısızsa ve Fallback farklıysa onu dene
-                        if (url === MAP_DATA_URL && FALLBACK_URL && FALLBACK_URL !== MAP_DATA_URL) {
-                             this.fetchMapData(FALLBACK_URL);
-                        } else {
-                            // Hepsinde başarısızsa manuel yükleme ekranını aç
-                            document.getElementById('loading-overlay').classList.add('hidden');
-                            document.getElementById('upload-overlay').style.display = 'flex';
-                            
-                            let msg = err.message;
-                            if(msg.includes('Failed to fetch') || msg.includes('CORS')) {
-                                msg = "Veri otomatik çekilemedi (" + err.message + "). Lütfen dosyayı manuel seçin.";
-                            }
-                            document.getElementById('fallback-msg').innerText = msg;
+                        document.getElementById('loading-overlay').classList.add('hidden');
+                        document.getElementById('upload-overlay').style.display = 'flex';
+                        let msg = err.message;
+                        if(msg.includes('Failed to fetch') || msg.includes('CORS')) {
+                            msg = "Veri otomatik çekilemedi (" + err.message + ").";
                         }
+                        document.getElementById('fallback-msg').innerText = msg;
                     });
             },
 
