@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KPSS Coğrafya Takip Sistemi</title>
+    
+    <!-- React ve ReactDOM (CDN) -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    
+    <!-- Babel (JSX'i tarayıcının anlaması için) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS (Tasarım için) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    animation: {
+                        'bounce-in': 'bounceIn 0.5s cubic-bezier(0.8, 0, 1, 1)',
+                        'fadeIn': 'fadeIn 0.3s ease-out',
+                    },
+                    keyframes: {
+                        bounceIn: {
+                            '0%': { transform: 'translate(-50%, 100%)', opacity: '0' },
+                            '100%': { transform: 'translate(-50%, 0)', opacity: '1' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(-10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 transition-colors duration-300">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- IKONLAR (Lucide-React yerine manuel SVG'ler) ---
+        const Icon = ({ path, size = 20, className = "" }) => (
+            <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width={size} 
+                height={size} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className={className}
+            >
+                {path}
+            </svg>
+        );
+
+        const Icons = {
+            BookOpen: (props) => <Icon {...props} path={<><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></>} />,
+            CheckCircle: (props) => <Icon {...props} path={<><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>} />,
+            Clock: (props) => <Icon {...props} path={<><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>} />,
+            Play: (props) => <Icon {...props} path={<polygon points="5 3 19 12 5 21 5 3"/>} />,
+            Pause: (props) => <Icon {...props} path={<><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></>} />,
+            RotateCcw: (props) => <Icon {...props} path={<><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></>} />,
+            Save: (props) => <Icon {...props} path={<><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></>} />,
+            Download: (props) => <Icon {...props} path={<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></>} />,
+            Upload: (props) => <Icon {...props} path={<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></>} />,
+            Moon: (props) => <Icon {...props} path={<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>} />,
+            Sun: (props) => <Icon {...props} path={<><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></>} />,
+            BarChart2: (props) => <Icon {...props} path={<><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></>} />,
+            ChevronDown: (props) => <Icon {...props} path={<polyline points="6 9 12 15 18 9"/>} />,
+            ChevronUp: (props) => <Icon {...props} path={<polyline points="18 15 12 9 6 15"/>} />,
+            Edit3: (props) => <Icon {...props} path={<><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></>} />,
+            Trash2: (props) => <Icon {...props} path={<><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></>} />,
+        };
+
+        // --- VERİLER ---
+        const DEFAULT_TOPICS = [
+          { id: 1, title: "Coğrafyanın Bölümleri ve Yöntemleri", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Coğrafyanın İlkeleri", "Harita Bilgisi", "Projeksiyon Yöntemleri"] },
+          { id: 2, title: "Türkiye'nin Coğrafi Konumu", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Matematik Konum", "Özel Konum", "Jeopolitik Konum"] },
+          { id: 3, title: "Türkiye'nin Yer Şekilleri", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Dağlar", "Ovalar", "Platolar", "Akarsular", "Göller"] },
+          { id: 4, title: "Jeolojik Zamanlar ve Oluşum", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Türkiye'nin Jeolojik Geçmişi", "Masif Araziler"] },
+          { id: 5, title: "İklim Bilgisi ve Türkiye'nin İklimi", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Sıcaklık", "Basınç ve Rüzgarlar", "Nem ve Yağış", "İklim Tipleri"] },
+          { id: 6, title: "Doğal Afetler", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Deprem", "Sel ve Taşkın", "Heyelan", "Erozyon"] },
+          { id: 7, title: "Nüfus ve Yerleşme", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Nüfusun Dağılışı", "Nüfus Piramitleri", "Göçler", "Kır ve Kent Yerleşmeleri"] },
+          { id: 8, title: "Tarım", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Tarımı Etkileyen Faktörler", "Tarım Ürünleri"] },
+          { id: 9, title: "Hayvancılık, Ormancılık ve Balıkçılık", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Büyükbaş/Küçükbaş", "Kümes Hayvancılığı", "Su Ürünleri"] },
+          { id: 10, title: "Madenler ve Enerji Kaynakları", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Metalik Madenler", "Enerji Kaynakları (Yenilenebilir/Tükenebilir)"] },
+          { id: 11, title: "Sanayi ve Ticaret", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Sanayi Kollarının Dağılışı", "İç ve Dış Ticaret"] },
+          { id: 12, title: "Ulaşım ve Turizm", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Karayolu, Demiryolu, Denizyolu, Havayolu", "Turizm Değerleri"] },
+          { id: 13, title: "Bölgeler Coğrafyası (Bölgesel Kalkınma)", status: "not-started", timeSpent: 0, notes: "", subtopics: ["GAP, DAP, KOP, DOKAP vb."] },
+          { id: 14, title: "Çevre ve Doğa (Güncel Çevre Sorunları)", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Küresel Isınma", "Atıklar"] },
+          { id: 15, title: "Kültür Bölgeleri ve Nüfus Hareketleri", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Türk Kültürü", "Küresel Örgütler"] },
+        ];
+
+        const STATUS_CONFIG = {
+          'not-started': { label: 'Başlamadım', color: 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300' },
+          'working': { label: 'Çalışılıyor', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' },
+          'reviewing': { label: 'Tekrar Ediyorum', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
+          'finished': { label: 'Bitirdim', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
+        };
+
+        function App() {
+          const [topics, setTopics] = useState(DEFAULT_TOPICS);
+          const [darkMode, setDarkMode] = useState(false);
+          const [activeTopicId, setActiveTopicId] = useState(null);
+          const [isTimerRunning, setIsTimerRunning] = useState(false);
+          const [expandedTopicId, setExpandedTopicId] = useState(null);
+          const [filter, setFilter] = useState('all');
+
+          const timerRef = useRef(null);
+
+          // LocalStorage Okuma
+          useEffect(() => {
+            const savedTopics = localStorage.getItem('kpssCografyaTopics');
+            const savedTheme = localStorage.getItem('kpssTheme');
+            
+            if (savedTopics) {
+              try { setTopics(JSON.parse(savedTopics)); } catch (e) { console.error(e); }
+            }
+            if (savedTheme === 'dark') setDarkMode(true);
+          }, []);
+
+          // LocalStorage Yazma
+          useEffect(() => {
+            localStorage.setItem('kpssCografyaTopics', JSON.stringify(topics));
+          }, [topics]);
+
+          useEffect(() => {
+            localStorage.setItem('kpssTheme', darkMode ? 'dark' : 'light');
+            if (darkMode) document.documentElement.classList.add('dark');
+            else document.documentElement.classList.remove('dark');
+          }, [darkMode]);
+
+          // Zamanlayıcı
+          useEffect(() => {
+            if (isTimerRunning && activeTopicId) {
+              timerRef.current = setInterval(() => {
+                setTopics(prev => prev.map(t => t.id === activeTopicId ? { ...t, timeSpent: t.timeSpent + 1 } : t));
+              }, 1000);
+            } else {
+              clearInterval(timerRef.current);
+            }
+            return () => clearInterval(timerRef.current);
+          }, [isTimerRunning, activeTopicId]);
+
+          // Fonksiyonlar
+          const toggleTimer = (id) => {
+            if (activeTopicId === id && isTimerRunning) {
+              setIsTimerRunning(false);
+            } else if (activeTopicId === id && !isTimerRunning) {
+              setIsTimerRunning(true);
+            } else {
+              setActiveTopicId(id);
+              setIsTimerRunning(true);
+              changeStatus(id, 'working');
+            }
+          };
+
+          const changeStatus = (id, newStatus) => {
+            setTopics(topics.map(t => t.id === id ? { ...t, status: newStatus } : t));
+          };
+
+          const updateNotes = (id, newNote) => {
+            setTopics(topics.map(t => t.id === id ? { ...t, notes: newNote } : t));
+          };
+
+          const deleteData = () => {
+            if(window.confirm("Tüm ilerlemeniz silinecek. Emin misiniz?")) {
+                setTopics(DEFAULT_TOPICS);
+                setActiveTopicId(null);
+                setIsTimerRunning(false);
+            }
+          }
+
+          const exportData = () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(topics));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "kpss_cografya_yedek.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+          };
+
+          const importData = (event) => {
+            const fileReader = new FileReader();
+            fileReader.readAsText(event.target.files[0], "UTF-8");
+            fileReader.onload = (e) => {
+              try {
+                const parsedData = JSON.parse(e.target.result);
+                if (Array.isArray(parsedData)) {
+                  setTopics(parsedData);
+                  alert("Yedek başarıyla yüklendi!");
+                }
+              } catch (error) {
+                alert("Dosya formatı hatalı.");
+              }
+            };
+          };
+
+          const formatTime = (seconds) => {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            return `${h > 0 ? h + 'sa ' : ''}${m}dk ${s}sn`;
+          };
+
+          const totalTopics = topics.length;
+          const completedTopics = topics.filter(t => t.status === 'finished').length;
+          const progressPercent = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+          const totalTime = topics.reduce((acc, curr) => acc + curr.timeSpent, 0);
+
+          const filteredTopics = topics.filter(t => {
+            if (filter === 'all') return true;
+            return t.status === filter;
+          });
+
+          return (
+            <div className={`min-h-screen transition-colors duration-300 ${darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-800'}`}>
+              
+              {/* ÜST BAR */}
+              <header className="sticky top-0 z-20 backdrop-blur-md bg-white/80 dark:bg-gray-800/80 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+                <div className="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <Icons.BookOpen className="text-indigo-600 dark:text-indigo-400" />
+                    <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                      KPSS Coğrafya Takip
+                    </h1>
+                  </div>
+                  <button 
+                    onClick={() => setDarkMode(!darkMode)}
+                    className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+                  >
+                    {darkMode ? <Icons.Sun size={20} /> : <Icons.Moon size={20} />}
+                  </button>
+                </div>
+              </header>
+
+              <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+                
+                {/* İSTATİSTİK PANOSU */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Genel İlerleme</p>
+                        <h2 className="text-3xl font-bold mt-1">%{progressPercent}</h2>
+                      </div>
+                      <div className="p-2 bg-indigo-100 dark:bg-indigo-900 rounded-lg text-indigo-600 dark:text-indigo-300">
+                        <Icons.BarChart2 size={24} />
+                      </div>
+                    </div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full mt-4">
+                      <div 
+                        className="bg-indigo-600 h-2 rounded-full transition-all duration-500" 
+                        style={{ width: `${progressPercent}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">{completedTopics} / {totalTopics} Konu Tamamlandı</p>
+                  </div>
+
+                  <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Toplam Çalışma</p>
+                        <h2 className="text-3xl font-bold mt-1">{formatTime(totalTime)}</h2>
+                      </div>
+                      <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg text-orange-600 dark:text-orange-300">
+                        <Icons.Clock size={24} />
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-4">Tüm konulara harcanan toplam süre</p>
+                  </div>
+
+                  <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-center space-y-3">
+                     <div className="flex gap-2">
+                        <button onClick={exportData} className="flex-1 flex items-center justify-center gap-2 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 py-2 rounded-lg transition">
+                          <Icons.Download size={16} /> Yedekle
+                        </button>
+                        <label className="flex-1 flex items-center justify-center gap-2 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 py-2 rounded-lg transition cursor-pointer">
+                          <Icons.Upload size={16} /> Yükle
+                          <input type="file" onChange={importData} className="hidden" accept=".json" />
+                        </label>
+                     </div>
+                     <button onClick={deleteData} className="w-full text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 flex items-center justify-center gap-1">
+                        <Icons.Trash2 size={12}/> Sıfırla
+                     </button>
+                  </div>
+                </div>
+
+                {/* AKTİF ÇALIŞMA ZAMANLAYICISI */}
+                {activeTopicId && (
+                  <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-[90%] md:w-auto z-50 animate-bounce-in">
+                    <div className="bg-gray-900 text-white dark:bg-white dark:text-gray-900 px-6 py-4 rounded-full shadow-2xl flex items-center gap-4 border border-gray-700 dark:border-gray-200">
+                        <div className="flex flex-col">
+                          <span className="text-xs font-medium opacity-70">Şu an çalışılıyor:</span>
+                          <span className="font-bold truncate max-w-[200px]">
+                            {topics.find(t => t.id === activeTopicId)?.title}
+                          </span>
+                        </div>
+                        <div className="text-2xl font-mono font-bold">
+                          {formatTime(topics.find(t => t.id === activeTopicId)?.timeSpent || 0)}
+                        </div>
+                        <button 
+                          onClick={() => setIsTimerRunning(!isTimerRunning)}
+                          className={`p-3 rounded-full transition ${isTimerRunning ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-green-500 hover:bg-green-600 text-white'}`}
+                        >
+                          {isTimerRunning ? <Icons.Pause size={20} /> : <Icons.Play size={20} />}
+                        </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* KONU LİSTESİ FİLTRE */}
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8">
+                  <h3 className="text-lg font-bold flex items-center gap-2">
+                    Konu Listesi
+                    <span className="text-xs font-normal bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-full">
+                       {topics.length}
+                    </span>
+                  </h3>
+                  <div className="flex gap-2">
+                     <select 
+                       value={filter} 
+                       onChange={(e) => setFilter(e.target.value)}
+                       className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+                     >
+                       <option value="all">Tümü</option>
+                       <option value="not-started">Başlanmadı</option>
+                       <option value="working">Çalışılıyor</option>
+                       <option value="reviewing">Tekrar</option>
+                       <option value="finished">Bitti</option>
+                     </select>
+                  </div>
+                </div>
+
+                {/* KONU KARTLARI */}
+                <div className="space-y-3 pb-24">
+                  {filteredTopics.map((topic) => (
+                    <div 
+                      key={topic.id} 
+                      className={`bg-white dark:bg-gray-800 rounded-xl border transition-all duration-200 
+                        ${topic.status === 'finished' ? 'border-green-200 dark:border-green-900/50' : 'border-gray-200 dark:border-gray-700'}
+                        ${expandedTopicId === topic.id ? 'shadow-md ring-1 ring-indigo-500/20' : 'hover:shadow-sm'}
+                      `}
+                    >
+                      {/* KART BAŞLIĞI */}
+                      <div 
+                        className="p-4 flex items-center justify-between cursor-pointer select-none"
+                        onClick={() => setExpandedTopicId(expandedTopicId === topic.id ? null : topic.id)}
+                      >
+                        <div className="flex items-center gap-4 flex-1">
+                          <div className={`p-2 rounded-lg flex-shrink-0 ${
+                            topic.status === 'finished' ? 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                          }`}>
+                            {topic.status === 'finished' ? <Icons.CheckCircle size={20} /> : <Icons.BookOpen size={20} />}
+                          </div>
+                          <div>
+                            <h4 className={`font-semibold ${topic.status === 'finished' ? 'text-gray-500 line-through decoration-2 decoration-green-500/50' : ''}`}>
+                              {topic.title}
+                            </h4>
+                            <div className="flex items-center gap-2 mt-1">
+                               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_CONFIG[topic.status].color}`}>
+                                  {STATUS_CONFIG[topic.status].label}
+                               </span>
+                               {topic.timeSpent > 0 && (
+                                 <span className="text-xs text-gray-400 font-mono flex items-center gap-1">
+                                    <Icons.Clock size={10} /> {formatTime(topic.timeSpent)}
+                                 </span>
+                               )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-gray-400">
+                          {expandedTopicId === topic.id ? <Icons.ChevronUp size={20} /> : <Icons.ChevronDown size={20} />}
+                        </div>
+                      </div>
+
+                      {/* DETAY ALANI */}
+                      {expandedTopicId === topic.id && (
+                        <div className="px-4 pb-4 pt-0 border-t border-gray-100 dark:border-gray-700 animate-fadeIn">
+                          
+                          {/* ALT BAŞLIKLAR */}
+                          {topic.subtopics && topic.subtopics.length > 0 && (
+                            <div className="mt-4 mb-4">
+                              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Konu İçeriği</p>
+                              <div className="flex flex-wrap gap-2">
+                                {topic.subtopics.map((sub, idx) => (
+                                  <span key={idx} className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded">
+                                    {sub}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* KONTROL PANELİ */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            
+                            <div className="space-y-4">
+                              <div>
+                                <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Durum Değiştir</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                   {Object.entries(STATUS_CONFIG).map(([key, config]) => (
+                                     <button
+                                       key={key}
+                                       onClick={() => changeStatus(topic.id, key)}
+                                       className={`text-xs py-2 px-2 rounded-lg border transition ${
+                                         topic.status === key 
+                                         ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300' 
+                                         : 'border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                       }`}
+                                     >
+                                       {config.label}
+                                     </button>
+                                   ))}
+                                </div>
+                              </div>
+
+                              <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg flex items-center justify-between border border-gray-100 dark:border-gray-700">
+                                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                                   <Icons.Clock size={16} />
+                                   <span className="text-sm font-mono font-bold">{formatTime(topic.timeSpent)}</span>
+                                </div>
+                                <div className="flex gap-2">
+                                   <button 
+                                     onClick={() => toggleTimer(topic.id)}
+                                     className={`flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-md text-white transition ${
+                                       activeTopicId === topic.id && isTimerRunning 
+                                       ? 'bg-red-500 hover:bg-red-600' 
+                                       : 'bg-indigo-600 hover:bg-indigo-700'
+                                     }`}
+                                   >
+                                     {activeTopicId === topic.id && isTimerRunning ? (
+                                       <><Icons.Pause size={12} /> Duraklat</>
+                                     ) : (
+                                       <><Icons.Play size={12} /> Çalış</>
+                                     )}
+                                   </button>
+                                   <button 
+                                     onClick={() => {
+                                       if(window.confirm('Süre sıfırlansın mı?')) {
+                                          setTopics(topics.map(t => t.id === topic.id ? { ...t, timeSpent: 0 } : t));
+                                       }
+                                     }}
+                                     className="p-1.5 text-gray-400 hover:text-red-500 transition"
+                                     title="Süreyi Sıfırla"
+                                   >
+                                     <Icons.RotateCcw size={14} />
+                                   </button>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-col h-full">
+                               <label className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase mb-2">
+                                 <Icons.Edit3 size={12} /> Kişisel Notlar
+                               </label>
+                               <textarea 
+                                 value={topic.notes}
+                                 onChange={(e) => updateNotes(topic.id, e.target.value)}
+                                 placeholder="Bu konuyla ilgili önemli notlar, şifreler veya eksikler..."
+                                 className="flex-1 w-full p-3 text-sm bg-yellow-50 dark:bg-gray-900 border border-yellow-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none resize-none min-h-[120px]"
+                               />
+                               <div className="flex justify-end mt-1">
+                                  <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                                    <Icons.Save size={10} /> Otomatik Kaydedilir
+                                  </span>
+                               </div>
+                            </div>
+
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  
+                  {filteredTopics.length === 0 && (
+                     <div className="text-center py-10 text-gray-400">
+                        <p>Bu filtreye uygun konu bulunamadı.</p>
+                     </div>
+                  )}
+                </div>
+              </main>
+            </div>
+          );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
