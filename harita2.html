@@ -382,80 +382,68 @@
     </main>
 
     <script>
-        // =========================================================
-        //  AYARLAR: HARITA DOSYA YOLU (URL)
-        //  Buraya 'tr.json' dosyanızın yolunu (veya sunucu adresini) yazın.
-        //  Örnek: 'tr.json' veya 'http://localhost:8000/tr.json'
-        // =========================================================
-        const HARITA_JSON_URL = 'https://raw.githubusercontent.com/Aliatas017/aliatas017.github.io/refs/heads/main/tr.json'; 
+        // ==========================================
+        //  AYARLAR: GITHUB LINKI
+        // ==========================================
+        const MAP_DATA_URL = 'tr.json'; // Örn: 'https://raw.githubusercontent.com/kullanici/repo/main/tr.json'
         
-        // --- 58 DAĞLIK TAM LİSTE ---
+        // Test amaçlı (Eğer link girilmezse çalışması için bir açık kaynak linki):
+        const FALLBACK_URL = 'https://raw.githubusercontent.com/alpers/Turkey-Maps-GeoJSON/master/tr-cities-utf8.json';
+
+        // --- GERÇEK KOORDİNATLI DAĞ LİSTESİ ---
         const mountainData = [
-            // 1. KIRIK DAĞLAR (Ege)
-            { name: "Kaz Dağları", lat: 39.78, lon: 26.83, type: "kirik" },
-            { name: "Madra Dağı", lat: 39.30, lon: 27.00, type: "kirik" },
-            { name: "Yunt Dağı", lat: 38.85, lon: 27.25, type: "kirik" },
-            { name: "Bozdağlar", lat: 38.35, lon: 28.10, type: "kirik" },
-            { name: "Aydın Dağları", lat: 37.95, lon: 28.05, type: "kirik" },
-            { name: "Menteşe Dağları", lat: 37.30, lon: 28.50, type: "kirik" },
-            { name: "Beşparmak", lat: 37.45, lon: 27.50, type: "kirik" },
-            { name: "Madranbaba", lat: 37.75, lon: 28.15, type: "kirik" },
-            { name: "Akdağ (Muğla)", lat: 36.90, lon: 29.50, type: "kirik" },
-
-            // Akdeniz Kırık
-            { name: "Amanos (Nur)", lat: 36.75, lon: 36.30, type: "kirik" },
-
-            // 2. VOLKANİK DAĞLAR
-            { name: "Nemrut (Bitlis)", lat: 38.65, lon: 42.25, type: "volkanik" },
-            { name: "Süphan Dağı", lat: 38.92, lon: 42.82, type: "volkanik" },
-            { name: "Tendürek", lat: 39.35, lon: 43.85, type: "volkanik" },
+            // Doğu Anadolu
             { name: "Ağrı Dağı", lat: 39.70, lon: 44.30, type: "volkanik" },
-            { name: "Erciyes", lat: 38.53, lon: 35.45, type: "volkanik" },
-            { name: "Hasan Dağı", lat: 38.13, lon: 34.17, type: "volkanik" },
-            { name: "Melendiz", lat: 38.07, lon: 34.40, type: "volkanik" },
-            { name: "Karadağ (Krm)", lat: 37.40, lon: 33.15, type: "volkanik" },
-            { name: "Karacadağ (Kon)", lat: 37.80, lon: 33.60, type: "volkanik" },
-            { name: "Karacadağ (Urf)", lat: 37.75, lon: 39.85, type: "volkanik" },
-            { name: "Kula Volkanları", lat: 38.55, lon: 28.50, type: "volkanik" },
-            { name: "Uludağ", lat: 40.07, lon: 29.22, type: "volkanik" },
-
-            // 3. KIVRIM DAĞLARI
-            { name: "Yıldız (Istranca)", lat: 41.75, lon: 27.50, type: "kivrim" },
-            { name: "Küre (İsfendiyar)", lat: 41.75, lon: 33.50, type: "kivrim" },
-            { name: "Ilgaz Dağları", lat: 41.06, lon: 33.85, type: "kivrim" },
-            { name: "Köroğlu Dağları", lat: 40.60, lon: 31.80, type: "kivrim" },
-            { name: "Bolu Dağları", lat: 40.75, lon: 31.60, type: "kivrim" },
-            { name: "Canik Dağları", lat: 40.90, lon: 36.50, type: "kivrim" },
-            { name: "Giresun Dağları", lat: 40.50, lon: 38.40, type: "kivrim" },
-            { name: "Rize Dağları", lat: 40.75, lon: 40.50, type: "kivrim" },
-            { name: "Kaçkar Dağları", lat: 40.93, lon: 41.15, type: "kivrim" },
-            { name: "Karçal Dağları", lat: 41.30, lon: 42.00, type: "kivrim" },
-            { name: "Kop Dağları", lat: 40.02, lon: 40.50, type: "kivrim" },
-            { name: "Mescit Dağları", lat: 40.45, lon: 41.10, type: "kivrim" },
-            { name: "Yalnızçam", lat: 41.10, lon: 42.30, type: "kivrim" },
-            { name: "Bey Dağları", lat: 36.55, lon: 30.05, type: "kivrim" },
-            { name: "Geyik Dağları", lat: 36.90, lon: 32.10, type: "kivrim" },
-            { name: "Sultan Dağları", lat: 38.45, lon: 31.25, type: "kivrim" },
-            { name: "Dedegöl", lat: 37.65, lon: 31.30, type: "kivrim" },
-            { name: "Akdağlar (Ant)", lat: 36.55, lon: 29.55, type: "kivrim" },
-            { name: "Sandras", lat: 37.05, lon: 28.85, type: "kivrim" },
-            { name: "Bolkar Dağları", lat: 37.25, lon: 34.60, type: "kivrim" },
-            { name: "Aladağlar", lat: 37.80, lon: 35.15, type: "kivrim" },
-            { name: "Tahtalı", lat: 38.25, lon: 36.40, type: "kivrim" },
-            { name: "Binboğa", lat: 38.15, lon: 36.85, type: "kivrim" },
-            { name: "Malatya Dağları", lat: 38.20, lon: 38.30, type: "kivrim" },
-            { name: "Nurhak Dağları", lat: 37.95, lon: 37.55, type: "kivrim" },
-            { name: "Genç Dağları", lat: 38.70, lon: 40.50, type: "kivrim" },
-            { name: "İhtiyar Şahap", lat: 38.15, lon: 42.10, type: "kivrim" },
+            { name: "Tendürek", lat: 39.35, lon: 43.90, type: "volkanik" },
+            { name: "Süphan", lat: 38.93, lon: 42.83, type: "volkanik" },
+            { name: "Nemrut (V)", lat: 38.62, lon: 42.24, type: "volkanik" },
             { name: "Cilo (Buzul)", lat: 37.48, lon: 44.00, type: "kivrim" },
-            { name: "Mercan (Munzur)", lat: 39.45, lon: 39.40, type: "kivrim" },
-            { name: "Palandöken", lat: 39.85, lon: 41.25, type: "kivrim" },
-            { name: "Karasu-Aras", lat: 40.10, lon: 41.50, type: "kivrim" },
-            { name: "Allahuekber", lat: 40.55, lon: 42.50, type: "kivrim" },
-            { name: "Tecer Dağları", lat: 39.60, lon: 37.50, type: "kivrim" },
-            { name: "Sündiken", lat: 39.95, lon: 30.90, type: "kivrim" },
-            { name: "Elmadağ", lat: 39.85, lon: 33.00, type: "kivrim" },
-            { name: "Murat Dağı", lat: 38.95, lon: 29.60, type: "kivrim" }
+            { name: "Mercan", lat: 39.40, lon: 39.50, type: "kivrim" },
+            { name: "Palandöken", lat: 39.85, lon: 41.28, type: "kivrim" },
+            
+            // İç Anadolu
+            { name: "Erciyes", lat: 38.53, lon: 35.45, type: "volkanik" },
+            { name: "Hasan Dağı", lat: 38.13, lon: 34.05, type: "volkanik" }, 
+            { name: "Melendiz", lat: 38.07, lon: 34.40, type: "volkanik" },
+            { name: "Karadağ", lat: 37.38, lon: 33.15, type: "volkanik" },
+            { name: "Karacadağ (K)", lat: 37.83, lon: 33.66, type: "volkanik" },
+            { name: "Elmadağ", lat: 39.80, lon: 33.00, type: "kivrim" },
+
+            // Güneydoğu
+            { name: "Karacadağ (U)", lat: 37.66, lon: 39.83, type: "volkanik" },
+
+            // Ege & Marmara
+            { name: "Kula", lat: 38.58, lon: 28.52, type: "volkanik" },
+            { name: "Uludağ", lat: 40.06, lon: 29.21, type: "volkanik" }, 
+            { name: "Yıldız", lat: 41.77, lon: 27.52, type: "kivrim" },
+            { name: "Kaz Dağları", lat: 39.75, lon: 26.83, type: "kirik" },
+            { name: "Madra Dağı", lat: 39.20, lon: 27.05, type: "kirik" },
+            { name: "Yunt Dağı", lat: 38.80, lon: 27.20, type: "kirik" },
+            { name: "Bozdağlar", lat: 38.35, lon: 28.10, type: "kirik" },
+            { name: "Aydın Dağları", lat: 37.95, lon: 28.00, type: "kirik" },
+            { name: "Menteşe", lat: 37.20, lon: 28.50, type: "kirik" },
+
+            // Akdeniz
+            { name: "Amanos", lat: 36.75, lon: 36.33, type: "kirik" },
+            { name: "Bey Dağları", lat: 36.60, lon: 30.11, type: "kivrim" },
+            { name: "Geyik", lat: 36.90, lon: 32.20, type: "kivrim" },
+            { name: "Sultan", lat: 38.50, lon: 31.25, type: "kivrim" },
+            { name: "Dedegöl", lat: 37.66, lon: 31.33, type: "kivrim" },
+            { name: "Bolkar", lat: 37.25, lon: 34.60, type: "kivrim" },
+            { name: "Aladağlar", lat: 37.80, lon: 35.15, type: "kivrim" },
+            { name: "Tahtalı", lat: 38.30, lon: 36.40, type: "kivrim" },
+            { name: "Binboğa", lat: 38.15, lon: 36.90, type: "kivrim" },
+
+            // Karadeniz
+            { name: "Küre", lat: 41.76, lon: 33.55, type: "kivrim" },
+            { name: "Ilgaz", lat: 41.07, lon: 33.86, type: "kivrim" },
+            { name: "Köroğlu", lat: 40.58, lon: 31.85, type: "kivrim" },
+            { name: "Canik", lat: 40.86, lon: 36.56, type: "kivrim" },
+            { name: "Giresun D.", lat: 40.50, lon: 38.50, type: "kivrim" },
+            { name: "Kaçkar", lat: 40.93, lon: 41.16, type: "kivrim" },
+            { name: "Kop", lat: 40.02, lon: 40.52, type: "kivrim" },
+            { name: "Mescit", lat: 40.50, lon: 41.20, type: "kivrim" },
+            { name: "Yalnızçam", lat: 41.00, lon: 42.20, type: "kivrim" }
         ];
 
         const game = {
@@ -473,12 +461,13 @@
             drawnLabels: [], 
 
             init: function() {
-                // Belirtilen URL'den veriyi çekmeye çalış
-                this.fetchMapData(HARITA_JSON_URL);
+                // Öncelikli URL'yi dene, hata verirse fallback'e geç veya manuel yüklemeyi aç
+                const url = (MAP_DATA_URL && MAP_DATA_URL !== 'tr.json') ? MAP_DATA_URL : FALLBACK_URL;
+                this.fetchMapData(url); 
                 lucide.createIcons();
                 this.setupPanZoom();
                 
-                // Fallback: Dosya yükleme dinleyicisi
+                // Dosya yükleme dinleyicisi (Her ihtimale karşı)
                 document.getElementById('json-file').addEventListener('change', (e) => this.handleFileUpload(e));
             },
 
@@ -553,27 +542,36 @@
             },
 
             fetchMapData: function(url) {
+                // Yükleniyor göster
+                document.getElementById('loading-overlay').classList.remove('hidden');
+                
                 fetch(url)
                     .then(response => {
                         if (!response.ok) throw new Error(`HTTP Hata: ${response.status}`);
                         return response.json();
                     })
                     .then(data => {
-                        if (!data.features) throw new Error("JSON formatı geçersiz (features eksik).");
                         this.loadMap(data);
-                        document.getElementById('loading-overlay').style.display = 'none';
+                        document.getElementById('loading-overlay').classList.add('hidden');
+                        document.getElementById('upload-overlay').style.display = 'none';
                         this.start();
                     })
                     .catch(err => {
-                        // Eğer fetch başarısız olursa (CORS veya dosya yok), fallback ekranını aç
-                        document.getElementById('loading-overlay').style.display = 'none';
-                        document.getElementById('upload-overlay').style.display = 'flex';
-                        
-                        let msg = err.message;
-                        if(msg.includes('Failed to fetch')) {
-                            msg = "Veri indirilemedi. (GitHub Pages kullanıyorsanız link doğru olmalı, Yerel çalışıyorsanız 'Dosya Seç' kullanın)";
+                        console.warn("Ana URL yüklenemedi, Fallback deneniyor...", err);
+                        // Eğer ana URL başarısızsa ve Fallback farklıysa onu dene
+                        if (url === MAP_DATA_URL && FALLBACK_URL && FALLBACK_URL !== MAP_DATA_URL) {
+                             this.fetchMapData(FALLBACK_URL);
+                        } else {
+                            // Hepsinde başarısızsa manuel yükleme ekranını aç
+                            document.getElementById('loading-overlay').classList.add('hidden');
+                            document.getElementById('upload-overlay').style.display = 'flex';
+                            
+                            let msg = err.message;
+                            if(msg.includes('Failed to fetch') || msg.includes('CORS')) {
+                                msg = "Veri otomatik çekilemedi (" + err.message + "). Lütfen dosyayı manuel seçin.";
+                            }
+                            document.getElementById('fallback-msg').innerText = msg;
                         }
-                        document.getElementById('fallback-msg').innerText = msg;
                     });
             },
 
