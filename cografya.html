@@ -83,6 +83,7 @@
             ChevronUp: (props) => <Icon {...props} path={<polyline points="18 15 12 9 6 15"/>} />,
             Edit3: (props) => <Icon {...props} path={<><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></>} />,
             Trash2: (props) => <Icon {...props} path={<><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></>} />,
+            X: (props) => <Icon {...props} path={<><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>} />,
         };
 
         // --- VERİLER ---
@@ -166,6 +167,11 @@
               setIsTimerRunning(true);
               changeStatus(id, 'working');
             }
+          };
+
+          const closeTimerSession = () => {
+            setIsTimerRunning(false);
+            setActiveTopicId(null);
           };
 
           const changeStatus = (id, newStatus) => {
@@ -300,25 +306,47 @@
                   </div>
                 </div>
 
-                {/* AKTİF ÇALIŞMA ZAMANLAYICISI */}
+                {/* GÜNCELLENMİŞ AKTİF ÇALIŞMA ZAMANLAYICISI */}
                 {activeTopicId && (
                   <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-[90%] md:w-auto z-50 animate-bounce-in">
-                    <div className="bg-gray-900 text-white dark:bg-white dark:text-gray-900 px-6 py-4 rounded-full shadow-2xl flex items-center gap-4 border border-gray-700 dark:border-gray-200">
-                        <div className="flex flex-col">
-                          <span className="text-xs font-medium opacity-70">Şu an çalışılıyor:</span>
-                          <span className="font-bold truncate max-w-[200px]">
-                            {topics.find(t => t.id === activeTopicId)?.title}
-                          </span>
+                    <div className="backdrop-blur-md bg-gray-900/95 text-white dark:bg-white/95 dark:text-gray-900 px-4 py-3 md:px-6 md:py-4 rounded-2xl md:rounded-full shadow-2xl flex items-center justify-between gap-4 border border-gray-700 dark:border-gray-200">
+                        
+                        {/* Bilgi Kısmı */}
+                        <div className="flex items-center gap-4 overflow-hidden">
+                            <div className={`p-2 rounded-full ${isTimerRunning ? 'bg-green-500/20 text-green-400 dark:text-green-600' : 'bg-yellow-500/20 text-yellow-400 dark:text-yellow-600'}`}>
+                                <Icons.Clock size={20} />
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-[10px] uppercase tracking-wider font-bold opacity-60">Aktif Konu</span>
+                              <span className="font-semibold truncate max-w-[120px] md:max-w-[200px] text-sm md:text-base">
+                                {topics.find(t => t.id === activeTopicId)?.title}
+                              </span>
+                            </div>
                         </div>
-                        <div className="text-2xl font-mono font-bold">
+
+                        {/* Süre */}
+                        <div className="text-xl md:text-2xl font-mono font-bold tracking-tight">
                           {formatTime(topics.find(t => t.id === activeTopicId)?.timeSpent || 0)}
                         </div>
-                        <button 
-                          onClick={() => setIsTimerRunning(!isTimerRunning)}
-                          className={`p-3 rounded-full transition ${isTimerRunning ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-green-500 hover:bg-green-600 text-white'}`}
-                        >
-                          {isTimerRunning ? <Icons.Pause size={20} /> : <Icons.Play size={20} />}
-                        </button>
+
+                        {/* Kontroller */}
+                        <div className="flex items-center gap-2 border-l border-gray-700 dark:border-gray-200 pl-4 ml-2">
+                            <button 
+                              onClick={() => setIsTimerRunning(!isTimerRunning)}
+                              className={`p-2 md:p-3 rounded-full transition-all active:scale-95 ${isTimerRunning ? 'bg-white text-gray-900 hover:bg-gray-200 dark:bg-gray-900 dark:text-white dark:hover:bg-gray-700' : 'bg-green-500 text-white hover:bg-green-600'}`}
+                              title={isTimerRunning ? "Duraklat" : "Devam Et"}
+                            >
+                              {isTimerRunning ? <Icons.Pause size={18} /> : <Icons.Play size={18} />}
+                            </button>
+                            
+                            <button 
+                              onClick={closeTimerSession}
+                              className="p-2 md:p-3 rounded-full text-gray-400 hover:text-white hover:bg-red-500/20 dark:hover:text-red-600 dark:hover:bg-red-100 transition-all"
+                              title="Kapat"
+                            >
+                              <Icons.X size={18} />
+                            </button>
+                        </div>
                     </div>
                   </div>
                 )}
