@@ -158,24 +158,6 @@
             100% { transform: translateY(-30px) scale(1.5); opacity: 0; }
         }
 
-        /* Yükleme Ekranı (Spinner) */
-        #loading-overlay {
-            position: absolute; inset: 0; z-index: 4000;
-            background: rgba(15, 23, 42, 1);
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-        }
-        .loader {
-            width: 48px; height: 48px;
-            border: 5px solid #FFF;
-            border-bottom-color: #3b82f6;
-            border-radius: 50%;
-            display: inline-block;
-            box-sizing: border-box;
-            animation: rotation 1s linear infinite;
-        }
-        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
         /* Rotasyon Uyarısı */
         #rotate-warning {
             display: none; position: fixed; inset: 0; z-index: 99999;
@@ -203,11 +185,11 @@
 
         #game-over-modal { z-index: 2000; }
 
-        /* Upload Screen (Fallback) */
+        /* Upload Screen */
         #upload-overlay {
             position: absolute; inset: 0; z-index: 3000;
             background: rgba(15, 23, 42, 0.98);
-            display: none; /* JS ile açılır */
+            display: none; /* JS ile kontrol edilir */
             flex-direction: column;
             align-items: center; justify-content: center;
         }
@@ -217,28 +199,23 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             max-width: 90%; width: 450px;
         }
+        
+        /* Hidden Class Utility */
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="h-screen flex flex-col">
 
-    <!-- Loading Screen -->
-    <div id="loading-overlay">
-        <span class="loader mb-4"></span>
-        <h2 class="text-xl font-bold text-white">Harita Verisi Yükleniyor...</h2>
-        <p class="text-slate-400 text-xs mt-2" id="loading-text">Veri sunucudan çekiliyor</p>
-    </div>
-
-    <!-- Upload Screen (Fallback) -->
+    <!-- Upload Screen (Dosya Yükleme Ekranı) -->
     <div id="upload-overlay">
         <div class="upload-box">
-            <div class="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="alert-circle" class="w-8 h-8 text-red-500"></i>
+            <div class="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="map" class="w-8 h-8 text-blue-500"></i>
             </div>
-            <h1 class="text-xl font-bold text-white mb-2">Otomatik Yükleme Başarısız</h1>
-            <p class="text-slate-400 mb-6 text-xs">
-                Kod içinde belirtilen URL'ye erişilemedi.<br>
-                (Yerel dosyalar tarayıcı güvenliği nedeniyle 'fetch' ile okunamaz)<br><br>
-                Lütfen <b>tr.json</b> dosyasını manuel seçin.
+            <h1 class="text-xl font-bold text-white mb-2">Harita Dosyası Gerekli</h1>
+            <p class="text-slate-400 mb-6 text-xs leading-relaxed">
+                Harita otomatik yüklenemedi (Yerel dosya kısıtlaması olabilir).<br>
+                Lütfen <b>tr.json</b> dosyasını aşağıdan seçin.
             </p>
             
             <label class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold text-sm cursor-pointer transition flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 group active:scale-95">
@@ -246,6 +223,7 @@
                 Dosya Seç
                 <input type="file" id="json-file" accept=".json" class="hidden">
             </label>
+            <p id="error-msg" class="text-red-400 mt-4 text-xs font-bold hidden bg-red-900/20 p-2 rounded border border-red-800"></p>
         </div>
     </div>
 
@@ -268,8 +246,8 @@
                 </div>
             </div>
 
-            <!-- Soru Paneli -->
-            <div id="question-panel" class="absolute left-1/2 top-16 -translate-x-1/2 bg-white text-slate-900 px-4 py-2 rounded-full shadow-2xl border-4 border-blue-500 flex items-center gap-3 transition-all opacity-0 pointer-events-none scale-90 z-50 min-w-[200px] justify-between">
+            <!-- Soru Paneli (Başlangıçta Gizli) -->
+            <div id="question-panel" class="hidden absolute left-1/2 top-16 -translate-x-1/2 bg-white text-slate-900 px-4 py-2 rounded-full shadow-2xl border-4 border-blue-500 flex items-center gap-3 scale-90 z-50 min-w-[200px] justify-between">
                 <div class="text-left">
                     <div class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">BUL:</div>
                     <div class="text-lg font-black text-blue-800 leading-none whitespace-nowrap" id="target-name">...</div>
@@ -368,8 +346,6 @@
     <script>
         // =========================================================
         //  AYARLAR: HARITA DOSYA YOLU (URL)
-        //  Buraya 'tr.json' dosyanızın yolunu (veya sunucu adresini) yazın.
-        //  Örnek: 'tr.json' veya 'http://localhost:8000/tr.json'
         // =========================================================
         const HARITA_JSON_URL = 'tr.json'; 
         
@@ -448,7 +424,6 @@
             viewBox: { w: 1000, h: 450 },
             scale: 1, offsetX: 0, offsetY: 0,
             
-            // Pan & Zoom State
             transform: { x: 0, y: 0, k: 1 },
             isDragging: false,
             startX: 0, startY: 0,
@@ -457,7 +432,7 @@
             drawnLabels: [], 
 
             init: function() {
-                // Belirtilen URL'den veriyi çekmeye çalış
+                // Veri Yükleme Başlat
                 this.fetchMapData(HARITA_JSON_URL);
                 lucide.createIcons();
                 this.setupPanZoom();
@@ -536,12 +511,10 @@
                     .then(data => {
                         if (!data.features) throw new Error("JSON formatı geçersiz (features eksik).");
                         this.loadMap(data);
-                        document.getElementById('loading-overlay').style.display = 'none';
                         this.start();
                     })
                     .catch(err => {
                         // Eğer fetch başarısız olursa (CORS veya dosya yok), fallback ekranını aç
-                        document.getElementById('loading-overlay').style.display = 'none';
                         document.getElementById('upload-overlay').style.display = 'flex';
                     });
             },
@@ -733,9 +706,7 @@
                 this.nextQuestion();
                 
                 const panel = document.getElementById('question-panel');
-                panel.style.opacity = 1;
-                panel.style.pointerEvents = 'auto';
-                panel.style.transform = 'translate(-50%, 0) scale(1)';
+                panel.classList.remove('hidden');
             },
 
             nextQuestion: function() {
