@@ -20,14 +20,9 @@
             theme: {
                 extend: {
                     animation: {
-                        'bounce-in': 'bounceIn 0.5s cubic-bezier(0.8, 0, 1, 1)',
                         'fadeIn': 'fadeIn 0.3s ease-out',
                     },
                     keyframes: {
-                        bounceIn: {
-                            '0%': { transform: 'translate(-50%, 100%)', opacity: '0' },
-                            '100%': { transform: 'translate(-50%, 0)', opacity: '1' },
-                        },
                         fadeIn: {
                             '0%': { opacity: '0', transform: 'translateY(-10px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
@@ -46,9 +41,9 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect } = React;
 
-        // --- IKONLAR (Lucide-React yerine manuel SVG'ler) ---
+        // --- IKONLAR ---
         const Icon = ({ path, size = 20, className = "" }) => (
             <svg 
                 xmlns="http://www.w3.org/2000/svg" 
@@ -69,10 +64,6 @@
         const Icons = {
             BookOpen: (props) => <Icon {...props} path={<><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></>} />,
             CheckCircle: (props) => <Icon {...props} path={<><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>} />,
-            Clock: (props) => <Icon {...props} path={<><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>} />,
-            Play: (props) => <Icon {...props} path={<polygon points="5 3 19 12 5 21 5 3"/>} />,
-            Pause: (props) => <Icon {...props} path={<><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></>} />,
-            RotateCcw: (props) => <Icon {...props} path={<><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></>} />,
             Save: (props) => <Icon {...props} path={<><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></>} />,
             Download: (props) => <Icon {...props} path={<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></>} />,
             Upload: (props) => <Icon {...props} path={<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></>} />,
@@ -83,26 +74,28 @@
             ChevronUp: (props) => <Icon {...props} path={<polyline points="18 15 12 9 6 15"/>} />,
             Edit3: (props) => <Icon {...props} path={<><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></>} />,
             Trash2: (props) => <Icon {...props} path={<><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></>} />,
-            X: (props) => <Icon {...props} path={<><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>} />,
+            Repeat: (props) => <Icon {...props} path={<><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></>} />,
+            Plus: (props) => <Icon {...props} path={<><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></>} />,
+            Minus: (props) => <Icon {...props} path={<line x1="5" y1="12" x2="19" y2="12"/>} />,
         };
 
         // --- VERİLER ---
         const DEFAULT_TOPICS = [
-          { id: 1, title: "Coğrafyanın Bölümleri ve Yöntemleri", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Coğrafyanın İlkeleri", "Harita Bilgisi", "Projeksiyon Yöntemleri"] },
-          { id: 2, title: "Türkiye'nin Coğrafi Konumu", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Matematik Konum", "Özel Konum", "Jeopolitik Konum"] },
-          { id: 3, title: "Türkiye'nin Yer Şekilleri", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Dağlar", "Ovalar", "Platolar", "Akarsular", "Göller"] },
-          { id: 4, title: "Jeolojik Zamanlar ve Oluşum", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Türkiye'nin Jeolojik Geçmişi", "Masif Araziler"] },
-          { id: 5, title: "İklim Bilgisi ve Türkiye'nin İklimi", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Sıcaklık", "Basınç ve Rüzgarlar", "Nem ve Yağış", "İklim Tipleri"] },
-          { id: 6, title: "Doğal Afetler", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Deprem", "Sel ve Taşkın", "Heyelan", "Erozyon"] },
-          { id: 7, title: "Nüfus ve Yerleşme", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Nüfusun Dağılışı", "Nüfus Piramitleri", "Göçler", "Kır ve Kent Yerleşmeleri"] },
-          { id: 8, title: "Tarım", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Tarımı Etkileyen Faktörler", "Tarım Ürünleri"] },
-          { id: 9, title: "Hayvancılık, Ormancılık ve Balıkçılık", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Büyükbaş/Küçükbaş", "Kümes Hayvancılığı", "Su Ürünleri"] },
-          { id: 10, title: "Madenler ve Enerji Kaynakları", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Metalik Madenler", "Enerji Kaynakları (Yenilenebilir/Tükenebilir)"] },
-          { id: 11, title: "Sanayi ve Ticaret", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Sanayi Kollarının Dağılışı", "İç ve Dış Ticaret"] },
-          { id: 12, title: "Ulaşım ve Turizm", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Karayolu, Demiryolu, Denizyolu, Havayolu", "Turizm Değerleri"] },
-          { id: 13, title: "Bölgeler Coğrafyası (Bölgesel Kalkınma)", status: "not-started", timeSpent: 0, notes: "", subtopics: ["GAP, DAP, KOP, DOKAP vb."] },
-          { id: 14, title: "Çevre ve Doğa (Güncel Çevre Sorunları)", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Küresel Isınma", "Atıklar"] },
-          { id: 15, title: "Kültür Bölgeleri ve Nüfus Hareketleri", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Türk Kültürü", "Küresel Örgütler"] },
+          { id: 1, title: "Coğrafyanın Bölümleri ve Yöntemleri", status: "not-started", reviewCount: 0, notes: "", subtopics: ["Coğrafyanın İlkeleri", "Harita Bilgisi", "Projeksiyon Yöntemleri"] },
+          { id: 2, title: "Türkiye'nin Coğrafi Konumu", status: "not-started", reviewCount: 0, notes: "", subtopics: ["Matematik Konum", "Özel Konum", "Jeopolitik Konum"] },
+          { id: 3, title: "Türkiye'nin Yer Şekilleri", status: "not-started", reviewCount: 0, notes: "", subtopics: ["Dağlar", "Ovalar", "Platolar", "Akarsular", "Göller"] },
+          { id: 4, title: "Jeolojik Zamanlar ve Oluşum", status: "not-started", reviewCount: 0, notes: "", subtopics: ["Türkiye'nin Jeolojik Geçmişi", "Masif Araziler"] },
+          { id: 5, title: "İklim Bilgisi ve Türkiye'nin İklimi", status: "not-started", reviewCount: 0, notes: "", subtopics: ["Sıcaklık", "Basınç ve Rüzgarlar", "Nem ve Yağış", "İklim Tipleri"] },
+          { id: 6, title: "Doğal Afetler", status: "not-started", reviewCount: 0, notes: "", subtopics: ["Deprem", "Sel ve Taşkın", "Heyelan", "Erozyon"] },
+          { id: 7, title: "Nüfus ve Yerleşme", status: "not-started", reviewCount: 0, notes: "", subtopics: ["Nüfusun Dağılışı", "Nüfus Piramitleri", "Göçler", "Kır ve Kent Yerleşmeleri"] },
+          { id: 8, title: "Tarım", status: "not-started", reviewCount: 0, notes: "", subtopics: ["Tarımı Etkileyen Faktörler", "Tarım Ürünleri"] },
+          { id: 9, title: "Hayvancılık, Ormancılık ve Balıkçılık", status: "not-started", reviewCount: 0, notes: "", subtopics: ["Büyükbaş/Küçükbaş", "Kümes Hayvancılığı", "Su Ürünleri"] },
+          { id: 10, title: "Madenler ve Enerji Kaynakları", status: "not-started", reviewCount: 0, notes: "", subtopics: ["Metalik Madenler", "Enerji Kaynakları (Yenilenebilir/Tükenebilir)"] },
+          { id: 11, title: "Sanayi ve Ticaret", status: "not-started", reviewCount: 0, notes: "", subtopics: ["Sanayi Kollarının Dağılışı", "İç ve Dış Ticaret"] },
+          { id: 12, title: "Ulaşım ve Turizm", status: "not-started", reviewCount: 0, notes: "", subtopics: ["Karayolu, Demiryolu, Denizyolu, Havayolu", "Turizm Değerleri"] },
+          { id: 13, title: "Bölgeler Coğrafyası (Bölgesel Kalkınma)", status: "not-started", reviewCount: 0, notes: "", subtopics: ["GAP, DAP, KOP, DOKAP vb."] },
+          { id: 14, title: "Çevre ve Doğa (Güncel Çevre Sorunları)", status: "not-started", reviewCount: 0, notes: "", subtopics: ["Küresel Isınma", "Atıklar"] },
+          { id: 15, title: "Kültür Bölgeleri ve Nüfus Hareketleri", status: "not-started", reviewCount: 0, notes: "", subtopics: ["Türk Kültürü", "Küresel Örgütler"] },
         ];
 
         const STATUS_CONFIG = {
@@ -115,12 +108,8 @@
         function App() {
           const [topics, setTopics] = useState(DEFAULT_TOPICS);
           const [darkMode, setDarkMode] = useState(false);
-          const [activeTopicId, setActiveTopicId] = useState(null);
-          const [isTimerRunning, setIsTimerRunning] = useState(false);
           const [expandedTopicId, setExpandedTopicId] = useState(null);
           const [filter, setFilter] = useState('all');
-
-          const timerRef = useRef(null);
 
           // LocalStorage Okuma
           useEffect(() => {
@@ -128,7 +117,15 @@
             const savedTheme = localStorage.getItem('kpssTheme');
             
             if (savedTopics) {
-              try { setTopics(JSON.parse(savedTopics)); } catch (e) { console.error(e); }
+              try { 
+                const parsedData = JSON.parse(savedTopics);
+                // Eski verilerde reviewCount olmayabilir, veriyi onar:
+                const migratedData = parsedData.map(t => ({
+                  ...t,
+                  reviewCount: t.reviewCount !== undefined ? t.reviewCount : 0
+                }));
+                setTopics(migratedData); 
+              } catch (e) { console.error(e); }
             }
             if (savedTheme === 'dark') setDarkMode(true);
           }, []);
@@ -144,36 +141,7 @@
             else document.documentElement.classList.remove('dark');
           }, [darkMode]);
 
-          // Zamanlayıcı
-          useEffect(() => {
-            if (isTimerRunning && activeTopicId) {
-              timerRef.current = setInterval(() => {
-                setTopics(prev => prev.map(t => t.id === activeTopicId ? { ...t, timeSpent: t.timeSpent + 1 } : t));
-              }, 1000);
-            } else {
-              clearInterval(timerRef.current);
-            }
-            return () => clearInterval(timerRef.current);
-          }, [isTimerRunning, activeTopicId]);
-
           // Fonksiyonlar
-          const toggleTimer = (id) => {
-            if (activeTopicId === id && isTimerRunning) {
-              setIsTimerRunning(false);
-            } else if (activeTopicId === id && !isTimerRunning) {
-              setIsTimerRunning(true);
-            } else {
-              setActiveTopicId(id);
-              setIsTimerRunning(true);
-              changeStatus(id, 'working');
-            }
-          };
-
-          const closeTimerSession = () => {
-            setIsTimerRunning(false);
-            setActiveTopicId(null);
-          };
-
           const changeStatus = (id, newStatus) => {
             setTopics(topics.map(t => t.id === id ? { ...t, status: newStatus } : t));
           };
@@ -182,11 +150,19 @@
             setTopics(topics.map(t => t.id === id ? { ...t, notes: newNote } : t));
           };
 
+          const changeReviewCount = (id, delta) => {
+             setTopics(topics.map(t => {
+                if (t.id === id) {
+                    const newCount = (t.reviewCount || 0) + delta;
+                    return { ...t, reviewCount: newCount < 0 ? 0 : newCount };
+                }
+                return t;
+             }));
+          };
+
           const deleteData = () => {
             if(window.confirm("Tüm ilerlemeniz silinecek. Emin misiniz?")) {
                 setTopics(DEFAULT_TOPICS);
-                setActiveTopicId(null);
-                setIsTimerRunning(false);
             }
           }
 
@@ -207,7 +183,11 @@
               try {
                 const parsedData = JSON.parse(e.target.result);
                 if (Array.isArray(parsedData)) {
-                  setTopics(parsedData);
+                  const migratedData = parsedData.map(t => ({
+                    ...t,
+                    reviewCount: t.reviewCount !== undefined ? t.reviewCount : 0
+                  }));
+                  setTopics(migratedData);
                   alert("Yedek başarıyla yüklendi!");
                 }
               } catch (error) {
@@ -216,17 +196,9 @@
             };
           };
 
-          const formatTime = (seconds) => {
-            const h = Math.floor(seconds / 3600);
-            const m = Math.floor((seconds % 3600) / 60);
-            const s = seconds % 60;
-            return `${h > 0 ? h + 'sa ' : ''}${m}dk ${s}sn`;
-          };
-
           const totalTopics = topics.length;
           const completedTopics = topics.filter(t => t.status === 'finished').length;
           const progressPercent = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
-          const totalTime = topics.reduce((acc, curr) => acc + curr.timeSpent, 0);
 
           const filteredTopics = topics.filter(t => {
             if (filter === 'all') return true;
@@ -257,7 +229,7 @@
               <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
                 
                 {/* İSTATİSTİK PANOSU */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between">
                     <div className="flex justify-between items-start">
                       <div>
@@ -277,19 +249,6 @@
                     <p className="text-xs text-gray-500 mt-2">{completedTopics} / {totalTopics} Konu Tamamlandı</p>
                   </div>
 
-                  <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Toplam Çalışma</p>
-                        <h2 className="text-3xl font-bold mt-1">{formatTime(totalTime)}</h2>
-                      </div>
-                      <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg text-orange-600 dark:text-orange-300">
-                        <Icons.Clock size={24} />
-                      </div>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-4">Tüm konulara harcanan toplam süre</p>
-                  </div>
-
                   <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-center space-y-3">
                      <div className="flex gap-2">
                         <button onClick={exportData} className="flex-1 flex items-center justify-center gap-2 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 py-2 rounded-lg transition">
@@ -305,51 +264,6 @@
                      </button>
                   </div>
                 </div>
-
-                {/* GÜNCELLENMİŞ AKTİF ÇALIŞMA ZAMANLAYICISI */}
-                {activeTopicId && (
-                  <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-[90%] md:w-auto z-50 animate-bounce-in">
-                    <div className="backdrop-blur-md bg-gray-900/95 text-white dark:bg-white/95 dark:text-gray-900 px-4 py-3 md:px-6 md:py-4 rounded-2xl md:rounded-full shadow-2xl flex items-center justify-between gap-4 border border-gray-700 dark:border-gray-200">
-                        
-                        {/* Bilgi Kısmı */}
-                        <div className="flex items-center gap-4 overflow-hidden">
-                            <div className={`p-2 rounded-full ${isTimerRunning ? 'bg-green-500/20 text-green-400 dark:text-green-600' : 'bg-yellow-500/20 text-yellow-400 dark:text-yellow-600'}`}>
-                                <Icons.Clock size={20} />
-                            </div>
-                            <div className="flex flex-col min-w-0">
-                              <span className="text-[10px] uppercase tracking-wider font-bold opacity-60">Aktif Konu</span>
-                              <span className="font-semibold truncate max-w-[120px] md:max-w-[200px] text-sm md:text-base">
-                                {topics.find(t => t.id === activeTopicId)?.title}
-                              </span>
-                            </div>
-                        </div>
-
-                        {/* Süre */}
-                        <div className="text-xl md:text-2xl font-mono font-bold tracking-tight">
-                          {formatTime(topics.find(t => t.id === activeTopicId)?.timeSpent || 0)}
-                        </div>
-
-                        {/* Kontroller */}
-                        <div className="flex items-center gap-2 border-l border-gray-700 dark:border-gray-200 pl-4 ml-2">
-                            <button 
-                              onClick={() => setIsTimerRunning(!isTimerRunning)}
-                              className={`p-2 md:p-3 rounded-full transition-all active:scale-95 ${isTimerRunning ? 'bg-white text-gray-900 hover:bg-gray-200 dark:bg-gray-900 dark:text-white dark:hover:bg-gray-700' : 'bg-green-500 text-white hover:bg-green-600'}`}
-                              title={isTimerRunning ? "Duraklat" : "Devam Et"}
-                            >
-                              {isTimerRunning ? <Icons.Pause size={18} /> : <Icons.Play size={18} />}
-                            </button>
-                            
-                            <button 
-                              onClick={closeTimerSession}
-                              className="p-2 md:p-3 rounded-full text-gray-400 hover:text-white hover:bg-red-500/20 dark:hover:text-red-600 dark:hover:bg-red-100 transition-all"
-                              title="Kapat"
-                            >
-                              <Icons.X size={18} />
-                            </button>
-                        </div>
-                    </div>
-                  </div>
-                )}
 
                 {/* KONU LİSTESİ FİLTRE */}
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8">
@@ -399,15 +313,15 @@
                             <h4 className={`font-semibold ${topic.status === 'finished' ? 'text-gray-500 line-through decoration-2 decoration-green-500/50' : ''}`}>
                               {topic.title}
                             </h4>
-                            <div className="flex items-center gap-2 mt-1">
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_CONFIG[topic.status].color}`}>
                                   {STATUS_CONFIG[topic.status].label}
                                </span>
-                               {topic.timeSpent > 0 && (
-                                 <span className="text-xs text-gray-400 font-mono flex items-center gap-1">
-                                    <Icons.Clock size={10} /> {formatTime(topic.timeSpent)}
-                                 </span>
-                               )}
+                               
+                               {/* TEKRAR SAYISI GÖSTERGESİ */}
+                               <span className="text-xs bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+                                  <Icons.Repeat size={10} /> {topic.reviewCount || 0} Tekrar
+                               </span>
                             </div>
                           </div>
                         </div>
@@ -438,6 +352,7 @@
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             
                             <div className="space-y-4">
+                              {/* Durum Değiştir */}
                               <div>
                                 <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Durum Değiştir</label>
                                 <div className="grid grid-cols-2 gap-2">
@@ -457,36 +372,25 @@
                                 </div>
                               </div>
 
-                              <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg flex items-center justify-between border border-gray-100 dark:border-gray-700">
-                                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                                   <Icons.Clock size={16} />
-                                   <span className="text-sm font-mono font-bold">{formatTime(topic.timeSpent)}</span>
+                              {/* Tekrar Sayısı Yönetimi */}
+                              <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg flex items-center justify-between border border-purple-100 dark:border-purple-800/50">
+                                <div className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
+                                   <Icons.Repeat size={16} />
+                                   <span className="text-sm font-bold">Tekrar Sayısı</span>
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex items-center gap-3">
                                    <button 
-                                     onClick={() => toggleTimer(topic.id)}
-                                     className={`flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-md text-white transition ${
-                                       activeTopicId === topic.id && isTimerRunning 
-                                       ? 'bg-red-500 hover:bg-red-600' 
-                                       : 'bg-indigo-600 hover:bg-indigo-700'
-                                     }`}
+                                     onClick={() => changeReviewCount(topic.id, -1)}
+                                     className="p-1.5 rounded-full bg-white dark:bg-gray-700 text-gray-500 hover:text-purple-600 dark:hover:text-purple-300 shadow-sm border border-gray-200 dark:border-gray-600 transition"
                                    >
-                                     {activeTopicId === topic.id && isTimerRunning ? (
-                                       <><Icons.Pause size={12} /> Duraklat</>
-                                     ) : (
-                                       <><Icons.Play size={12} /> Çalış</>
-                                     )}
+                                     <Icons.Minus size={14} />
                                    </button>
+                                   <span className="font-bold text-lg min-w-[20px] text-center">{topic.reviewCount || 0}</span>
                                    <button 
-                                     onClick={() => {
-                                       if(window.confirm('Süre sıfırlansın mı?')) {
-                                          setTopics(topics.map(t => t.id === topic.id ? { ...t, timeSpent: 0 } : t));
-                                       }
-                                     }}
-                                     className="p-1.5 text-gray-400 hover:text-red-500 transition"
-                                     title="Süreyi Sıfırla"
+                                     onClick={() => changeReviewCount(topic.id, 1)}
+                                     className="p-1.5 rounded-full bg-white dark:bg-gray-700 text-gray-500 hover:text-purple-600 dark:hover:text-purple-300 shadow-sm border border-gray-200 dark:border-gray-600 transition"
                                    >
-                                     <Icons.RotateCcw size={14} />
+                                     <Icons.Plus size={14} />
                                    </button>
                                 </div>
                               </div>
