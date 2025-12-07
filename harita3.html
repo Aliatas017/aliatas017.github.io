@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Coğrafya Pro: Türkiye Dağları</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts: Inter & Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --volcanic: #ef4444; 
+            --fault: #a855f7;    
+            --fold: #eab308;     
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #020617; 
+            color: white;
+            overflow: hidden;
+            user-select: none;
+            touch-action: none;
+        }
+
+        /* --- HARİTA --- */
+        #map-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, #1e3a8a 0%, #020617 100%);
+            overflow: hidden;
+            cursor: grab;
+        }
+        #map-container:active { cursor: grabbing; }
+
+        #map-content {
+            transition: transform 0.1s linear;
+            transform-origin: center center;
+        }
+
+        .province-path {
+            fill: #1e293b;
+            stroke: #334155;
+            stroke-width: 0.5px;
+            vector-effect: non-scaling-stroke;
+            transition: all 0.3s ease;
+        }
+        .province-path:hover {
+            fill: #334155;
+            stroke: #64748b;
+            stroke-width: 1px;
+        }
+
+        .city-group { pointer-events: none; opacity: 0.3; }
+        .city-dot { fill: #64748b; r: 1.2; }
+        .city-label {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 6px; fill: #94a3b8;
+            font-weight: 600; text-anchor: middle;
+            text-shadow: 0px 1px 2px rgba(0,0,0,0.8);
+            letter-spacing: 0.5px;
+        }
+
+        /* --- MARKERLAR --- */
+        .mountain-marker {
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .mountain-marker:hover { z-index: 500; }
+
+        .mountain-shape {
+            stroke: #fff;
+            stroke-width: 0.8;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            vector-effect: non-scaling-stroke;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+        }
+
+        .mountain-marker[data-type="volkanik"] .mountain-shape { fill: var(--volcanic); }
+        .mountain-marker[data-type="kirik"] .mountain-shape { fill: var(--fault); }
+        .mountain-marker[data-type="kivrim"] .mountain-shape { fill: var(--fold); }
+
+        .mountain-marker:hover .mountain-shape {
+            transform: scale(2.5);
+            stroke: #3b82f6; 
+            stroke-width: 1.5;
+        }
+
+        .mountain-marker.found .mountain-shape {
+            fill: #22c55e !important;
+            stroke: #14532d;
+            transform: scale(1.3);
+        }
+        .mountain-marker.found { pointer-events: none; }
+
+        .shake .mountain-shape { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        /* --- ETİKETLER --- */
+        .map-label-bg { 
+            fill: rgba(15, 23, 42, 0.95); 
+            rx: 4; ry: 4; 
+            stroke: rgba(148, 163, 184, 0.4); 
+            stroke-width: 0.5px;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.4));
+        }
+        .map-label-text { 
+            fill: #f8fafc; 
+            font-family: 'Montserrat', sans-serif;
+            font-size: 9px; 
+            font-weight: 700; 
+            text-anchor: middle; 
+            dominant-baseline: middle; 
+            letter-spacing: 0.2px;
+        }
+        .label-connector { 
+            stroke: rgba(255,255,255,0.6); 
+            stroke-width: 1px; 
+            stroke-dasharray: 2,2; 
+        }
+
+        /* --- UI (HUD) --- */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        .hud-label {
+            font-size: 9px; font-weight: 800; letter-spacing: 1px; color: #94a3b8; text-transform: uppercase;
+        }
+        .hud-value {
+            font-family: 'Montserrat', sans-serif; font-weight: 800; line-height: 1;
+        }
+
+        /* Tip Göstergesi */
+        .type-badge {
+            font-size: 10px; padding: 4px 10px; border-radius: 6px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            display: flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+            margin-top: 4px;
+        }
+
+        /* Alt Lejant */
+        .legend-bar {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 2rem; padding: 10px 24px; border-radius: 9999px; z-index: 50;
+            pointer-events: none;
+        }
+        .legend-item {
+            display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0.5; transition: all 0.3s;
+        }
+        .legend-item.active {
+            opacity: 1; transform: scale(1.15); filter: drop-shadow(0 0 8px rgba(255,255,255,0.3));
+        }
+        .legend-label { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+        .legend-icon svg { width: 20px; height: 20px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); }
+
+        /* Yüzen Puan */
+        .score-float {
+            position: absolute; font-weight: 900; font-size: 2rem; pointer-events: none;
+            animation: floatUp 0.8s ease-out forwards; z-index: 1000;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-30px) scale(1.5); opacity: 0; }
+        }
+
+        /* Progress Bar */
+        #progress-container {
+            width: 100%; height: 4px; background: rgba(255,255,255,0.1); 
+            position: absolute; bottom: 0; left: 0; border-radius: 2px; overflow: hidden;
+        }
+        #progress-fill {
+            height: 100%; background: #3b82f6; width: 0%; transition: width 0.5s ease-out; box-shadow: 0 0 10px #3b82f6;
+        }
+
+        /* Zoom Kontrolleri */
+        .zoom-controls { position: absolute; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 10px; z-index: 60; }
+        .zoom-btn {
+            width: 44px; height: 44px; border-radius: 12px;
+            background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255,255,255,0.1);
+            color: #94a3b8; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; backdrop-filter: blur(4px); box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .zoom-btn:active { background: #3b82f6; color: white; transform: scale(0.95); }
+
+        #game-over-modal { z-index: 2000; }
+
+        /* Loading Screen */
+        #loading-overlay {
+            position: absolute; inset: 0; z-index: 4000;
+            background: rgba(15, 23, 42, 1);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .loader {
+            width: 48px; height: 48px;
+            border: 5px solid #FFF;
+            border-bottom-color: #3b82f6;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Error Screen */
+        #error-overlay {
+            position: absolute; inset: 0; z-index: 4001;
+            background: rgba(15, 23, 42, 0.98);
+            display: none;
+            flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+
+        #rotate-warning { display: none; position: fixed; inset: 0; z-index: 9999; background: #020617; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
+        @media screen and (orientation: portrait) and (max-width: 768px) { #rotate-warning { display: flex; } }
+        
+        .hit-area { fill: transparent; r: 12; cursor: pointer; }
+    </style>
+</head>
+<body class="h-screen flex flex-col">
+
+    <!-- Loading Screen -->
+    <div id="loading-overlay">
+        <span class="loader mb-4"></span>
+        <h2 class="text-xl font-bold text-white tracking-widest uppercase">Atlas Yükleniyor</h2>
+        <p class="text-slate-400 text-xs mt-2" id="loading-text">Veri sunucudan çekiliyor...</p>
+    </div>
+
+    <!-- Error Screen -->
+    <div id="error-overlay">
+        <div class="bg-red-900/20 border border-red-500/50 p-8 rounded-2xl text-center max-w-sm">
+            <i data-lucide="wifi-off" class="w-12 h-12 text-red-500 mx-auto mb-4"></i>
+            <h2 class="text-xl font-bold text-white mb-2">Bağlantı Hatası</h2>
+            <p class="text-slate-300 text-sm mb-6">Harita verisi indirilemedi. Lütfen internet bağlantınızı kontrol edin.</p>
+            <button onclick="location.reload()" class="bg-red-600 hover:bg-red-500 text-white px-6 py-3 rounded-xl font-bold transition w-full">
+                Tekrar Dene
+            </button>
+        </div>
+    </div>
+
+    <!-- Rotasyon Uyarısı -->
+    <div id="rotate-warning">
+        <i data-lucide="smartphone" class="w-12 h-12 text-blue-500 rotate-90 animate-bounce mb-4"></i>
+        <h2 class="text-xl font-bold text-white">Ekranı Çevirin</h2>
+        <p class="text-slate-500 text-sm mt-2">Haritayı görebilmek için telefonunuzu yan tutun.</p>
+    </div>
+
+    <!-- Game Header -->
+    <header class="bg-slate-800/90 backdrop-blur border-b border-slate-700 p-2 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="bg-blue-600 p-1.5 rounded-lg shadow-inner"><i data-lucide="mountain" class="w-4 h-4 text-white"></i></div>
+                <div class="hidden sm:block">
+                    <h2 class="font-bold text-base leading-tight text-white">Türkiye Atlası</h2>
+                </div>
+            </div>
+
+            <!-- Soru Paneli (Başlangıçta Gizli) -->
+            <div id="question-panel" class="hidden absolute left-1/2 top-16 -translate-x-1/2 bg-white text-slate-900 px-4 py-2 rounded-full shadow-2xl border-4 border-blue-500 flex items-center gap-3 scale-90 z-50 min-w-[200px] justify-between">
+                <div class="text-left">
+                    <div class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">BUL:</div>
+                    <div class="text-lg font-black text-blue-800 leading-none whitespace-nowrap" id="target-name">...</div>
+                </div>
+                
+                <!-- Tip Göstergesi (Mobil için gizlenebilir, PC'de açık) -->
+                <div id="target-type-badge" class="hidden md:flex items-center gap-1 bg-slate-100 px-2 py-1 rounded text-[9px] font-bold text-slate-600">
+                    <span id="type-icon"></span>
+                    <span id="type-text">...</span>
+                </div>
+
+                <button onclick="game.hint()" id="hint-btn" class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-2 py-1 rounded text-[9px] font-bold transition flex flex-col items-center justify-center min-w-[40px] border border-orange-200 active:bg-orange-300">
+                    <i data-lucide="eye" class="w-3 h-3"></i>
+                </button>
+            </div>
+
+            <!-- Dashboard -->
+            <div class="flex gap-2">
+                <div class="bg-slate-700 px-2 py-1 rounded border border-slate-600 flex flex-col items-center min-w-[45px]">
+                    <div class="text-[8px] text-slate-400 font-bold uppercase">Başarı</div>
+                    <div class="text-sm font-mono font-bold text-yellow-400 leading-none" id="accuracy">100%</div>
+                </div>
+                <div class="bg-slate-700 px-2 py-1 rounded border border-slate-600 flex flex-col items-center min-w-[45px]">
+                    <div class="text-[8px] text-slate-400 font-bold uppercase">Puan</div>
+                    <div class="text-sm font-mono font-bold text-green-400 leading-none" id="score">0</div>
+                </div>
+                <!-- Kalan (Progress Bar) -->
+                <div class="bg-slate-700 px-2 py-1 rounded border border-slate-600 flex flex-col items-center min-w-[45px] relative overflow-hidden">
+                    <div class="text-[8px] text-slate-400 font-bold uppercase z-10 relative">Kalan</div>
+                    <div class="text-sm font-mono font-bold text-white leading-none z-10 relative" id="remaining">0</div>
+                    <div id="progress-fill" class="absolute bottom-0 left-0 w-full h-1 bg-blue-500"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Map Area -->
+    <main class="flex-grow p-2 relative flex items-center justify-center bg-slate-900 overflow-hidden">
+        <div id="map-container">
+            <svg id="game-map" width="100%" height="100%" viewBox="0 0 1000 450" preserveAspectRatio="xMidYMid meet">
+                <g id="map-content">
+                    <g id="layer-provinces"></g>
+                    <g id="layer-cities"></g>
+                    <g id="layer-lines"></g> 
+                    <g id="layer-mountains"></g>
+                    <g id="layer-labels"></g> 
+                    <g id="layer-effects"></g>
+                </g>
+            </svg>
+
+            <!-- Zoom Controls -->
+            <div class="zoom-controls">
+                <button class="zoom-btn" onclick="game.zoom(1.2)"><i data-lucide="plus"></i></button>
+                <button class="zoom-btn" onclick="game.zoom(0.8)"><i data-lucide="minus"></i></button>
+                <button class="zoom-btn" onclick="game.resetZoom()"><i data-lucide="maximize"></i></button>
+            </div>
+
+            <!-- Lejant -->
+            <div class="legend-box hidden sm:flex">
+                <div class="legend-item" id="legend-volkanik">
+                    <svg class="legend-svg" viewBox="-6 -6 12 12">
+                        <path d="M0,-6 L-5,4 L5,4 Z" fill="#ef4444" stroke="white" stroke-width="0.5"></path>
+                    </svg>
+                    VOLKANİK
+                </div>
+                <div class="legend-item" id="legend-kirik">
+                    <svg class="legend-svg" viewBox="-6 -6 12 12">
+                        <rect x="-4" y="-4" width="8" height="8" fill="#8b5cf6" stroke="white" stroke-width="0.5"></rect>
+                    </svg>
+                    KIRIK
+                </div>
+                <div class="legend-item" id="legend-kivrim">
+                    <svg class="legend-svg" viewBox="-6 -6 12 12">
+                        <circle r="4" fill="#fbbf24" stroke="white" stroke-width="0.5"></circle>
+                    </svg>
+                    KIVRIM
+                </div>
+            </div>
+        </div>
+        
+        <!-- Game Over Modal -->
+        <div id="game-over-modal" class="fixed inset-0 bg-slate-900/95 hidden flex items-center justify-center p-4 backdrop-blur-md">
+            <div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 max-w-xs w-full text-center shadow-2xl">
+                <div class="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-orange-500/20">
+                    <i data-lucide="trophy" class="w-8 h-8 text-white"></i>
+                </div>
+                <h2 class="text-2xl font-black text-white mb-2">Oyun Bitti!</h2>
+                
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
+                        <div class="text-[9px] text-slate-400 font-bold uppercase">Puan</div>
+                        <div class="text-xl font-black text-green-400" id="final-score">0</div>
+                    </div>
+                    <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
+                        <div class="text-[9px] text-slate-400 font-bold uppercase">Başarı</div>
+                        <div class="text-xl font-black text-yellow-400" id="final-accuracy">0%</div>
+                    </div>
+                </div>
+
+                <button onclick="location.reload()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-bold transition shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2">
+                    <i data-lucide="rotate-cw" class="w-4 h-4"></i> Tekrar Oyna
+                </button>
+            </div>
+        </div>
+
+        <div id="status-msg" class="absolute bottom-20 left-1/2 -translate-x-1/2 bg-slate-800/90 text-white px-4 py-2 rounded-full shadow-2xl font-bold transition-all opacity-0 translate-y-4 pointer-events-none border border-slate-600 backdrop-blur-sm z-50 text-xs"></div>
+    </main>
+
+    <script>
+        // ==========================================
+        //  AYARLAR: GITHUB LINKI
+        // ==========================================
+        const MAP_DATA_URL = 'https://raw.githubusercontent.com/Aliatas017/aliatas017.github.io/main/tr.json';
+        const FALLBACK_URL = 'https://raw.githubusercontent.com/alpers/Turkey-Maps-GeoJSON/master/tr-cities-utf8.json';
+
+        // --- DAĞ VERİLERİ ---
+        const mountainData = [
+            { name: "Kaz Dağları", lat: 39.78, lon: 26.83, type: "kirik" },
+            { name: "Madra Dağı", lat: 39.30, lon: 27.00, type: "kirik" },
+            { name: "Yunt Dağı", lat: 38.85, lon: 27.25, type: "kirik" },
+            { name: "Bozdağlar", lat: 38.35, lon: 28.10, type: "kirik" },
+            { name: "Aydın Dağları", lat: 37.95, lon: 28.05, type: "kirik" },
+            { name: "Menteşe Dağları", lat: 37.30, lon: 28.50, type: "kirik" },
+            { name: "Beşparmak", lat: 37.45, lon: 27.50, type: "kirik" },
+            { name: "Madranbaba", lat: 37.75, lon: 28.15, type: "kirik" },
+            { name: "Akdağ (Muğla)", lat: 36.90, lon: 29.50, type: "kirik" },
+            { name: "Amanos (Nur)", lat: 36.75, lon: 36.30, type: "kirik" },
+            { name: "Nemrut (Bitlis)", lat: 38.65, lon: 42.25, type: "volkanik" },
+            { name: "Süphan Dağı", lat: 38.92, lon: 42.82, type: "volkanik" },
+            { name: "Tendürek", lat: 39.35, lon: 43.85, type: "volkanik" },
+            { name: "Ağrı Dağı", lat: 39.70, lon: 44.30, type: "volkanik" },
+            { name: "Erciyes", lat: 38.53, lon: 35.45, type: "volkanik" },
+            { name: "Hasan Dağı", lat: 38.13, lon: 34.17, type: "volkanik" },
+            { name: "Melendiz", lat: 38.07, lon: 34.40, type: "volkanik" },
+            { name: "Karadağ (Krm)", lat: 37.40, lon: 33.15, type: "volkanik" },
+            { name: "Karacadağ (Kon)", lat: 37.80, lon: 33.60, type: "volkanik" },
+            { name: "Karacadağ (Urf)", lat: 37.75, lon: 39.85, type: "volkanik" },
+            { name: "Kula Volkanları", lat: 38.55, lon: 28.50, type: "volkanik" },
+            { name: "Uludağ", lat: 40.07, lon: 29.22, type: "volkanik" },
+            { name: "Yıldız (Istranca)", lat: 41.75, lon: 27.50, type: "kivrim" },
+            { name: "Küre (İsfendiyar)", lat: 41.75, lon: 33.50, type: "kivrim" },
+            { name: "Ilgaz Dağları", lat: 41.06, lon: 33.85, type: "kivrim" },
+            { name: "Köroğlu Dağları", lat: 40.60, lon: 31.80, type: "kivrim" },
+            { name: "Bolu Dağları", lat: 40.75, lon: 31.60, type: "kivrim" },
+            { name: "Canik Dağları", lat: 40.90, lon: 36.50, type: "kivrim" },
+            { name: "Giresun Dağları", lat: 40.50, lon: 38.40, type: "kivrim" },
+            { name: "Rize Dağları", lat: 40.75, lon: 40.50, type: "kivrim" },
+            { name: "Kaçkar Dağları", lat: 40.93, lon: 41.15, type: "kivrim" },
+            { name: "Karçal Dağları", lat: 41.30, lon: 42.00, type: "kivrim" },
+            { name: "Kop Dağları", lat: 40.02, lon: 40.50, type: "kivrim" },
+            { name: "Mescit Dağları", lat: 40.45, lon: 41.10, type: "kivrim" },
+            { name: "Yalnızçam", lat: 41.10, lon: 42.30, type: "kivrim" },
+            { name: "Bey Dağları", lat: 36.55, lon: 30.05, type: "kivrim" },
+            { name: "Geyik Dağları", lat: 36.90, lon: 32.10, type: "kivrim" },
+            { name: "Sultan Dağları", lat: 38.45, lon: 31.25, type: "kivrim" },
+            { name: "Dedegöl", lat: 37.65, lon: 31.30, type: "kivrim" },
+            { name: "Akdağlar (Ant)", lat: 36.55, lon: 29.55, type: "kivrim" },
+            { name: "Sandras", lat: 37.05, lon: 28.85, type: "kivrim" },
+            { name: "Bolkar Dağları", lat: 37.25, lon: 34.60, type: "kivrim" },
+            { name: "Aladağlar", lat: 37.80, lon: 35.15, type: "kivrim" },
+            { name: "Tahtalı", lat: 38.25, lon: 36.40, type: "kivrim" },
+            { name: "Binboğa", lat: 38.15, lon: 36.85, type: "kivrim" },
+            { name: "Malatya Dağları", lat: 38.20, lon: 38.30, type: "kivrim" },
+            { name: "Nurhak Dağları", lat: 37.95, lon: 37.55, type: "kivrim" },
+            { name: "Genç Dağları", lat: 38.70, lon: 40.50, type: "kivrim" },
+            { name: "İhtiyar Şahap", lat: 38.15, lon: 42.10, type: "kivrim" },
+            { name: "Cilo (Buzul)", lat: 37.48, lon: 44.00, type: "kivrim" },
+            { name: "Mercan (Munzur)", lat: 39.45, lon: 39.40, type: "kivrim" },
+            { name: "Palandöken", lat: 39.85, lon: 41.25, type: "kivrim" },
+            { name: "Karasu-Aras", lat: 40.10, lon: 41.50, type: "kivrim" },
+            { name: "Allahuekber", lat: 40.55, lon: 42.50, type: "kivrim" },
+            { name: "Tecer Dağları", lat: 39.60, lon: 37.50, type: "kivrim" },
+            { name: "Sündiken", lat: 39.95, lon: 30.90, type: "kivrim" },
+            { name: "Elmadağ", lat: 39.85, lon: 33.00, type: "kivrim" },
+            { name: "Murat Dağı", lat: 38.95, lon: 29.60, type: "kivrim" }
+        ];
+
+        const game = {
+            svg: null,
+            geoBounds: { minLon: 180, maxLon: -180, minLat: 90, maxLat: -90 },
+            viewBox: { w: 1000, h: 450 },
+            scale: 1, offsetX: 0, offsetY: 0,
+            transform: { x: 0, y: 0, k: 1 },
+            isDragging: false, startX: 0, startY: 0,
+            
+            state: { score: 0, remaining: [], current: null, active: false, correct: 0, wrong: 0 },
+            drawnLabels: [], 
+            totalMountains: mountainData.length,
+
+            init: function() {
+                // Öncelikli URL'yi dene
+                this.fetchMapData(MAP_DATA_URL);
+                lucide.createIcons();
+                this.setupPanZoom();
+            },
+
+            setupPanZoom: function() {
+                const container = document.getElementById('map-container');
+                container.addEventListener('mousedown', (e) => { this.isDragging = true; this.startX = e.clientX - this.transform.x; this.startY = e.clientY - this.transform.y; container.style.cursor = 'grabbing'; });
+                window.addEventListener('mouseup', () => { this.isDragging = false; container.style.cursor = 'grab'; });
+                window.addEventListener('mousemove', (e) => { if(!this.isDragging) return; e.preventDefault(); this.transform.x = e.clientX - this.startX; this.transform.y = e.clientY - this.startY; this.updateTransform(); });
+                container.addEventListener('touchstart', (e) => { if(e.touches.length === 1) { this.isDragging = true; this.startX = e.touches[0].clientX - this.transform.x; this.startY = e.touches[0].clientY - this.transform.y; } }, {passive: false});
+                window.addEventListener('touchend', () => { this.isDragging = false; });
+                window.addEventListener('touchmove', (e) => { if(!this.isDragging || e.touches.length !== 1) return; this.transform.x = e.touches[0].clientX - this.startX; this.transform.y = e.touches[0].clientY - this.startY; this.updateTransform(); }, {passive: false});
+            },
+
+            zoom: function(factor) {
+                this.transform.k *= factor;
+                if(this.transform.k < 1) this.transform.k = 1; if(this.transform.k > 8) this.transform.k = 8;
+                this.updateTransform();
+            },
+            resetZoom: function() { this.transform = { x: 0, y: 0, k: 1 }; this.updateTransform(); },
+            updateTransform: function() { document.getElementById('map-content').style.transform = `translate(${this.transform.x}px, ${this.transform.y}px) scale(${this.transform.k})`; },
+
+            fetchMapData: function(url) {
+                document.getElementById('loading-overlay').classList.remove('hidden');
+                
+                // Timeout mekanizması
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 saniye bekle
+
+                fetch(url, { signal: controller.signal })
+                    .then(r => { 
+                        clearTimeout(timeoutId);
+                        if (!r.ok) throw new Error(r.status); 
+                        return r.json(); 
+                    })
+                    .then(data => {
+                        this.loadMap(data);
+                        document.getElementById('loading-overlay').classList.add('hidden');
+                        this.start();
+                    })
+                    .catch(err => {
+                        clearTimeout(timeoutId);
+                        console.warn("Ana URL yüklenemedi:", err);
+                        
+                        // Ana URL başarısızsa Fallback'i dene
+                        if (url !== FALLBACK_URL) {
+                             console.log("Yedek URL deneniyor...");
+                             this.fetchMapData(FALLBACK_URL);
+                        } else {
+                            // Hepsi başarısızsa hata ekranını aç
+                            document.getElementById('loading-overlay').classList.add('hidden');
+                            document.getElementById('error-overlay').style.display = 'flex';
+                        }
+                    });
+            },
+
+            scanCoords: function(coords) {
+                if (Array.isArray(coords) && coords.length === 2 && typeof coords[0] === 'number') {
+                    const lon = coords[0]; const lat = coords[1];
+                    if (lon < this.geoBounds.minLon) this.geoBounds.minLon = lon;
+                    if (lon > this.geoBounds.maxLon) this.geoBounds.maxLon = lon;
+                    if (lat < this.geoBounds.minLat) this.geoBounds.minLat = lat;
+                    if (lat > this.geoBounds.maxLat) this.geoBounds.maxLat = lat;
+                } else if (Array.isArray(coords)) {
+                    coords.forEach(c => this.scanCoords(c));
+                }
+            },
+
+            project: function(lon, lat) {
+                const x = (lon - this.geoBounds.minLon) * this.scale + this.offsetX;
+                const y = this.viewBox.h - ((lat - this.geoBounds.minLat) * this.scale + this.offsetY);
+                return { x, y };
+            },
+
+            loadMap: function(data) {
+                this.svg = document.getElementById('game-map');
+                const layerProvinces = document.getElementById('layer-provinces');
+                const layerCities = document.getElementById('layer-cities');
+
+                data.features.forEach(f => this.scanCoords(f.geometry.coordinates));
+
+                const lonSpan = this.geoBounds.maxLon - this.geoBounds.minLon;
+                const latSpan = this.geoBounds.maxLat - this.geoBounds.minLat;
+                const padding = 20;
+                const scaleX = (this.viewBox.w - 2 * padding) / lonSpan;
+                const scaleY = (this.viewBox.h - 2 * padding) / latSpan;
+                
+                this.scale = Math.min(scaleX, scaleY);
+                this.offsetX = (this.viewBox.w - lonSpan * this.scale) / 2;
+                this.offsetY = (this.viewBox.h - latSpan * this.scale) / 2;
+
+                data.features.forEach(f => {
+                    const d = this.createPathD(f.geometry);
+                    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    path.setAttribute("d", d);
+                    path.setAttribute("class", "province-path");
+                    layerProvinces.appendChild(path);
+
+                    const center = this.getCentroid(f.geometry);
+                    if(center) {
+                        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                        g.setAttribute("class", "city-group");
+                        const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                        dot.setAttribute("cx", center.x); dot.setAttribute("cy", center.y);
+                        dot.setAttribute("class", "city-dot");
+                        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                        text.setAttribute("x", center.x); text.setAttribute("y", center.y + 4);
+                        text.setAttribute("class", "city-label");
+                        text.textContent = f.properties.name || f.properties.il;
+                        g.appendChild(dot); g.appendChild(text);
+                        layerCities.appendChild(g);
+                    }
+                });
+                this.drawMountains();
+            },
+
+            createPathD: function(geometry) {
+                let d = "";
+                const polys = geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
+                polys.forEach(poly => {
+                    poly.forEach(ring => {
+                        let ringD = "M";
+                        ring.forEach((pt, i) => {
+                            const p = this.project(pt[0], pt[1]);
+                            ringD += `${p.x.toFixed(1)},${p.y.toFixed(1)} `;
+                            if (i === 0) ringD += "L";
+                        });
+                        ringD += "Z ";
+                        d += ringD;
+                    });
+                });
+                return d;
+            },
+
+            getCentroid: function(geometry) {
+                let sx = 0, sy = 0, count = 0;
+                const traverse = (c) => {
+                    if (typeof c[0] === 'number') {
+                        const p = this.project(c[0], c[1]);
+                        sx += p.x; sy += p.y; count++;
+                    } else c.forEach(traverse);
+                };
+                traverse(geometry.coordinates);
+                return count ? { x: sx/count, y: sy/count } : null;
+            },
+
+            drawMountains: function() {
+                const layer = document.getElementById('layer-mountains');
+                layer.innerHTML = "";
+                this.state.remaining = [...mountainData];
+                this.drawnLabels = []; 
+
+                mountainData.forEach(m => {
+                    const p = this.project(m.lon, m.lat);
+                    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                    g.setAttribute("class", "mountain-marker");
+                    g.setAttribute("transform", `translate(${p.x}, ${p.y})`);
+                    g.setAttribute("data-name", m.name);
+                    g.setAttribute("data-type", m.type);
+                    
+                    let startX, startY;
+                    g.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, {passive: true});
+                    g.addEventListener('touchend', (e) => {
+                        if(Math.abs(e.changedTouches[0].clientX - startX) < 5) { e.stopPropagation(); this.checkAnswer(m, g); }
+                    });
+                    g.onclick = (e) => { e.stopPropagation(); this.checkAnswer(m, g); };
+
+                    const hitArea = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    hitArea.setAttribute("class", "hit-area");
+                    g.appendChild(hitArea);
+
+                    const shape = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    shape.setAttribute("class", "mountain-shape");
+                    
+                    if (m.type === 'volkanik') {
+                        shape.setAttribute("d", "M0,-6 L-5,4 L5,4 Z"); 
+                    } else if (m.type === 'kirik') {
+                        shape.setAttribute("d", "M-4,-4 L4,-4 L4,4 L-4,4 Z");
+                    } else {
+                        shape.setAttribute("d", "M 0,0 m -4,0 a 4,4 0 1,0 8,0 a 4,4 0 1,0 -8,0");
+                    }
+                    g.appendChild(shape);
+                    layer.appendChild(g);
+                    m.el = g;
+                });
+            },
+
+            start: function() {
+                this.state.active = true;
+                this.state.score = 0;
+                this.state.correct = 0;
+                this.state.wrong = 0;
+                this.updateUI();
+                this.nextQuestion();
+                document.getElementById('question-card').classList.add('active');
+                document.getElementById('question-panel').classList.remove('hidden');
+            },
+
+            nextQuestion: function() {
+                if (this.state.remaining.length === 0) {
+                    this.endGame();
+                    return;
+                }
+                const idx = Math.floor(Math.random() * this.state.remaining.length);
+                this.state.current = this.state.remaining[idx];
+                document.getElementById('target-name').innerText = this.state.current.name;
+
+                // Tip Göstergesi
+                document.querySelectorAll('.legend-item').forEach(el => el.classList.remove('active'));
+                const legendEl = document.getElementById(`legend-${this.state.current.type}`);
+                if(legendEl) legendEl.classList.add('active');
+
+                let label = "", colorClass = "", icon = "";
+                if(this.state.current.type === 'volkanik') {
+                    label = "VOLKANİK"; colorClass = "text-red-400";
+                    icon = `<svg viewBox="-6 -6 12 12" class="w-3 h-3 text-red-500"><path d="M0,-6 L-5,4 L5,4 Z" fill="currentColor"/></svg>`;
+                } else if(this.state.current.type === 'kirik') {
+                    label = "KIRIK (HORST)"; colorClass = "text-purple-400";
+                    icon = `<svg viewBox="-6 -6 12 12" class="w-3 h-3 text-purple-500"><rect x="-4" y="-4" width="8" height="8" fill="currentColor"/></svg>`;
+                } else {
+                    label = "KIVRIM"; colorClass = "text-yellow-400";
+                    icon = `<svg viewBox="-6 -6 12 12" class="w-3 h-3 text-yellow-500"><circle r="4" fill="currentColor"/></svg>`;
+                }
+                
+                const typeText = document.getElementById('type-text');
+                const typeIcon = document.getElementById('type-icon');
+                if(typeText && typeIcon) {
+                    typeText.innerText = label;
+                    typeText.className = colorClass;
+                    typeIcon.innerHTML = icon;
+                }
+            },
+
+            checkAnswer: function(mountain, el) {
+                if (!this.state.active) return;
+                if (!this.state.current) return;
+
+                if (mountain.name === this.state.current.name) {
+                    el.classList.add('found');
+                    this.addLabel(mountain);
+                    this.state.score += 10;
+                    this.state.correct++;
+                    this.spawnFloatingText("+10", el, "text-green-400");
+                    this.state.remaining = this.state.remaining.filter(m => m.name !== mountain.name);
+                    this.updateUI();
+                    setTimeout(() => this.nextQuestion(), 600);
+                } else {
+                    el.classList.add('shake');
+                    setTimeout(() => el.classList.remove('shake'), 500);
+                    this.state.score -= 5;
+                    this.state.wrong++;
+                    this.spawnFloatingText("-5", el, "text-red-400");
+                    this.updateUI();
+                }
+            },
+
+            hint: function() {
+                if (!this.state.active || !this.state.current) return;
+                const target = mountainData.find(m => m.name === this.state.current.name);
+                this.state.score -= 5;
+                this.updateUI();
+
+                if (target && target.el) {
+                    const layer = document.getElementById('layer-effects');
+                    const p = this.project(target.lon, target.lat);
+                    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    circle.setAttribute("cx", p.x); circle.setAttribute("cy", p.y);
+                    circle.setAttribute("r", 5); circle.setAttribute("fill", "none");
+                    circle.setAttribute("stroke", "#ef4444"); circle.setAttribute("stroke-width", "2");
+                    let r = 5;
+                    const anim = setInterval(() => {
+                        r += 3;
+                        circle.setAttribute("r", r);
+                        circle.setAttribute("opacity", 1 - (r/60));
+                        if(r > 60) { clearInterval(anim); layer.removeChild(circle); }
+                    }, 30);
+                    layer.appendChild(circle);
+                }
+            },
+
+            addLabel: function(mountain) {
+                const g = document.getElementById('layer-labels');
+                const lineLayer = document.getElementById('layer-lines');
+                const p = this.project(mountain.lon, mountain.lat);
+                
+                let labelY = p.y - 14;
+                let labelHeight = 12;
+                let collision = true;
+                let safety = 0;
+                
+                while(collision && safety < 15) {
+                    collision = false;
+                    for(let l of this.drawnLabels) {
+                        if(Math.abs(p.x - l.x) < 40 && Math.abs(labelY - l.y) < 14) {
+                            labelY -= 14;
+                            collision = true;
+                        }
+                    }
+                    if(!collision) {
+                         for(let m of this.state.remaining) {
+                             if(m.name !== mountain.name) {
+                                 const mp = this.project(m.lon, m.lat);
+                                 if(Math.abs(p.x - mp.x) < 20 && Math.abs(labelY - mp.y) < 10) {
+                                     labelY -= 14;
+                                     collision = true;
+                                 }
+                             }
+                         }
+                    }
+                    safety++;
+                }
+
+                this.drawnLabels.push({x: p.x, y: labelY});
+
+                if(p.y - labelY > 18) {
+                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    line.setAttribute("x1", p.x); line.setAttribute("y1", p.y - 8);
+                    line.setAttribute("x2", p.x); line.setAttribute("y2", labelY + 6);
+                    line.setAttribute("class", "label-connector");
+                    lineLayer.appendChild(line);
+                }
+
+                const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                group.setAttribute("transform", `translate(${p.x}, ${labelY})`);
+                
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute("class", "map-label-bg");
+                rect.setAttribute("height", 12); rect.setAttribute("y", -6);
+                
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("class", "map-label-text");
+                text.textContent = mountain.name;
+                
+                const w = mountain.name.length * 5 + 10;
+                rect.setAttribute("width", w); rect.setAttribute("x", -w/2);
+                
+                group.appendChild(rect); group.appendChild(text);
+                g.appendChild(group);
+            },
+
+            spawnFloatingText: function(text, el, colorClass) {
+                const rect = el.getBoundingClientRect();
+                const div = document.createElement("div");
+                div.innerText = text;
+                div.className = `score-float ${colorClass}`;
+                div.style.left = rect.left + "px"; div.style.top = rect.top + "px";
+                document.body.appendChild(div);
+                setTimeout(() => div.remove(), 800);
+            },
+
+            endGame: function() {
+                this.state.active = false;
+                const total = this.state.correct + this.state.wrong;
+                const acc = total > 0 ? Math.round((this.state.correct / total) * 100) : 0;
+                document.getElementById('final-score').innerText = this.state.score;
+                document.getElementById('final-accuracy').innerText = acc + "%";
+                document.getElementById('game-over-modal').classList.remove('hidden');
+            },
+
+            updateUI: function() {
+                document.getElementById('score').innerText = this.state.score;
+                document.getElementById('remaining').innerText = this.state.remaining.length;
+                
+                const total = this.state.correct + this.state.wrong;
+                const acc = total > 0 ? Math.round((this.state.correct / total) * 100) : 100;
+                document.getElementById('accuracy').innerText = acc + "%";
+                
+                const progress = ((this.state.totalMountains - this.state.remaining.length) / this.state.totalMountains) * 100;
+                document.getElementById('progress-fill').style.width = `${progress}%`;
+            }
+        };
+
+        game.init();
+    </script>
+</body>
+</html>
