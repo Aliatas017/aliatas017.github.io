@@ -1,455 +1,389 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  BookOpen, 
-  CheckCircle, 
-  Clock, 
-  Play, 
-  Pause, 
-  RotateCcw, 
-  Save, 
-  Download, 
-  Upload, 
-  Moon, 
-  Sun, 
-  BarChart2, 
-  ChevronDown, 
-  ChevronUp, 
-  Edit3,
-  Trash2
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coğrafya Oyunları - Anasayfa</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* --- DARK MODE (Varsayılan) --- */
+            --bg-body: #020617;         
+            --bg-dots: #1e293b;         
+            
+            --panel-bg: #0f172a;        
+            --panel-border: #334155;    
+            
+            --text-primary: #f8fafc;    
+            --text-secondary: #94a3b8;  
+            
+            /* Vurgu Renkleri */
+            --accent-primary: #38bdf8;  
+            --accent-glow: rgba(56, 189, 248, 0.15);
+            
+            --glass-bg: rgba(15, 23, 42, 0.85); 
+            --card-hover-bg: #1e293b;
 
-// --- ENGİN ERAYDIN MÜFREDATINA UYGUN VARSAYILAN VERİLER ---
-const DEFAULT_TOPICS = [
-  { id: 1, title: "Coğrafyanın Bölümleri ve Yöntemleri", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Coğrafyanın İlkeleri", "Harita Bilgisi", "Projeksiyon Yöntemleri"] },
-  { id: 2, title: "Türkiye'nin Coğrafi Konumu", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Matematik Konum", "Özel Konum", "Jeopolitik Konum"] },
-  { id: 3, title: "Türkiye'nin Yer Şekilleri", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Dağlar", "Ovalar", "Platolar", "Akarsular", "Göller"] },
-  { id: 4, title: "Jeolojik Zamanlar ve Oluşum", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Türkiye'nin Jeolojik Geçmişi", "Masif Araziler"] },
-  { id: 5, title: "İklim Bilgisi ve Türkiye'nin İklimi", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Sıcaklık", "Basınç ve Rüzgarlar", "Nem ve Yağış", "İklim Tipleri"] },
-  { id: 6, title: "Doğal Afetler", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Deprem", "Sel ve Taşkın", "Heyelan", "Erozyon"] },
-  { id: 7, title: "Nüfus ve Yerleşme", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Nüfusun Dağılışı", "Nüfus Piramitleri", "Göçler", "Kır ve Kent Yerleşmeleri"] },
-  { id: 8, title: "Tarım", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Tarımı Etkileyen Faktörler", "Tarım Ürünleri"] },
-  { id: 9, title: "Hayvancılık, Ormancılık ve Balıkçılık", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Büyükbaş/Küçükbaş", "Kümes Hayvancılığı", "Su Ürünleri"] },
-  { id: 10, title: "Madenler ve Enerji Kaynakları", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Metalik Madenler", "Enerji Kaynakları (Yenilenebilir/Tükenebilir)"] },
-  { id: 11, title: "Sanayi ve Ticaret", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Sanayi Kollarının Dağılışı", "İç ve Dış Ticaret"] },
-  { id: 12, title: "Ulaşım ve Turizm", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Karayolu, Demiryolu, Denizyolu, Havayolu", "Turizm Değerleri"] },
-  { id: 13, title: "Bölgeler Coğrafyası (Bölgesel Kalkınma)", status: "not-started", timeSpent: 0, notes: "", subtopics: ["GAP, DAP, KOP, DOKAP vb."] },
-  { id: 14, title: "Çevre ve Doğa (Güncel Çevre Sorunları)", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Küresel Isınma", "Atıklar"] },
-  { id: 15, title: "Kültür Bölgeleri ve Nüfus Hareketleri", status: "not-started", timeSpent: 0, notes: "", subtopics: ["Türk Kültürü", "Küresel Örgütler"] },
-];
-
-const STATUS_CONFIG = {
-  'not-started': { label: 'Başlamadım', color: 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300' },
-  'working': { label: 'Çalışılıyor', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' },
-  'reviewing': { label: 'Tekrar Ediyorum', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
-  'finished': { label: 'Bitirdim', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
-};
-
-export default function App() {
-  // --- STATE YÖNETİMİ ---
-  const [topics, setTopics] = useState(DEFAULT_TOPICS);
-  const [darkMode, setDarkMode] = useState(false);
-  const [activeTopicId, setActiveTopicId] = useState(null); // Şu an zamanlayıcının çalıştığı konu ID'si
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [expandedTopicId, setExpandedTopicId] = useState(null); // Detayı açılan konu
-  const [filter, setFilter] = useState('all'); // all, working, finished...
-
-  const timerRef = useRef(null);
-
-  // --- LOCALSTORAGE İŞLEMLERİ ---
-  useEffect(() => {
-    const savedTopics = localStorage.getItem('kpssCografyaTopics');
-    const savedTheme = localStorage.getItem('kpssTheme');
-    
-    if (savedTopics) {
-      try {
-        setTopics(JSON.parse(savedTopics));
-      } catch (e) {
-        console.error("Veri okuma hatası", e);
-      }
-    }
-
-    if (savedTheme === 'dark') {
-      setDarkMode(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('kpssCografyaTopics', JSON.stringify(topics));
-  }, [topics]);
-
-  useEffect(() => {
-    localStorage.setItem('kpssTheme', darkMode ? 'dark' : 'light');
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [darkMode]);
-
-  // --- ZAMANLAYICI MANTIĞI ---
-  useEffect(() => {
-    if (isTimerRunning && activeTopicId) {
-      timerRef.current = setInterval(() => {
-        setTopics(prevTopics => 
-          prevTopics.map(topic => 
-            topic.id === activeTopicId 
-              ? { ...topic, timeSpent: topic.timeSpent + 1 }
-              : topic
-          )
-        );
-      }, 1000);
-    } else {
-      clearInterval(timerRef.current);
-    }
-    return () => clearInterval(timerRef.current);
-  }, [isTimerRunning, activeTopicId]);
-
-  // --- FONKSİYONLAR ---
-  
-  const toggleTimer = (id) => {
-    if (activeTopicId === id && isTimerRunning) {
-      setIsTimerRunning(false);
-    } else if (activeTopicId === id && !isTimerRunning) {
-      setIsTimerRunning(true);
-    } else {
-      // Başka bir konuya geçiş
-      setActiveTopicId(id);
-      setIsTimerRunning(true);
-      // Otomatik olarak durumu "Çalışılıyor" yap (Eğer bitmediyse)
-      changeStatus(id, 'working');
-    }
-  };
-
-  const changeStatus = (id, newStatus) => {
-    setTopics(topics.map(t => t.id === id ? { ...t, status: newStatus } : t));
-  };
-
-  const updateNotes = (id, newNote) => {
-    setTopics(topics.map(t => t.id === id ? { ...t, notes: newNote } : t));
-  };
-
-  const deleteData = () => {
-    if(window.confirm("Tüm ilerlemeniz silinecek ve varsayılana dönülecek. Emin misiniz?")) {
-        setTopics(DEFAULT_TOPICS);
-        setActiveTopicId(null);
-        setIsTimerRunning(false);
-    }
-  }
-
-  const exportData = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(topics));
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "kpss_cografya_yedek.json");
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-  };
-
-  const importData = (event) => {
-    const fileReader = new FileReader();
-    fileReader.readAsText(event.target.files[0], "UTF-8");
-    fileReader.onload = (e) => {
-      try {
-        const parsedData = JSON.parse(e.target.result);
-        if (Array.isArray(parsedData)) {
-          setTopics(parsedData);
-          alert("Yedek başarıyla yüklendi!");
+            --radius-md: 12px;
+            --radius-lg: 16px;
         }
-      } catch (error) {
-        alert("Dosya formatı hatalı.");
-      }
-    };
-  };
 
-  const formatTime = (seconds) => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    return `${h > 0 ? h + 'sa ' : ''}${m}dk ${s}sn`;
-  };
+        /* --- LIGHT MODE --- */
+        body.light-mode {
+            --bg-body: #f1f5f9;         
+            --bg-dots: #cbd5e1;         
+            
+            --panel-bg: #ffffff;        
+            --panel-border: #cbd5e1;    
+            
+            --text-primary: #0f172a;    
+            --text-secondary: #475569;  
 
-  // --- İSTATİSTİK HESAPLAMA ---
-  const totalTopics = topics.length;
-  const completedTopics = topics.filter(t => t.status === 'finished').length;
-  const progressPercent = Math.round((completedTopics / totalTopics) * 100);
-  const totalTime = topics.reduce((acc, curr) => acc + curr.timeSpent, 0);
+            --accent-primary: #0369a1;  
+            --accent-glow: rgba(3, 105, 161, 0.1);
 
-  // Filtreleme
-  const filteredTopics = topics.filter(t => {
-    if (filter === 'all') return true;
-    return t.status === filter;
-  });
+            --glass-bg: rgba(255, 255, 255, 0.85); 
+            --card-hover-bg: #f8fafc;
+        }
 
-  return (
-    <div className={`min-h-screen transition-colors duration-300 ${darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-800'}`}>
-      
-      {/* ÜST BAR */}
-      <header className="sticky top-0 z-20 backdrop-blur-md bg-white/80 dark:bg-gray-800/80 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <BookOpen className="text-indigo-600 dark:text-indigo-400" />
-            <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              KPSS Coğrafya Takip
-            </h1>
-          </div>
-          <button 
-            onClick={() => setDarkMode(!darkMode)}
-            className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
-          >
-            {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
-        </div>
-      </header>
+        body { 
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg-body);
+            background-image: radial-gradient(var(--bg-dots) 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-      <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+        /* --- HEADER & FOOTER --- */
+        header, footer {
+            background-color: var(--glass-bg);
+            border-color: var(--panel-border);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: background-color 0.5s ease, border-color 0.5s ease;
+        }
+
+        /* --- AUTH BUTTONS --- */
+        .auth-btn {
+            font-weight: 600;
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
         
-        {/* İSTATİSTİK PANOSU */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Genel İlerleme</p>
-                <h2 className="text-3xl font-bold mt-1">%{progressPercent}</h2>
-              </div>
-              <div className="p-2 bg-indigo-100 dark:bg-indigo-900 rounded-lg text-indigo-600 dark:text-indigo-300">
-                <BarChart2 size={24} />
-              </div>
-            </div>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full mt-4">
-              <div 
-                className="bg-indigo-600 h-2 rounded-full transition-all duration-500" 
-                style={{ width: `${progressPercent}%` }}
-              ></div>
-            </div>
-            <p className="text-xs text-gray-500 mt-2">{completedTopics} / {totalTopics} Konu Tamamlandı</p>
-          </div>
+        .btn-login {
+            color: var(--text-primary);
+            background: transparent;
+        }
+        .btn-login:hover {
+            background: var(--bg-dots);
+        }
 
-          <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Toplam Çalışma</p>
-                <h2 className="text-3xl font-bold mt-1">{formatTime(totalTime)}</h2>
-              </div>
-              <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg text-orange-600 dark:text-orange-300">
-                <Clock size={24} />
-              </div>
-            </div>
-            <p className="text-xs text-gray-500 mt-4">Tüm konulara harcanan toplam süre</p>
-          </div>
+        .btn-signup {
+            background: var(--accent-primary);
+            color: var(--bg-body); /* Kontrast için */
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+        .btn-signup:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px var(--accent-glow);
+            filter: brightness(1.1);
+        }
 
-          <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-center space-y-3">
-             <div className="flex gap-2">
-                <button onClick={exportData} className="flex-1 flex items-center justify-center gap-2 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 py-2 rounded-lg transition">
-                  <Download size={16} /> Yedekle
+        /* --- GAME CARD --- */
+        .game-card {
+            background: var(--panel-bg);
+            border: 2px solid var(--panel-border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .game-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-6px);
+            box-shadow: 0 12px 24px -8px rgba(0,0,0,0.3);
+            background: var(--card-hover-bg);
+        }
+
+        .icon-box {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-body);
+            border: 2px solid var(--panel-border);
+            color: var(--accent-primary);
+            transition: all 0.3s ease;
+        }
+
+        .game-card:hover .icon-box {
+            background: var(--accent-primary);
+            color: var(--bg-body); /* İkon rengi arka planla zıt olsun */
+            border-color: var(--accent-primary);
+            transform: scale(1.1) rotate(3deg);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        .card-desc {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .play-badge {
+            margin-top: auto;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 700;
+            color: var(--accent-primary);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        .game-card:hover .play-badge {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- THEME TOGGLE --- */
+        .theme-toggle-btn {
+            width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--panel-bg);
+            border: 2px solid var(--panel-border);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .theme-toggle-btn:hover {
+            color: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        /* --- GRID LAYOUT --- */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            width: 100%;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 border-b-2">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            
+            <!-- Logo Alanı -->
+            <div class="flex items-center gap-3 select-none">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center border-2" 
+                     style="background: var(--panel-bg); border-color: var(--accent-primary); color: var(--accent-primary);">
+                    <i data-lucide="globe-2" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-black text-lg leading-tight tracking-tight" style="color: var(--text-primary)">COĞRAFYA</h1>
+                    <p class="text-[10px] font-bold tracking-widest uppercase" style="color: var(--text-secondary)">Eğitim Platformu</p>
+                </div>
+            </div>
+
+            <!-- Sağ Menü -->
+            <div class="flex items-center gap-4">
+                <!-- Auth Butonları (Mobilde gizlenebilir veya ikon yapılabilir) -->
+                <div class="hidden md:flex items-center gap-2 mr-2">
+                    <button class="auth-btn btn-login">Giriş Yap</button>
+                    <button class="auth-btn btn-signup">Kayıt Ol</button>
+                </div>
+
+                <!-- Tema Değiştirici -->
+                <button onclick="toggleTheme()" class="theme-toggle-btn" title="Tema Değiştir">
+                    <i data-lucide="sun" class="w-5 h-5 hidden dark-icon"></i>
+                    <i data-lucide="moon" class="w-5 h-5 light-icon"></i>
                 </button>
-                <label className="flex-1 flex items-center justify-center gap-2 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 py-2 rounded-lg transition cursor-pointer">
-                  <Upload size={16} /> Yükle
-                  <input type="file" onChange={importData} className="hidden" accept=".json" />
-                </label>
-             </div>
-             <button onClick={deleteData} className="w-full text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 flex items-center justify-center gap-1">
-                <Trash2 size={12}/> Sıfırla
-             </button>
-          </div>
-        </div>
-
-        {/* AKTİF ÇALIŞMA ZAMANLAYICISI (Eğer çalışıyorsa görünür) */}
-        {activeTopicId && (
-          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-[90%] md:w-auto z-50 animate-bounce-in">
-            <div className="bg-gray-900 text-white dark:bg-white dark:text-gray-900 px-6 py-4 rounded-full shadow-2xl flex items-center gap-4 border border-gray-700 dark:border-gray-200">
-                <div className="flex flex-col">
-                  <span className="text-xs font-medium opacity-70">Şu an çalışılıyor:</span>
-                  <span className="font-bold truncate max-w-[200px]">
-                    {topics.find(t => t.id === activeTopicId)?.title}
-                  </span>
-                </div>
-                <div className="text-2xl font-mono font-bold">
-                  {formatTime(topics.find(t => t.id === activeTopicId)?.timeSpent || 0)}
-                </div>
-                <button 
-                  onClick={() => setIsTimerRunning(!isTimerRunning)}
-                  className={`p-3 rounded-full transition ${isTimerRunning ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-green-500 hover:bg-green-600 text-white'}`}
-                >
-                  {isTimerRunning ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
+                
+                <!-- Mobil Menü İkonu (Opsiyonel) -->
+                <button class="md:hidden theme-toggle-btn">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
             </div>
-          </div>
-        )}
+        </div>
+    </header>
 
-        {/* KONU LİSTESİ FİLTRE VE BAŞLIK */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8">
-          <h3 className="text-lg font-bold flex items-center gap-2">
-            Konu Listesi
-            <span className="text-xs font-normal bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-full">
-               {topics.length}
-            </span>
-          </h3>
-          <div className="flex gap-2">
-             <select 
-               value={filter} 
-               onChange={(e) => setFilter(e.target.value)}
-               className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
-             >
-               <option value="all">Tümü</option>
-               <option value="not-started">Başlanmadı</option>
-               <option value="working">Çalışılıyor</option>
-               <option value="reviewing">Tekrar</option>
-               <option value="finished">Bitti</option>
-             </select>
-          </div>
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-6 py-12 flex flex-col items-center">
+        
+        <!-- Hero Metni -->
+        <div class="text-center mb-16 max-w-2xl">
+            <h2 class="text-4xl md:text-5xl font-black mb-4 tracking-tight" style="color: var(--text-primary)">
+                Türkiye'yi <span style="color: var(--accent-primary)">Keşfet</span>
+            </h2>
+            <p class="text-lg" style="color: var(--text-secondary)">
+                İnteraktif haritalar ve oyunlarla coğrafya bilginizi test edin. Başlamak için aşağıdan bir kategori seçin.
+            </p>
         </div>
 
-        {/* KONU KARTLARI */}
-        <div className="space-y-3 pb-24">
-          {filteredTopics.map((topic) => (
-            <div 
-              key={topic.id} 
-              className={`bg-white dark:bg-gray-800 rounded-xl border transition-all duration-200 
-                ${topic.status === 'finished' ? 'border-green-200 dark:border-green-900/50' : 'border-gray-200 dark:border-gray-700'}
-                ${expandedTopicId === topic.id ? 'shadow-md ring-1 ring-indigo-500/20' : 'hover:shadow-sm'}
-              `}
-            >
-              {/* KART BAŞLIĞI (Tıklanabilir) */}
-              <div 
-                className="p-4 flex items-center justify-between cursor-pointer select-none"
-                onClick={() => setExpandedTopicId(expandedTopicId === topic.id ? null : topic.id)}
-              >
-                <div className="flex items-center gap-4 flex-1">
-                  <div className={`p-2 rounded-lg flex-shrink-0 ${
-                    topic.status === 'finished' ? 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
-                  }`}>
-                    {topic.status === 'finished' ? <CheckCircle size={20} /> : <BookOpen size={20} />}
-                  </div>
-                  <div>
-                    <h4 className={`font-semibold ${topic.status === 'finished' ? 'text-gray-500 line-through decoration-2 decoration-green-500/50' : ''}`}>
-                      {topic.title}
-                    </h4>
-                    <div className="flex items-center gap-2 mt-1">
-                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_CONFIG[topic.status].color}`}>
-                          {STATUS_CONFIG[topic.status].label}
-                       </span>
-                       {topic.timeSpent > 0 && (
-                         <span className="text-xs text-gray-400 font-mono flex items-center gap-1">
-                            <Clock size={10} /> {formatTime(topic.timeSpent)}
-                         </span>
-                       )}
-                    </div>
-                  </div>
-                </div>
-                <div className="text-gray-400">
-                  {expandedTopicId === topic.id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                </div>
-              </div>
+        <!-- OYUN KARTLARI (JS ile doldurulacak) -->
+        <div id="games-container" class="games-grid max-w-7xl">
+            <!-- Kartlar buraya dinamik olarak gelecek -->
+        </div>
 
-              {/* AÇILAN DETAY ALANI */}
-              {expandedTopicId === topic.id && (
-                <div className="px-4 pb-4 pt-0 border-t border-gray-100 dark:border-gray-700 animate-fadeIn">
-                  
-                  {/* ALT BAŞLIKLAR */}
-                  {topic.subtopics && topic.subtopics.length > 0 && (
-                    <div className="mt-4 mb-4">
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Konu İçeriği</p>
-                      <div className="flex flex-wrap gap-2">
-                        {topic.subtopics.map((sub, idx) => (
-                          <span key={idx} className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded">
-                            {sub}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+    </main>
 
-                  {/* KONTROL PANELİ */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    
-                    {/* DURUM VE SÜRE */}
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Durum Değiştir</label>
-                        <div className="grid grid-cols-2 gap-2">
-                           {Object.entries(STATUS_CONFIG).map(([key, config]) => (
-                             <button
-                               key={key}
-                               onClick={() => changeStatus(topic.id, key)}
-                               className={`text-xs py-2 px-2 rounded-lg border transition ${
-                                 topic.status === key 
-                                 ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300' 
-                                 : 'border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
-                               }`}
-                             >
-                               {config.label}
-                             </button>
-                           ))}
-                        </div>
-                      </div>
-
-                      <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg flex items-center justify-between border border-gray-100 dark:border-gray-700">
-                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                           <Clock size={16} />
-                           <span className="text-sm font-mono font-bold">{formatTime(topic.timeSpent)}</span>
-                        </div>
-                        <div className="flex gap-2">
-                           <button 
-                             onClick={() => toggleTimer(topic.id)}
-                             className={`flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-md text-white transition ${
-                               activeTopicId === topic.id && isTimerRunning 
-                               ? 'bg-red-500 hover:bg-red-600' 
-                               : 'bg-indigo-600 hover:bg-indigo-700'
-                             }`}
-                           >
-                             {activeTopicId === topic.id && isTimerRunning ? (
-                               <><Pause size={12} /> Duraklat</>
-                             ) : (
-                               <><Play size={12} /> Çalış</>
-                             )}
-                           </button>
-                           <button 
-                             onClick={() => {
-                               if(window.confirm('Süre sıfırlansın mı?')) {
-                                  setTopics(topics.map(t => t.id === topic.id ? { ...t, timeSpent: 0 } : t));
-                               }
-                             }}
-                             className="p-1.5 text-gray-400 hover:text-red-500 transition"
-                             title="Süreyi Sıfırla"
-                           >
-                             <RotateCcw size={14} />
-                           </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* NOT ALANI */}
-                    <div className="flex flex-col h-full">
-                       <label className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase mb-2">
-                         <Edit3 size={12} /> Kişisel Notlar
-                       </label>
-                       <textarea 
-                         value={topic.notes}
-                         onChange={(e) => updateNotes(topic.id, e.target.value)}
-                         placeholder="Bu konuyla ilgili önemli notlar, şifreler veya eksikler..."
-                         className="flex-1 w-full p-3 text-sm bg-yellow-50 dark:bg-gray-900 border border-yellow-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none resize-none min-h-[120px]"
-                       />
-                       <div className="flex justify-end mt-1">
-                          <span className="text-[10px] text-gray-400 flex items-center gap-1">
-                            <Save size={10} /> Otomatik Kaydedilir
-                          </span>
-                       </div>
-                    </div>
-
-                  </div>
-                </div>
-              )}
+    <!-- Footer -->
+    <footer class="border-t-2 mt-auto">
+        <div class="max-w-7xl mx-auto px-6 py-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-sm font-medium" style="color: var(--text-secondary)">
+                &copy; 2024 Coğrafya Oyunları. Tüm hakları saklıdır.
             </div>
-          ))}
-          
-          {filteredTopics.length === 0 && (
-             <div className="text-center py-10 text-gray-400">
-                <p>Bu filtreye uygun konu bulunamadı.</p>
-             </div>
-          )}
+            
+            <div class="flex items-center gap-2 px-4 py-2 rounded-full border border-[var(--panel-border)] bg-[var(--panel-bg)]">
+                <i data-lucide="code-2" class="w-4 h-4" style="color: var(--accent-primary)"></i>
+                <span class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-secondary)">
+                    Geliştirici: <span style="color: var(--text-primary)">Ali Ataş</span>
+                </span>
+            </div>
         </div>
-      </main>
-    </div>
-  );
-}
+    </footer>
+
+    <script>
+        // --- KONFIGÜRASYON ---
+        // Yeni buton/kart eklemek için bu listeye yeni bir obje eklemen yeterli.
+        const games = [
+            {
+                title: "Platolar",
+                description: "Türkiye'nin önemli platolarını harita üzerinde bulun.",
+                icon: "map", // Lucide icon adı
+                link: "platolar.html",
+                active: true
+            },
+            {
+                title: "Dağlar",
+                description: "Sıradağlar ve volkanik dağları ne kadar tanıyorsun?",
+                icon: "mountain",
+                link: "#",
+                active: true
+            },
+            {
+                title: "Ovalar",
+                description: "Kıyı ve iç kesim ovalarının yerlerini öğrenin.",
+                icon: "sunset",
+                link: "#",
+                active: true
+            },
+            {
+                title: "Göller",
+                description: "Tektonik, volkanik ve set gölleri haritası.",
+                icon: "waves",
+                link: "#",
+                active: true
+            },
+            {
+                title: "Akarsular",
+                description: "Türkiye'nin hayat damarlarını keşfedin.",
+                icon: "zap", 
+                link: "#",
+                active: true
+            },
+            {
+                title: "Şehirler",
+                description: "81 ilin yerini tahmin etme oyunu.",
+                icon: "building-2",
+                link: "#",
+                active: true
+            }
+        ];
+
+        // --- KARTLARI OLUŞTURMA ---
+        const container = document.getElementById('games-container');
+
+        games.forEach(game => {
+            const card = document.createElement('a');
+            card.href = game.link;
+            card.className = 'game-card group'; // group for hover effects
+            
+            card.innerHTML = `
+                <div class="icon-box">
+                    <i data-lucide="${game.icon}" class="w-10 h-10"></i>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                    <h3 class="card-title">${game.title}</h3>
+                    <p class="card-desc">${game.description}</p>
+                </div>
+                <div class="play-badge flex items-center gap-1">
+                    Oyna <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </div>
+            `;
+            
+            container.appendChild(card);
+        });
+
+        // --- TEMA YÖNETİMİ ---
+        let isLightMode = false;
+        
+        function toggleTheme() {
+            isLightMode = !isLightMode;
+            document.body.classList.toggle('light-mode', isLightMode);
+            
+            const lightIcons = document.querySelectorAll('.light-icon');
+            const darkIcons = document.querySelectorAll('.dark-icon');
+            
+            if (isLightMode) {
+                lightIcons.forEach(i => i.classList.add('hidden'));
+                darkIcons.forEach(i => i.classList.remove('hidden'));
+            } else {
+                lightIcons.forEach(i => i.classList.remove('hidden'));
+                darkIcons.forEach(i => i.classList.add('hidden'));
+            }
+        }
+
+        // İkonları başlat
+        lucide.createIcons();
+
+        // Sayfa yüklendiğinde hafif bir animasyonla giriş yap
+        window.onload = () => {
+            const cards = document.querySelectorAll('.game-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 * index); // Her kart sırayla gelsin
+            });
+        };
+    </script>
+</body>
+</html>
