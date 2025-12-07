@@ -273,28 +273,8 @@
             totalMountains: mountainData.length,
 
             init: function() {
-                if (MAP_DATA_URL) {
-                     fetch(MAP_DATA_URL)
-                        .then(response => {
-                            if (!response.ok) throw new Error("Ağ hatası");
-                            return response.json();
-                        })
-                        .then(data => {
-                            this.loadMap(data);
-                            this.start();
-                        })
-                        .catch(error => {
-                            console.error("Yükleme hatası:", error);
-                            this.showStatus("Harita yüklenemedi. URL'yi kontrol edin.", "bg-red-600");
-                            // Show overlay optionally or just status
-                            const overlay = document.getElementById('data-missing-overlay');
-                            overlay.classList.remove('hidden');
-                            overlay.querySelector('h2').innerText = "Yükleme Hatası";
-                            overlay.querySelector('p').innerHTML = "Girdiğiniz URL'den veri çekilemedi.<br>Lütfen linkin 'Raw' formatta ve erişilebilir olduğundan emin olun.";
-                        });
-                } else {
-                    document.getElementById('data-missing-overlay').classList.remove('hidden');
-                }
+               this.fetchMapData(MAP_DATA_URL);
+                } 
                 lucide.createIcons();
                 this.setupPanZoom();
             },
