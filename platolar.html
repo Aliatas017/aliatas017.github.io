@@ -129,7 +129,7 @@
         .plateau-shape {
             stroke: #fff;
             stroke-width: 1;
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), fill 0.3s;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), fill 0.3s;
             transform-origin: 0 0; 
             vector-effect: non-scaling-stroke;
         }
@@ -142,9 +142,10 @@
 
         /* Hover Efekti */
         .plateau-marker:hover .plateau-shape {
-            transform: scale(1.5);
+            transform: scale(1.6);
             stroke: #3b82f6; 
             stroke-width: 1.5px;
+            filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
         }
 
         /* Bulunan */
@@ -155,6 +156,15 @@
             transform: scale(1.1);
         }
         .plateau-marker.found { cursor: default; }
+
+        /* Giriş Animasyonu */
+        .entrance-anim {
+            animation: popInMarker 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+        }
+        @keyframes popInMarker {
+            from { transform: scale(0); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
 
         /* Yanlış Efekti */
         .shake .plateau-shape { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
@@ -170,8 +180,20 @@
         .map-label-text { fill: var(--text-primary); font-size: 10px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; pointer-events: none; transition: fill 0.5s ease; }
         .label-connector { stroke: var(--connector-stroke); stroke-width: 1px; pointer-events: none; stroke-dasharray: 3,3; transition: stroke 0.5s ease; }
 
+        /* Etiket Açılma Animasyonu */
+        .label-animate {
+            animation: labelPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            opacity: 0;
+            /* DÜZELTME: transform-origin 0 0 yapıldı, fill-box kaldırıldı */
+            transform-origin: 0 0;
+        }
+        @keyframes labelPop {
+            from { opacity: 0; transform: scale(0.5) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
         /* Tıklama Alanı */
-        .hit-area { fill: transparent; r: 16; cursor: pointer; }
+        .hit-area { fill: transparent; r: 18; cursor: pointer; }
         
         /* Lejant */
         .legend-box {
@@ -244,6 +266,10 @@
         
         .theme-toggle { top: 85px; }
         .audio-toggle { top: 140px; }
+
+        /* Hedef Yanıp Sönme */
+        .pulse-text { animation: pulseText 2s infinite; }
+        @keyframes pulseText { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
     </style>
 </head>
 <body class="h-screen flex flex-col">
@@ -292,7 +318,7 @@
             <div id="question-panel" class="absolute left-1/2 top-20 -translate-x-1/2 px-6 py-2.5 rounded-full shadow-2xl border-4 border-indigo-500 flex items-center gap-4 transition-all opacity-0 pointer-events-none scale-90 z-50" style="background-color: var(--legend-bg); color: var(--text-primary);">
                 <div class="text-center md:text-left">
                     <div class="text-[9px] font-bold uppercase tracking-widest mb-0.5" style="color: var(--text-secondary)">BULMAN GEREKEN PLATO</div>
-                    <div class="text-xl font-black text-indigo-500 leading-none whitespace-nowrap" id="target-name">...</div>
+                    <div class="text-xl font-black text-indigo-500 leading-none whitespace-nowrap pulse-text" id="target-name">...</div>
                 </div>
                 <button onclick="game.hint()" id="hint-btn" class="bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 px-3 py-2 rounded-lg text-[10px] font-bold transition flex flex-col items-center justify-center gap-1 min-w-[50px] border border-orange-500/30 shadow-sm">
                     <i data-lucide="eye" class="w-3 h-3"></i>
@@ -704,10 +730,13 @@
                 this.state.remaining = [...plateauData];
                 this.drawnLabels = []; 
 
-                plateauData.forEach(pData => {
+                plateauData.forEach((pData, index) => {
                     const p = this.project(pData.lon, pData.lat);
                     const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-                    g.setAttribute("class", "plateau-marker");
+                    g.setAttribute("class", "plateau-marker entrance-anim");
+                    // Animasyon sırası için delay ekle
+                    g.style.animationDelay = `${index * 0.05}s`;
+                    
                     g.setAttribute("transform", `translate(${p.x}, ${p.y})`);
                     g.setAttribute("data-name", pData.name);
                     g.setAttribute("data-type", pData.type);
@@ -824,24 +853,29 @@
                     const layer = document.getElementById('layer-effects');
                     const p = this.project(target.lon, target.lat);
                     
-                    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    circle.setAttribute("cx", p.x);
-                    circle.setAttribute("cy", p.y);
-                    circle.setAttribute("r", 5);
-                    circle.setAttribute("fill", "none");
-                    circle.setAttribute("stroke", "#ef4444");
-                    circle.setAttribute("stroke-width", "2");
-                    
-                    circle.animate([
-                        { r: 5, opacity: 1 },
-                        { r: 40, opacity: 0 }
-                    ], {
-                        duration: 1500,
-                        iterations: 2
-                    });
-                    
-                    layer.appendChild(circle);
-                    setTimeout(() => layer.removeChild(circle), 3000);
+                    // Ripple Efekti (İç içe 3 halka)
+                    for(let i=0; i<3; i++) {
+                        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                        circle.setAttribute("cx", p.x);
+                        circle.setAttribute("cy", p.y);
+                        circle.setAttribute("r", 5);
+                        circle.setAttribute("fill", "none");
+                        circle.setAttribute("stroke", "#ef4444");
+                        circle.setAttribute("stroke-width", "2");
+                        circle.style.opacity = "0.8";
+                        
+                        circle.animate([
+                            { r: 5, opacity: 0.8, strokeWidth: "3px" },
+                            { r: 40 + (i*15), opacity: 0, strokeWidth: "0px" }
+                        ], {
+                            duration: 1500 + (i*300),
+                            easing: "cubic-bezier(0, 0, 0.2, 1)",
+                            iterations: 1
+                        });
+                        
+                        layer.appendChild(circle);
+                        setTimeout(() => layer.removeChild(circle), 2500);
+                    }
                 }
             },
 
@@ -859,10 +893,8 @@
                 let labelY = p.y - 18;
                 let labelX = p.x;
                 
-                // --- AKILLI ÇAKIŞMA KONTROLÜ ---
-                // Yeni etiket için bir sınır kutusu (Bounding Box) oluştur
-                // [sol, sağ, üst, alt]
-                let maxTries = 10;
+                // --- AKILLI ÇAKIŞMA KONTROLÜ (Geliştirilmiş) ---
+                let maxTries = 15;
                 let collision = true;
 
                 while (collision && maxTries > 0) {
@@ -872,24 +904,50 @@
                     const newRect = {
                         left: labelX - textWidth / 2,
                         right: labelX + textWidth / 2,
-                        top: labelY - 7, // Merkezden yukarı
-                        bottom: labelY + 7 // Merkezden aşağı
+                        top: labelY - 7,
+                        bottom: labelY + 7
                     };
 
+                    // 1. ADIM: Mevcut Etiketlerle Çakışma Kontrolü
                     for (let drawn of this.drawnLabels) {
-                        // Mevcut çizilmiş etiketlerle çakışma var mı?
-                        // Basit AABB (Axis-Aligned Bounding Box) çarpışma testi
                         if (newRect.left < drawn.right && 
                             newRect.right > drawn.left && 
                             newRect.top < drawn.bottom && 
                             newRect.bottom > drawn.top) {
                             
-                            // Çakışma var, etiketi yukarı taşı
                             labelY -= (textHeight + 5); 
                             collision = true;
-                            break; // Döngüyü kır, yeni konumla tekrar kontrol et
+                            break; 
                         }
                     }
+                    
+                    // 2. ADIM: Henüz Bulunmamış Platolarla Çakışma Kontrolü
+                    // Etiketin, henüz tıklanmamış bir işaretçinin üzerine gelmesini önler
+                    if (!collision) {
+                        for (let remainingPlato of this.state.remaining) {
+                            if (remainingPlato.name === plateau.name) continue; // Kendisi hariç
+
+                            const pRem = this.project(remainingPlato.lon, remainingPlato.lat);
+                            // İşaretçi alanı (Görsel boyut + marj)
+                            const markerBox = {
+                                left: pRem.x - 18,
+                                right: pRem.x + 18,
+                                top: pRem.y - 18,
+                                bottom: pRem.y + 18
+                            };
+
+                            if (newRect.left < markerBox.right && 
+                                newRect.right > markerBox.left && 
+                                newRect.top < markerBox.bottom && 
+                                newRect.bottom > markerBox.top) {
+                                
+                                labelY -= (textHeight + 6); // İşaretçiden kaçmak için yukarı kaydır
+                                collision = true;
+                                break; 
+                            }
+                        }
+                    }
+                    
                     maxTries--;
                 }
                 
@@ -912,24 +970,30 @@
                     lineLayer.appendChild(line);
                 }
 
-                const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-                group.setAttribute("transform", `translate(${p.x}, ${labelY})`);
+                // Grup: Pozisyon (Dış Kutu)
+                const positionGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                positionGroup.setAttribute("transform", `translate(${p.x}, ${labelY})`);
+
+                // Grup: Animasyon (İç Kutu)
+                const animGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                animGroup.setAttribute("class", "label-animate");
                 
                 const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
                 rect.setAttribute("class", "map-label-bg");
                 rect.setAttribute("height", textHeight);
                 rect.setAttribute("y", -textHeight/2);
+                rect.setAttribute("width", textWidth);
+                rect.setAttribute("x", -textWidth/2);
                 
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("class", "map-label-text");
                 text.textContent = plateau.name;
-                
-                rect.setAttribute("width", textWidth);
-                rect.setAttribute("x", -textWidth/2);
 
-                group.appendChild(rect);
-                group.appendChild(text);
-                g.appendChild(group);
+                animGroup.appendChild(rect);
+                animGroup.appendChild(text);
+                positionGroup.appendChild(animGroup);
+                
+                g.appendChild(positionGroup);
             },
             
             spawnFloatingText: function(text, el, colorClass) {
@@ -962,18 +1026,15 @@
                 const total = this.state.correct + this.state.wrong;
                 const accuracy = total > 0 ? Math.round((this.state.correct / total) * 100) : 0;
                 
-                // Final verileri yazdır
                 document.getElementById('final-score').innerText = this.state.score;
                 document.getElementById('final-accuracy').innerText = accuracy + "%";
                 document.getElementById('final-correct').innerText = this.state.correct;
                 document.getElementById('final-wrong').innerText = this.state.wrong;
 
-                // Süreyi yazdır
                 const m = Math.floor(this.state.secondsElapsed / 60).toString().padStart(2, '0');
                 const s = (this.state.secondsElapsed % 60).toString().padStart(2, '0');
                 document.getElementById('final-time').innerText = `${m}:${s}`;
                 
-                // Konfeti
                 this.triggerConfetti();
                 
                 document.getElementById('game-over-modal').classList.remove('hidden');
