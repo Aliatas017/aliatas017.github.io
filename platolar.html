@@ -200,7 +200,7 @@
             max-width: 90vw; 
             /* Absolute positioning relative to map container */
             position: absolute;
-            top: 10px; /* Changed from 20px to 10px */
+            top: 10px; 
             left: 50%;
             transform: translateX(-50%);
             z-index: 40;
@@ -460,17 +460,26 @@
             <p class="mb-6 text-xs" style="color: var(--text-secondary)">Oyun tamamlandı.</p>
             
             <div class="space-y-3 mb-6">
-                 <div class="flex justify-between items-center p-3 rounded-lg border border-[var(--panel-border)] bg-[var(--bg-body)]">
-                    <span class="text-[10px] font-bold uppercase" style="color: var(--text-secondary)">Puan</span>
-                    <span class="text-xl font-bold" style="color: var(--accent-success)" id="final-score">0</span>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
+                 <!-- Puan & Başarı Oranı -->
+                 <div class="grid grid-cols-2 gap-3">
                     <div class="p-3 rounded-lg border border-[var(--panel-border)] bg-[var(--bg-body)]">
-                        <div class="text-[10px] font-bold uppercase" style="color: var(--text-secondary)">Doğru</div>
-                        <div class="text-lg font-bold" style="color: var(--accent-primary)" id="final-correct">0</div>
+                        <span class="text-[10px] font-bold uppercase block mb-1" style="color: var(--text-secondary)">Puan</span>
+                        <span class="text-xl font-bold" style="color: var(--accent-success)" id="final-score">0</span>
                     </div>
                     <div class="p-3 rounded-lg border border-[var(--panel-border)] bg-[var(--bg-body)]">
-                        <div class="text-[10px] font-bold uppercase" style="color: var(--text-secondary)">Yanlış</div>
+                        <span class="text-[10px] font-bold uppercase block mb-1" style="color: var(--text-secondary)">Başarı</span>
+                        <span class="text-xl font-bold" style="color: var(--accent-primary)" id="final-accuracy">0%</span>
+                    </div>
+                </div>
+
+                <!-- Doğru & Yanlış -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="p-3 rounded-lg border border-[var(--panel-border)] bg-[var(--bg-body)]">
+                        <div class="text-[10px] font-bold uppercase mb-1" style="color: var(--text-secondary)">Doğru</div>
+                        <div class="text-lg font-bold" style="color: var(--accent-success)" id="final-correct">0</div>
+                    </div>
+                    <div class="p-3 rounded-lg border border-[var(--panel-border)] bg-[var(--bg-body)]">
+                        <div class="text-[10px] font-bold uppercase mb-1" style="color: var(--text-secondary)">Yanlış</div>
                         <div class="text-lg font-bold" style="color: var(--accent-danger)" id="final-wrong">0</div>
                     </div>
                 </div>
