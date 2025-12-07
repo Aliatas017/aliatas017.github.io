@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <!-- Google Fonts: Montserrat -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -132,7 +134,7 @@
             vector-effect: non-scaling-stroke;
         }
         
-        /* Renkler (Temadan bağımsız sabit canlı renkler) */
+        /* Renkler */
         .plateau-marker[data-type="karstik"] .plateau-shape { fill: #94a3b8; } /* Gri */
         .plateau-marker[data-type="volkanik"] .plateau-shape { fill: #ef4444; } /* Kırmızı */
         .plateau-marker[data-type="asinim"] .plateau-shape { fill: #22c55e; } /* Yeşil */
@@ -224,11 +226,10 @@
         }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* Tema Butonu */
-        .theme-toggle {
+        /* Kontrol Butonları */
+        .control-btn {
             position: fixed;
             right: 20px;
-            top: 85px; /* Header'ın hemen altında */
             z-index: 60;
             background: var(--legend-bg);
             border: 1px solid var(--legend-border);
@@ -239,7 +240,10 @@
             transition: all 0.3s ease;
             color: var(--text-primary);
         }
-        .theme-toggle:hover { transform: scale(1.1); }
+        .control-btn:hover { transform: scale(1.1); }
+        
+        .theme-toggle { top: 85px; }
+        .audio-toggle { top: 140px; }
     </style>
 </head>
 <body class="h-screen flex flex-col">
@@ -262,9 +266,15 @@
     </div>
     
     <!-- Theme Toggle Button -->
-    <button onclick="game.toggleTheme()" class="theme-toggle" title="Gece/Gündüz Modu">
+    <button onclick="game.toggleTheme()" class="control-btn theme-toggle" title="Gece/Gündüz Modu">
         <i data-lucide="sun" class="w-6 h-6 hidden dark-icon"></i>
         <i data-lucide="moon" class="w-6 h-6 light-icon"></i>
+    </button>
+    
+    <!-- Audio Toggle Button -->
+    <button onclick="game.toggleAudio()" class="control-btn audio-toggle" title="Sesi Aç/Kapat">
+        <i data-lucide="volume-2" class="w-6 h-6 sound-on-icon"></i>
+        <i data-lucide="volume-x" class="w-6 h-6 sound-off-icon hidden"></i>
     </button>
 
     <!-- Game Header -->
@@ -292,6 +302,10 @@
 
             <!-- Dashboard -->
             <div class="flex gap-3">
+                 <div class="px-3 py-1.5 rounded-lg border flex flex-col items-center min-w-[70px]" style="background-color: var(--bg-map-container); border-color: var(--legend-border);">
+                    <div class="text-[9px] font-bold uppercase" style="color: var(--text-secondary)">Süre</div>
+                    <div class="text-lg font-mono font-bold leading-none" style="color: var(--text-primary)" id="timer">00:00</div>
+                </div>
                 <div class="px-3 py-1.5 rounded-lg border flex flex-col items-center min-w-[60px]" style="background-color: var(--bg-map-container); border-color: var(--legend-border);">
                     <div class="text-[9px] font-bold uppercase" style="color: var(--text-secondary)">Doğruluk</div>
                     <div class="text-lg font-mono font-bold text-yellow-500 leading-none" id="accuracy">100%</div>
@@ -361,21 +375,35 @@
         
         <!-- Game Over Modal -->
         <div id="game-over-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-md" style="background-color: rgba(0,0,0,0.8);">
-            <div class="border rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl" style="background-color: var(--bg-map-container); border-color: var(--legend-border);">
-                <div class="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/20">
+            <div class="border rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl relative" style="background-color: var(--bg-map-container); border-color: var(--legend-border);">
+                <div class="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-orange-500/20">
                     <i data-lucide="trophy" class="w-10 h-10 text-white"></i>
                 </div>
-                <h2 class="text-3xl font-black mb-2" style="color: var(--text-primary)">Tebrikler!</h2>
-                <p class="mb-8 text-sm" style="color: var(--text-secondary)">Plato bilgin harika!</p>
+                <h2 class="text-3xl font-black mb-1" style="color: var(--text-primary)">Tebrikler!</h2>
+                <p class="mb-6 text-sm" style="color: var(--text-secondary)">Tüm platoları buldun.</p>
                 
-                <div class="grid grid-cols-2 gap-4 mb-8">
-                    <div class="p-4 rounded-xl border" style="background-color: var(--legend-bg); border-color: var(--legend-border);">
-                        <div class="text-[10px] font-bold uppercase" style="color: var(--text-secondary)">Puan</div>
-                        <div class="text-2xl font-black text-green-500" id="final-score">0</div>
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div class="p-3 rounded-xl border col-span-2 flex justify-between items-center px-6" style="background-color: var(--legend-bg); border-color: var(--legend-border);">
+                        <div class="text-xs font-bold uppercase" style="color: var(--text-secondary)">Toplam Süre</div>
+                        <div class="text-xl font-mono font-bold text-blue-400" id="final-time">00:00</div>
                     </div>
-                    <div class="p-4 rounded-xl border" style="background-color: var(--legend-bg); border-color: var(--legend-border);">
+                    
+                    <div class="p-3 rounded-xl border" style="background-color: var(--legend-bg); border-color: var(--legend-border);">
+                        <div class="text-[10px] font-bold uppercase" style="color: var(--text-secondary)">Doğru</div>
+                        <div class="text-xl font-bold text-green-500" id="final-correct">0</div>
+                    </div>
+                    <div class="p-3 rounded-xl border" style="background-color: var(--legend-bg); border-color: var(--legend-border);">
+                        <div class="text-[10px] font-bold uppercase" style="color: var(--text-secondary)">Yanlış</div>
+                        <div class="text-xl font-bold text-red-500" id="final-wrong">0</div>
+                    </div>
+                    
+                    <div class="p-3 rounded-xl border" style="background-color: var(--legend-bg); border-color: var(--legend-border);">
+                        <div class="text-[10px] font-bold uppercase" style="color: var(--text-secondary)">Puan</div>
+                        <div class="text-xl font-black text-indigo-400" id="final-score">0</div>
+                    </div>
+                    <div class="p-3 rounded-xl border" style="background-color: var(--legend-bg); border-color: var(--legend-border);">
                         <div class="text-[10px] font-bold uppercase" style="color: var(--text-secondary)">Başarı</div>
-                        <div class="text-2xl font-black text-yellow-500" id="final-accuracy">0%</div>
+                        <div class="text-xl font-black text-yellow-500" id="final-accuracy">0%</div>
                     </div>
                 </div>
 
@@ -411,13 +439,108 @@
             { name: "Şanlıurfa Platosu", lat: 37.20, lon: 38.80, type: "tabaka" }
         ];
 
+        // --- GELİŞMİŞ SES KONTROLÜ (Web Audio API) ---
+        const audioController = {
+            ctx: null,
+            isMuted: false,
+            
+            init: function() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            
+            toggleMute: function() {
+                this.isMuted = !this.isMuted;
+                if(this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+                return this.isMuted;
+            },
+
+            play: function(type) {
+                if (this.isMuted) return;
+                if (!this.ctx) this.init();
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+
+                const now = this.ctx.currentTime;
+                const gain = this.ctx.createGain();
+                gain.connect(this.ctx.destination);
+
+                if (type === 'success') {
+                    // Ding-Dong (İki Tonlu Zil)
+                    const osc1 = this.ctx.createOscillator();
+                    osc1.type = 'sine';
+                    osc1.frequency.setValueAtTime(659.25, now); // E5
+                    osc1.connect(gain);
+                    
+                    const osc2 = this.ctx.createOscillator();
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(880.00, now + 0.1); // A5
+                    osc2.connect(gain);
+                    
+                    gain.gain.setValueAtTime(0, now);
+                    gain.gain.linearRampToValueAtTime(0.1, now + 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+                    
+                    osc1.start(now);
+                    osc1.stop(now + 0.8);
+                    osc2.start(now + 0.1);
+                    osc2.stop(now + 0.8);
+
+                } else if (type === 'error') {
+                    // Tok Hata Sesi (Daha kısa, daha az rahatsız edici)
+                    const osc = this.ctx.createOscillator();
+                    osc.type = 'triangle'; // Triangle daha yumuşak ama belirgin
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.exponentialRampToValueAtTime(80, now + 0.2);
+                    osc.connect(gain);
+                    
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                    
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+
+                } else if (type === 'end') {
+                    // Zafer Melodisi
+                    const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51]; // C Major Arpeggio
+                    notes.forEach((note, i) => {
+                        const o = this.ctx.createOscillator();
+                        const g = this.ctx.createGain();
+                        o.connect(g);
+                        g.connect(this.ctx.destination);
+                        
+                        o.type = 'sine';
+                        o.frequency.value = note;
+                        
+                        const time = now + i * 0.15;
+                        g.gain.setValueAtTime(0, time);
+                        g.gain.linearRampToValueAtTime(0.1, time + 0.05);
+                        g.gain.exponentialRampToValueAtTime(0.001, time + 0.6);
+                        
+                        o.start(time);
+                        o.stop(time + 0.6);
+                    });
+                }
+            }
+        };
+
         const game = {
             svg: null,
             geoBounds: { minLon: 180, maxLon: -180, minLat: 90, maxLat: -90 },
             viewBox: { w: 1000, h: 450 },
             scale: 1, offsetX: 0, offsetY: 0,
             
-            state: { score: 0, remaining: [], current: null, active: false, correct: 0, wrong: 0, isLightMode: false },
+            state: { 
+                score: 0, 
+                remaining: [], 
+                current: null, 
+                active: false, 
+                correct: 0, 
+                wrong: 0, 
+                isLightMode: false,
+                secondsElapsed: 0, // Kronometre için
+                timerInterval: null
+            },
             drawnLabels: [], 
 
             init: function() {
@@ -425,12 +548,29 @@
                 this.fetchMapData(url);
                 lucide.createIcons();
                 this.updateThemeIcon();
+                
+                // İlk tıklamada ses motorunu başlat
+                document.body.addEventListener('click', () => audioController.init(), { once: true });
             },
 
             toggleTheme: function() {
                 this.state.isLightMode = !this.state.isLightMode;
                 document.body.classList.toggle('light-mode', this.state.isLightMode);
                 this.updateThemeIcon();
+            },
+            
+            toggleAudio: function() {
+                const isMuted = audioController.toggleMute();
+                const onIcon = document.querySelector('.sound-on-icon');
+                const offIcon = document.querySelector('.sound-off-icon');
+                
+                if (isMuted) {
+                    onIcon.classList.add('hidden');
+                    offIcon.classList.remove('hidden');
+                } else {
+                    onIcon.classList.remove('hidden');
+                    offIcon.classList.add('hidden');
+                }
             },
 
             updateThemeIcon: function() {
@@ -602,6 +742,7 @@
                 this.state.score = 0;
                 this.state.correct = 0;
                 this.state.wrong = 0;
+                this.state.secondsElapsed = 0;
                 this.updateUI();
                 this.nextQuestion();
                 
@@ -609,6 +750,23 @@
                 panel.style.opacity = 1;
                 panel.style.pointerEvents = 'auto';
                 panel.style.transform = 'translate(-50%, 0) scale(1)';
+                
+                this.startChronometer();
+            },
+
+            startChronometer: function() {
+                if(this.state.timerInterval) clearInterval(this.state.timerInterval);
+                const timerEl = document.getElementById('timer');
+                
+                this.state.timerInterval = setInterval(() => {
+                    if (!this.state.active) return;
+                    
+                    this.state.secondsElapsed++;
+                    const m = Math.floor(this.state.secondsElapsed / 60).toString().padStart(2, '0');
+                    const s = (this.state.secondsElapsed % 60).toString().padStart(2, '0');
+                    timerEl.innerText = `${m}:${s}`;
+                    
+                }, 1000);
             },
 
             nextQuestion: function() {
@@ -625,6 +783,8 @@
                 if (!this.state.active) return;
                 
                 if (plateau.name === this.state.current.name) {
+                    // DOĞRU
+                    audioController.play('success');
                     el.classList.add('found');
                     this.addLabel(plateau);
                     
@@ -637,6 +797,8 @@
                     this.showStatus("Doğru!", "bg-green-600");
                     setTimeout(() => this.nextQuestion(), 800);
                 } else {
+                    // YANLIŞ
+                    audioController.play('error');
                     el.classList.add('shake');
                     setTimeout(() => el.classList.remove('shake'), 500);
                     
@@ -688,38 +850,58 @@
                 const lineLayer = document.getElementById('layer-lines');
                 const p = this.project(plateau.lon, plateau.lat);
                 
-                // Etiket Başlangıç Konumu
+                // Etiketin boyutu (Tahmini)
+                const charWidth = 5.5;
+                const textWidth = plateau.name.length * charWidth + 12;
+                const textHeight = 14;
+                
+                // Varsayılan Konum (Platonun üstü)
                 let labelY = p.y - 18;
-                let labelHeight = 12;
+                let labelX = p.x;
                 
-                // GELİŞMİŞ ÇARPIŞMA KONTROLÜ
+                // --- AKILLI ÇAKIŞMA KONTROLÜ ---
+                // Yeni etiket için bir sınır kutusu (Bounding Box) oluştur
+                // [sol, sağ, üst, alt]
+                let maxTries = 10;
                 let collision = true;
-                let safetyLoop = 0;
-                
-                // Kontrol edilecek genişlik (piksel cinsinden yaklaşık)
-                // "Uzunyayla Platosu" gibi uzun isimler için 60-70px yarıçap kontrolü iyidir.
-                const checkRadiusX = 65; 
-                
-                while(collision && safetyLoop < 20) {
+
+                while (collision && maxTries > 0) {
                     collision = false;
+                    
+                    // Yeni etiketin sınırları
+                    const newRect = {
+                        left: labelX - textWidth / 2,
+                        right: labelX + textWidth / 2,
+                        top: labelY - 7, // Merkezden yukarı
+                        bottom: labelY + 7 // Merkezden aşağı
+                    };
+
                     for (let drawn of this.drawnLabels) {
-                        // X ekseninde çakışma var mı?
-                        if (Math.abs(p.x - drawn.x) < checkRadiusX) { 
-                            // Y ekseninde çakışma var mı?
-                            if (Math.abs(labelY - drawn.y) < labelHeight + 4) {
-                                // Çakışma var, etiketi yukarı taşı
-                                labelY -= (labelHeight + 8); 
-                                collision = true;
-                                break; // Döngüyü kır, yeni konumla tekrar kontrol et
-                            }
+                        // Mevcut çizilmiş etiketlerle çakışma var mı?
+                        // Basit AABB (Axis-Aligned Bounding Box) çarpışma testi
+                        if (newRect.left < drawn.right && 
+                            newRect.right > drawn.left && 
+                            newRect.top < drawn.bottom && 
+                            newRect.bottom > drawn.top) {
+                            
+                            // Çakışma var, etiketi yukarı taşı
+                            labelY -= (textHeight + 5); 
+                            collision = true;
+                            break; // Döngüyü kır, yeni konumla tekrar kontrol et
                         }
                     }
-                    safetyLoop++;
+                    maxTries--;
                 }
+                
+                // Çizilen etiketi kaydet
+                this.drawnLabels.push({
+                    left: labelX - textWidth / 2,
+                    right: labelX + textWidth / 2,
+                    top: labelY - 7,
+                    bottom: labelY + 7
+                });
 
-                this.drawnLabels.push({ x: p.x, y: labelY });
-
-                // Çizgi
+                // Bağlantı Çizgisi
                 if (p.y - labelY > 15) {
                     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
                     line.setAttribute("x1", p.x);
@@ -735,16 +917,15 @@
                 
                 const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
                 rect.setAttribute("class", "map-label-bg");
-                rect.setAttribute("height", 14);
-                rect.setAttribute("y", -7);
+                rect.setAttribute("height", textHeight);
+                rect.setAttribute("y", -textHeight/2);
                 
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("class", "map-label-text");
                 text.textContent = plateau.name;
                 
-                const width = plateau.name.length * 5.5 + 12;
-                rect.setAttribute("width", width);
-                rect.setAttribute("x", -width/2);
+                rect.setAttribute("width", textWidth);
+                rect.setAttribute("x", -textWidth/2);
 
                 group.appendChild(rect);
                 group.appendChild(text);
@@ -774,14 +955,51 @@
             },
             
             endGame: function() {
+                this.state.active = false;
+                clearInterval(this.state.timerInterval);
+                audioController.play('end');
+                
                 const total = this.state.correct + this.state.wrong;
                 const accuracy = total > 0 ? Math.round((this.state.correct / total) * 100) : 0;
                 
+                // Final verileri yazdır
                 document.getElementById('final-score').innerText = this.state.score;
                 document.getElementById('final-accuracy').innerText = accuracy + "%";
+                document.getElementById('final-correct').innerText = this.state.correct;
+                document.getElementById('final-wrong').innerText = this.state.wrong;
+
+                // Süreyi yazdır
+                const m = Math.floor(this.state.secondsElapsed / 60).toString().padStart(2, '0');
+                const s = (this.state.secondsElapsed % 60).toString().padStart(2, '0');
+                document.getElementById('final-time').innerText = `${m}:${s}`;
+                
+                // Konfeti
+                this.triggerConfetti();
                 
                 document.getElementById('game-over-modal').classList.remove('hidden');
                 document.getElementById('game-over-modal').classList.add('flex');
+            },
+
+            triggerConfetti: function() {
+                var duration = 3 * 1000;
+                var animationEnd = Date.now() + duration;
+                var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 200 };
+
+                function randomInRange(min, max) {
+                  return Math.random() * (max - min) + min;
+                }
+
+                var interval = setInterval(function() {
+                  var timeLeft = animationEnd - Date.now();
+
+                  if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                  }
+
+                  var particleCount = 50 * (timeLeft / duration);
+                  confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                  confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+                }, 250);
             },
 
             updateUI: function() {
