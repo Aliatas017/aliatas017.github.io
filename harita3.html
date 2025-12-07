@@ -272,11 +272,14 @@
             drawnLabels: [], 
             totalMountains: mountainData.length,
 
-            init: function() {
-               this.fetchMapData(MAP_DATA_URL);
-                } 
+             init: function() {
+                // Linki dene
+                this.fetchMapData(MAP_DATA_URL);
                 lucide.createIcons();
                 this.setupPanZoom();
+                
+                // Fallback: Dosya yükleme dinleyicisi
+                document.getElementById('json-file').addEventListener('change', (e) => this.handleFileUpload(e));
             },
 
             setupPanZoom: function() {
