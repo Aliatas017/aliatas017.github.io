@@ -59,8 +59,8 @@
             --marker-found-fill: #00ffff;
             --marker-found-stroke: #ffffff;
             
-            --city-text: #64748b;
-            --city-dot: #475569;
+            --city-text: #475569;       /* Şehir isimleri için renk */
+            --city-dot: #334155;
             
             --label-bg-color: rgba(15, 23, 42, 0.95);
             --label-border-color: #38bdf8;
@@ -103,8 +103,8 @@
             --marker-found-fill: #0284c7; 
             --marker-found-stroke: #f0f9ff;
             
-            --city-text: #94a3b8;
-            --city-dot: #cbd5e1;
+            --city-text: #cbd5e1;
+            --city-dot: #e2e8f0;
             
             --label-bg-color: rgba(255, 255, 255, 0.95);
             --label-border-color: #0369a1;
@@ -165,12 +165,11 @@
             background-color: var(--map-bg);
             background-image: radial-gradient(circle at 50% 50%, var(--map-grad-start) 0%, var(--map-grad-end) 100%);
             overflow: hidden;
-            /* Harita kapsayıcısı */
         }
 
         /* --- RIGHT: SIDEBAR (STATS) --- */
         .stats-sidebar {
-            width: 140px; /* Sabit genişlik */
+            width: 100px; /* DAHA İNCE (140px -> 100px) */
             background: var(--panel-bg);
             border-left: 2px solid var(--panel-border);
             display: flex;
@@ -194,21 +193,20 @@
             transition: transform 0.2s;
         }
         .stat-chip:hover { transform: translateY(-2px); border-color: var(--text-secondary); }
-        .stat-label { font-size: 0.55rem; text-transform: uppercase; font-weight: 800; color: var(--text-secondary); margin-bottom: 0.1rem; letter-spacing: 0.05em; }
-        .stat-value { font-size: 1.1rem; font-weight: 900; line-height: 1; }
-        .stat-icon { width: 16px; height: 16px; margin-bottom: 4px; opacity: 0.8; }
+        .stat-label { font-size: 0.5rem; text-transform: uppercase; font-weight: 800; color: var(--text-secondary); margin-bottom: 0.1rem; letter-spacing: 0.05em; }
+        .stat-value { font-size: 1rem; font-weight: 900; line-height: 1; }
+        .stat-icon { width: 14px; height: 14px; margin-bottom: 4px; opacity: 0.8; }
 
         /* --- QUESTION PANEL (TOP CENTER) --- */
         #question-panel {
             background: var(--panel-bg);
             border: 3px solid var(--accent-primary);
             border-radius: var(--radius-lg);
-            padding: 0.6rem 1.2rem; /* Biraz daha kompakt */
+            padding: 0.6rem 1.2rem;
             box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
             display: flex; align-items: center; justify-content: center; gap: 1rem;
             width: fit-content; max-width: 80vw;
             
-            /* Konumlandırma: Üst Orta */
             position: absolute;
             top: 20px;
             left: 50%;
@@ -232,8 +230,17 @@
         /* Harita SVG Elemanları */
         .province-path { fill: var(--province-fill); stroke: var(--province-stroke); stroke-width: 0.5px; transition: all 0.2s ease; vector-effect: non-scaling-stroke; }
         .province-path:hover { fill: var(--province-hover); stroke: var(--accent-primary); stroke-width: 2px; }
-        .city-label { fill: var(--city-text); font-weight: 500; font-size: 6px; pointer-events: none; }
-        .city-dot { fill: var(--city-dot); pointer-events: none; }
+        
+        /* Şehir Etiketleri Stili */
+        .city-label { 
+            fill: var(--city-text); 
+            font-weight: 500; 
+            font-size: 5px; /* Küçük font */
+            pointer-events: none; 
+            text-anchor: middle;
+            opacity: 0.7;
+        }
+        .city-dot { fill: var(--city-dot); pointer-events: none; r: 0.6; }
 
         /* Markers */
         .mountain-marker { cursor: pointer; transition: opacity 0.2s; }
@@ -285,7 +292,7 @@
             .stats-sidebar { 
                 width: 100%; height: auto; flex-direction: row; justify-content: space-around; 
                 padding: 0.5rem; border-left: none; border-bottom: 2px solid var(--panel-border);
-                order: -1; /* İstatistikleri üste al */
+                order: -1; 
             }
             .stat-chip { width: auto; min-width: 60px; padding: 0.3rem 0.5rem; }
             .stat-icon { width: 14px; height: 14px; }
@@ -307,10 +314,13 @@
         </div>
     </div>
 
-    <!-- Header -->
-    <header>
+    <!-- Header (GÜNCELLENDİ: Navigasyon Eklendi) -->
+    <header class="border-b-2 border-[var(--panel-border)]">
         <div class="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between relative bg-inherit">
+            
+            <!-- Sol: Logo & Nav -->
             <div class="flex items-center gap-6">
+                <!-- Logo -->
                 <div class="flex items-center gap-2 select-none cursor-pointer group" onclick="location.href='index.html'">
                     <div class="w-8 h-8 rounded-lg flex items-center justify-center border-2 transition-transform group-hover:scale-105" 
                          style="background: var(--panel-bg); border-color: var(--accent-primary); color: var(--accent-primary);">
@@ -321,16 +331,47 @@
                         <p class="text-[9px] font-bold tracking-widest uppercase" style="color: var(--text-secondary)">Harita Oyunu</p>
                     </div>
                 </div>
+
+                <!-- Desktop Nav -->
+                <nav class="hidden md:flex items-center gap-4 border-l border-[var(--panel-border)] pl-4 h-8">
+                    <a href="index.html" class="nav-link text-xs">Ana Sayfa</a>
+                    <span class="text-[10px] text-[var(--text-secondary)]">/</span>
+                    <span class="text-xs font-bold text-[var(--accent-primary)]">Oyun</span>
+                </nav>
             </div>
+
+            <!-- Sağ: Kontroller -->
             <div class="flex items-center gap-2">
+                <!-- Ses Kontrol -->
                 <button onclick="game.toggleAudio()" class="theme-toggle-btn" title="Sesi Aç/Kapat">
                     <i data-lucide="volume-2" class="w-4 h-4 sound-on-icon"></i>
                     <i data-lucide="volume-x" class="w-4 h-4 sound-off-icon hidden"></i>
                 </button>
+
+                <!-- Tema Değiştirici -->
                 <button onclick="game.toggleTheme()" class="theme-toggle-btn" title="Tema Değiştir">
                     <i data-lucide="sun" class="w-4 h-4 hidden dark-icon"></i>
                     <i data-lucide="moon" class="w-4 h-4 light-icon"></i>
                 </button>
+
+                <!-- Hamburger (Mobil) -->
+                <button onclick="toggleMobileMenu()" class="md:hidden theme-toggle-btn ml-1">
+                    <i data-lucide="menu" id="menu-icon" class="w-4 h-4"></i>
+                    <i data-lucide="x" id="close-icon" class="w-4 h-4 hidden"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobil Menü -->
+        <div id="mobile-menu" class="md:hidden bg-[var(--panel-bg)] border-b border-[var(--panel-border)] w-full absolute top-16 left-0 z-40 shadow-xl">
+            <div class="p-4 flex flex-col gap-2">
+                <a href="index.html" class="block px-4 py-3 font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-dots)] rounded-lg text-sm">Ana Sayfa</a>
+                <a href="#" class="block px-4 py-3 font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-dots)] rounded-lg text-sm">Hakkımızda</a>
+                <hr class="border-[var(--panel-border)] my-1">
+                <div class="flex gap-2">
+                    <button class="auth-btn btn-login w-full border border-[var(--panel-border)]">Giriş</button>
+                    <button class="auth-btn btn-signup w-full">Kayıt</button>
+                </div>
             </div>
         </div>
     </header>
@@ -383,7 +424,7 @@
             <div id="status-msg" class="absolute bottom-16 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl shadow-2xl font-bold text-sm transition-all opacity-0 translate-y-4 pointer-events-none z-50 flex items-center gap-2 border-2"></div>
         </div>
 
-        <!-- Sidebar Stats (Right) -->
+        <!-- Sidebar Stats (Right) - GÜNCELLENDİ: Daha ince -->
         <aside class="stats-sidebar">
             <div class="stat-chip">
                 <i data-lucide="timer" class="stat-icon" style="color: var(--accent-warn)"></i>
@@ -629,10 +670,22 @@
                     
                     const center = this.getCentroid(f.geometry);
                     if(center) {
+                        // ŞEHİR İSİMLERİ EKLENDİ
+                        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                        
                         const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                         circle.setAttribute("cx", center.x); circle.setAttribute("cy", center.y);
-                        circle.setAttribute("r", 0.5); circle.setAttribute("class", "city-dot");
-                        layerCities.appendChild(circle);
+                        circle.setAttribute("r", 0.6); circle.setAttribute("class", "city-dot");
+                        
+                        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                        text.setAttribute("x", center.x);
+                        text.setAttribute("y", center.y + 2.5); // Noktanın biraz altına
+                        text.setAttribute("class", "city-label");
+                        text.textContent = f.properties.name;
+
+                        g.appendChild(circle);
+                        g.appendChild(text);
+                        layerCities.appendChild(g);
                     }
                 });
                 this.drawMountains();
