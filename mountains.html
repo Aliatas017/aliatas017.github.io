@@ -208,7 +208,7 @@
             width: fit-content; max-width: 80vw;
             
             position: absolute;
-            top: 20px;
+            top: 5px; /* DAHA YUKARIDA: 20px -> 5px */
             left: 50%;
             transform: translateX(-50%);
             z-index: 40;
@@ -537,9 +537,11 @@
             // --- KIVRIM DAĞLARI (TOROSLAR) ---
             { name: "Bey Dağları", lat: 36.55, lon: 30.05, type: "kivrim" },
             { name: "Sultan Dağları", lat: 38.35, lon: 31.30, type: "kivrim" },
+            { name: "Dedegöl Dağları", lat: 37.65, lon: 31.35, type: "kivrim" },
             { name: "Bolkar Dağları", lat: 37.25, lon: 34.55, type: "kivrim" },
             { name: "Aladağlar", lat: 37.80, lon: 35.15, type: "kivrim" },
             { name: "Tahtalı Dağları", lat: 38.20, lon: 36.30, type: "kivrim" },
+            { name: "Binboğa Dağları", lat: 38.25, lon: 36.90, type: "kivrim" },
             { name: "Cilo (Buzul) Dağı", lat: 37.50, lon: 43.90, type: "kivrim" },
             { name: "Geyik Dağları", lat: 36.90, lon: 32.20, type: "kivrim" },
 
@@ -753,7 +755,7 @@
                     else if (mData.type === 'kivrim') {
                         shape.setAttribute("d", "M-8,2 Q-4,-6 0,2 T8,2");
                         shape.setAttribute("fill", "none");
-                        shape.setAttribute("stroke-width", "3");
+                        shape.setAttribute("stroke-width", "4.5");
                         shape.setAttribute("stroke-linecap", "round");
                     }
 
