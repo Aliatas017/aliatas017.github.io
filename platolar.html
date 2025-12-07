@@ -184,7 +184,6 @@
         .label-animate {
             animation: labelPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
             opacity: 0;
-            /* DÜZELTME: transform-origin 0 0 yapıldı, fill-box kaldırıldı */
             transform-origin: 0 0;
         }
         @keyframes labelPop {
@@ -810,6 +809,7 @@
 
             checkAnswer: function(plateau, el) {
                 if (!this.state.active) return;
+                if (el.classList.contains('found')) return; 
                 
                 if (plateau.name === this.state.current.name) {
                     // DOĞRU
