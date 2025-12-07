@@ -243,42 +243,99 @@
             width: 100%;
         }
 
-        /* Fade Animation */
+        /* --- ANIMATIONS --- */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .fade-in-up { animation: fadeInUp 0.4s ease forwards; opacity: 0; }
 
+        /* Mobile Menu Animation */
+        #mobile-menu {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        #mobile-menu.open {
+            max-height: 400px; /* Biraz arttırdık çünkü yeni linkler geldi */
+            opacity: 1;
+        }
+        
+        /* Nav Links */
+        .nav-link {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+        .nav-link:hover {
+            color: var(--accent-primary);
+        }
+
     </style>
 </head>
 <body>
 
-    <!-- Header (Sabit kalmaya devam ediyor) -->
+    <!-- Header -->
     <header class="sticky top-0 z-50 border-b-2">
-        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between relative bg-inherit z-20">
             
-            <div class="flex items-center gap-3 select-none cursor-pointer" onclick="window.location.reload()">
-                <div class="w-9 h-9 rounded-lg flex items-center justify-center border-2" 
-                     style="background: var(--panel-bg); border-color: var(--accent-primary); color: var(--accent-primary);">
-                    <i data-lucide="globe-2" class="w-5 h-5"></i>
+            <!-- Sol Taraf: Logo ve Desktop Nav -->
+            <div class="flex items-center gap-8">
+                <!-- Logo -->
+                <div class="flex items-center gap-3 select-none cursor-pointer" onclick="window.location.reload()">
+                    <div class="w-9 h-9 rounded-lg flex items-center justify-center border-2" 
+                         style="background: var(--panel-bg); border-color: var(--accent-primary); color: var(--accent-primary);">
+                        <i data-lucide="globe-2" class="w-5 h-5"></i>
+                    </div>
+                    <div class="hidden sm:block">
+                        <h1 class="font-black text-base leading-tight tracking-tight" style="color: var(--text-primary)">COĞRAFYA</h1>
+                        <p class="text-[9px] font-bold tracking-widest uppercase" style="color: var(--text-secondary)">Eğitim Platformu</p>
+                    </div>
                 </div>
-                <div class="hidden sm:block">
-                    <h1 class="font-black text-base leading-tight tracking-tight" style="color: var(--text-primary)">COĞRAFYA</h1>
-                    <p class="text-[9px] font-bold tracking-widest uppercase" style="color: var(--text-secondary)">Eğitim Platformu</p>
-                </div>
+
+                <!-- Desktop Navigation (Sadece büyük ekranda görünür) -->
+                <nav class="hidden md:flex items-center gap-6">
+                    <a href="#" class="nav-link">Hakkımızda</a>
+                    <a href="#" class="nav-link">İletişim</a>
+                </nav>
             </div>
 
+            <!-- Sağ Taraf Kontrolleri -->
             <div class="flex items-center gap-3">
+                
+                <!-- Desktop Auth (MD ve üzeri) -->
                 <div class="hidden md:flex items-center gap-2 mr-2">
                     <button class="auth-btn btn-login">Giriş</button>
                     <button class="auth-btn btn-signup">Kayıt Ol</button>
                 </div>
 
+                <!-- Tema Değiştirici -->
                 <button onclick="toggleTheme()" class="theme-toggle-btn w-9 h-9" title="Tema Değiştir">
                     <i data-lucide="sun" class="w-4 h-4 hidden dark-icon"></i>
                     <i data-lucide="moon" class="w-4 h-4 light-icon"></i>
                 </button>
+
+                <!-- Hamburger Menü Butonu (Mobil) -->
+                <button onclick="toggleMobileMenu()" class="md:hidden theme-toggle-btn w-9 h-9 ml-1" title="Menü">
+                    <i data-lucide="menu" id="menu-icon" class="w-5 h-5"></i>
+                    <i data-lucide="x" id="close-icon" class="w-5 h-5 hidden"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobil Menü Dropdown (Header'ın içinde) -->
+        <div id="mobile-menu" class="md:hidden bg-[var(--panel-bg)] border-b border-[var(--panel-border)] w-full absolute top-16 left-0 z-10 shadow-xl">
+            <div class="p-4 flex flex-col gap-3">
+                <!-- Mobil Nav Linkleri -->
+                <a href="#" class="block px-4 py-2 font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-dots)] rounded-lg">Hakkımızda</a>
+                <a href="#" class="block px-4 py-2 font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-dots)] rounded-lg">İletişim</a>
+                
+                <hr class="border-[var(--panel-border)] my-1">
+                
+                <button class="auth-btn btn-login w-full text-center border border-[var(--panel-border)] py-3">Giriş Yap</button>
+                <button class="auth-btn btn-signup w-full text-center justify-center py-3">Kayıt Ol</button>
             </div>
         </div>
     </header>
@@ -286,7 +343,7 @@
     <!-- Main Content -->
     <main class="flex-grow container mx-auto px-4 md:px-6 py-8 flex flex-col items-center">
         
-        <!-- Controls Bar (Sticky özelliği kaldırıldı, artık sayfayla birlikte yukarı kayacak) -->
+        <!-- Controls Bar -->
         <div class="w-full max-w-7xl mb-6 flex flex-col md:flex-row gap-4 justify-between items-center py-2 transition-all" id="controls-bar">
             
             <!-- Kategori Filtreleri -->
@@ -525,6 +582,25 @@
             // Buton kontrolü
             if (itemsToShow >= filtered.length) {
                 loadMoreBtn.classList.add('hidden');
+            }
+        };
+
+        // --- MOBILE MENU ---
+        window.toggleMobileMenu = () => {
+            const menu = document.getElementById('mobile-menu');
+            const menuIcon = document.getElementById('menu-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            if (menu.classList.contains('open')) {
+                // Kapat
+                menu.classList.remove('open');
+                menuIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+            } else {
+                // Aç
+                menu.classList.add('open');
+                menuIcon.classList.add('hidden');
+                closeIcon.classList.remove('hidden');
             }
         };
 
