@@ -737,11 +737,16 @@
                     g.setAttribute("data-type", mData.type);
                     g.onclick = (e) => { e.stopPropagation(); this.checkAnswer(mData, g); };
 
+                    // YENİ: İçerik grubu (Shake buna uygulanacak)
+                    const contentG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                    contentG.setAttribute("class", "marker-content");
+                    g.appendChild(contentG);
+
                     const hitArea = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                     hitArea.setAttribute("class", "hit-area");
                     hitArea.setAttribute("r", 10);
                     hitArea.setAttribute("fill", "transparent");
-                    g.appendChild(hitArea);
+                    contentG.appendChild(hitArea);
 
                     const shape = document.createElementNS("http://www.w3.org/2000/svg", "path");
                     shape.setAttribute("class", "mountain-shape");
@@ -764,7 +769,8 @@
                         shape.style.stroke = "var(--marker-kivrim)";
                     }
 
-                    g.appendChild(shape); layer.appendChild(g);
+                    contentG.appendChild(shape);
+                    layer.appendChild(g);
                     mData.el = g;
                 });
             },
@@ -823,8 +829,14 @@
                     setTimeout(() => this.nextQuestion(), 800);
                 } else {
                     audioController.play('error');
-                    el.classList.add('shake');
-                    setTimeout(() => el.classList.remove('shake'), 500);
+                    
+                    // Shake efektini iç gruba uyguluyoruz
+                    const content = el.querySelector('.marker-content');
+                    if (content) {
+                        content.classList.add('shake');
+                        setTimeout(() => content.classList.remove('shake'), 500);
+                    }
+
                     this.state.score -= 5; this.state.wrong++;
                     this.spawnFloatingText("-5", el, "text-red-400");
                     this.updateUI();
@@ -937,7 +949,7 @@
                 }
 
                 const positionGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-                positionGroup.setAttribute("transform", `translate(${p.x}, ${labelY})`);
+                positionGroup.setAttribute("transform", `translate(${labelX}, ${labelY})`); // DÜZELTME: p.x yerine labelX, labelY
                 const animGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
                 animGroup.setAttribute("class", "label-animate");
                 
@@ -957,10 +969,6 @@
                 const realWidth = text.getComputedTextLength(); 
                 const boxWidth = realWidth + 16; 
                 rect.setAttribute("width", boxWidth); rect.setAttribute("x", -boxWidth / 2);
-
-                // Konumu aslında transform ile ayarlamıştık ama çizgi için labelX, labelY kullandık.
-                // positionGroup transform'unu labelX, labelY olarak güncellememiz lazım, p.x değil.
-                positionGroup.setAttribute("transform", `translate(${labelX}, ${labelY})`);
 
                 this.drawnLabels.push({ left: labelX - boxWidth / 2, right: labelX + boxWidth / 2, top: labelY - 7, bottom: labelY + 7 });
             },
