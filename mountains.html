@@ -861,35 +861,77 @@
                 const lineLayer = document.getElementById('layer-lines');
                 const p = this.project(mountain.lon, mountain.lat);
                 const textHeight = 16;
-                let labelY = p.y - 18; let labelX = p.x;
-                const charWidth = 6.5; const estimateWidth = mountain.name.length * charWidth + 24; 
-                let maxTries = 15; let collision = true;
+                
+                let labelY = p.y - 18; 
+                let labelX = p.x;
+                let isCustom = false; // Özel pozisyon var mı?
 
-                while (collision && maxTries > 0) {
-                    collision = false;
-                    const newRect = { left: labelX - estimateWidth / 2, right: labelX + estimateWidth / 2, top: labelY - 7, bottom: labelY + 7 };
-                    for (let drawn of this.drawnLabels) {
-                        if (newRect.left < drawn.right && newRect.right > drawn.left && newRect.top < drawn.bottom && newRect.bottom > drawn.top) {
-                            labelY -= (textHeight + 5); collision = true; break; 
-                        }
-                    }
-                    if (!collision) {
-                        for (let remainingM of this.state.remaining) {
-                            if (remainingM.name === mountain.name) continue; 
-                            const pRem = this.project(remainingM.lon, remainingM.lat);
-                            const markerBox = { left: pRem.x - 12, right: pRem.x + 12, top: pRem.y - 12, bottom: pRem.y + 12 };
-                            if (newRect.left < markerBox.right && newRect.right > markerBox.left && newRect.top < markerBox.bottom && newRect.bottom > markerBox.top) {
-                                labelY -= (textHeight + 6); collision = true; break; 
+                // --- ÖZEL KONUMLANDIRMA ---
+                if (mountain.name === "Küre Dağları") {
+                    labelX -= 30; // Sola kaydır
+                    isCustom = true;
+                } 
+                else if (mountain.name === "Kula Volkanları") {
+                    labelX += 45; // Sağa kaydır
+                    labelY = p.y; // Aynı hizada
+                    isCustom = true;
+                }
+                else if (["Kaz Dağları", "Madra Dağı", "Yunt Dağı", "Aydın Dağları"].includes(mountain.name)) {
+                    labelX -= 50; // Sola kaydır
+                    labelY = p.y; // Aynı hizada
+                    isCustom = true;
+                }
+                else if (mountain.name === "Süphan Dağı") {
+                    labelX += 30; // Sağa
+                    labelY = p.y + 25; // Aşağı
+                    isCustom = true;
+                }
+
+                const charWidth = 6.5; 
+                const estimateWidth = mountain.name.length * charWidth + 24; 
+                
+                // Eğer özel ayar yoksa çarpışma önleyiciyi çalıştır
+                if (!isCustom) {
+                    let maxTries = 15; let collision = true;
+                    while (collision && maxTries > 0) {
+                        collision = false;
+                        const newRect = { left: labelX - estimateWidth / 2, right: labelX + estimateWidth / 2, top: labelY - 7, bottom: labelY + 7 };
+                        for (let drawn of this.drawnLabels) {
+                            if (newRect.left < drawn.right && newRect.right > drawn.left && newRect.top < drawn.bottom && newRect.bottom > drawn.top) {
+                                labelY -= (textHeight + 5); collision = true; break; 
                             }
                         }
+                        if (!collision) {
+                            for (let remainingM of this.state.remaining) {
+                                if (remainingM.name === mountain.name) continue; 
+                                const pRem = this.project(remainingM.lon, remainingM.lat);
+                                const markerBox = { left: pRem.x - 12, right: pRem.x + 12, top: pRem.y - 12, bottom: pRem.y + 12 };
+                                if (newRect.left < markerBox.right && newRect.right > markerBox.left && newRect.top < markerBox.bottom && newRect.bottom > markerBox.top) {
+                                    labelY -= (textHeight + 6); collision = true; break; 
+                                }
+                            }
+                        }
+                        maxTries--;
                     }
-                    maxTries--;
                 }
                 
-                if (Math.abs(p.y - labelY) > 12) {
+                // Çizgi çizimi (Mesafe varsa)
+                const dist = Math.sqrt(Math.pow(p.x - labelX, 2) + Math.pow(p.y - labelY, 2));
+                
+                if (dist > 18) {
                     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                    line.setAttribute("x1", p.x); line.setAttribute("y1", p.y - 8); 
-                    line.setAttribute("x2", p.x); line.setAttribute("y2", labelY + 8); 
+                    line.setAttribute("x1", p.x); 
+                    line.setAttribute("y1", p.y); 
+                    line.setAttribute("x2", labelX); 
+                    
+                    // Eğer dikey hizadaysa (yanyana)
+                    if (Math.abs(p.y - labelY) < 10) {
+                        line.setAttribute("y2", labelY);
+                    } else {
+                        // Altında/Üstünde ise
+                        line.setAttribute("y2", labelY + (labelY < p.y ? 8 : -8)); 
+                    }
+                    
                     line.setAttribute("class", "label-connector");
                     lineLayer.appendChild(line);
                 }
@@ -915,6 +957,10 @@
                 const realWidth = text.getComputedTextLength(); 
                 const boxWidth = realWidth + 16; 
                 rect.setAttribute("width", boxWidth); rect.setAttribute("x", -boxWidth / 2);
+
+                // Konumu aslında transform ile ayarlamıştık ama çizgi için labelX, labelY kullandık.
+                // positionGroup transform'unu labelX, labelY olarak güncellememiz lazım, p.x değil.
+                positionGroup.setAttribute("transform", `translate(${labelX}, ${labelY})`);
 
                 this.drawnLabels.push({ left: labelX - boxWidth / 2, right: labelX + boxWidth / 2, top: labelY - 7, bottom: labelY + 7 });
             },
