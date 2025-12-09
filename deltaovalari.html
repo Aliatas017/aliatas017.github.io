@@ -53,7 +53,7 @@
 
             /* Marker Renkleri (Bölgelere Göre) */
             --region-karadeniz: #22c55e;  /* Yeşil */
-            --region-ege: #3b82f6;        /* Mavi */
+            --region-ege: #f59e0b;        /* SARI/TURUNCU (Değişti) */
             --region-akdeniz: #ef4444;    /* Kırmızı */
             
             --marker-found-fill: #06b6d4; /* Cyan */
@@ -97,7 +97,7 @@
             --province-hover: #f1f5f9;
 
             --region-karadeniz: #15803d; 
-            --region-ege: #0369a1;       
+            --region-ege: #d97706;       /* SARI/TURUNCU (Light Mode) */
             --region-akdeniz: #b91c1c;   
             
             --marker-found-fill: #0891b2; 
@@ -835,37 +835,38 @@
                 let labelX = p.x;
                 let labelY = p.y - 18;
                 let textAnchor = 'middle';
-                let startOffset = 0; // For rect adjustment if not centered
+                let rectX = 0; // Will be calculated below
+                let textX = 0; // Text position inside the group
+                let boxFill = 'var(--label-bg-color)'; // Default color
+                let textColor = 'var(--text-primary)';
 
                 if (["Bafra Deltası", "Çarşamba Deltası"].includes(delta.name)) {
                     // Samsun Deltas: Bottom
                     labelY = p.y + 25;
                 } else if (delta.region === "ege") {
-                    // Aegean Deltas: Right (changed from Left)
+                    // Aegean Deltas: Right
                     labelX = p.x + 30; // Move right
                     labelY = p.y;
-                    textAnchor = 'start'; // Text grows to the right
+                    
+                    // Special styling for Ege REMOVED as per request to change marker color instead
+                    // boxFill = '#d97706'; 
+                    // textColor = '#ffffff';
                 }
 
-                // Initial text element creation to measure width
-                const tempText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                tempText.setAttribute("class", "map-label-text");
-                tempText.textContent = delta.name;
-                document.body.appendChild(tempText); // Temporarily append to DOM to measure? Or just estimate.
-                // SVG text measurement requires it to be in the SVG tree usually.
-                // Using estimation for cleaner code without flicker
+                // Estimate Width
                 const estimatedTextWidth = delta.name.length * charWidth + 10;
-                
-                // Box calculation
                 const boxWidth = estimatedTextWidth + 14;
                 
-                let rectX = -boxWidth / 2; // Default for 'middle'
-                if (textAnchor === 'end') rectX = -boxWidth;
-                else if (textAnchor === 'start') rectX = 0;
-
-                // Collision Detection (simplified for preferred positions)
-                // We will trust the preferred position first, but if needed we could offset more
-                // For now, let's just place them as requested.
+                // Calculate Rect & Text positions to ensure centering
+                if (delta.region === "ege") {
+                    // Box starts at labelX (0 relative to group) and goes right
+                    rectX = 0;
+                    textX = boxWidth / 2; // Center text in the box
+                } else {
+                    // Standard: Box centered on labelX
+                    rectX = -boxWidth / 2;
+                    textX = 0;
+                }
 
                 // Draw Connector Line
                 const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
@@ -874,13 +875,9 @@
                 line.setAttribute("y1", p.y); 
                 
                 // Line End Point
-                if (textAnchor === 'end') {
-                    // Left connector
-                    line.setAttribute("x2", labelX + 5); 
-                    line.setAttribute("y2", labelY);
-                } else if (textAnchor === 'start') {
-                    // Right connector
-                    line.setAttribute("x2", labelX - 5); 
+                if (delta.region === 'ege') {
+                    // Connect to left edge of the box
+                    line.setAttribute("x2", labelX); 
                     line.setAttribute("y2", labelY);
                 } else {
                     // Vertical connector
@@ -903,8 +900,11 @@
                 
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("class", "map-label-text");
-                text.setAttribute("text-anchor", textAnchor); 
+                // Always center text relative to its calculated X position
+                text.setAttribute("text-anchor", "middle"); 
                 text.setAttribute("dominant-baseline", "central");
+                text.setAttribute("x", textX);
+                text.style.fill = textColor;
                 text.textContent = delta.name;
                 
                 const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
@@ -913,9 +913,13 @@
                 rect.setAttribute("y", -textHeight/2);
                 rect.setAttribute("width", boxWidth);
                 rect.setAttribute("x", rectX);
+                rect.style.fill = boxFill;
                 
-                animGroup.appendChild(rect); animGroup.appendChild(text);
-                positionGroup.appendChild(animGroup); g.appendChild(positionGroup);
+                // Add rect first (background), then text
+                animGroup.appendChild(rect); 
+                animGroup.appendChild(text);
+                positionGroup.appendChild(animGroup); 
+                g.appendChild(positionGroup);
             },
             
             spawnFloatingText: function(text, el, colorClass) {
