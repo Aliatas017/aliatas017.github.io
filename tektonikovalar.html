@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* --- RENK PALETİ (PROFESYONEL KOYU TEMA) --- */
+            /* --- RENK PALETİ --- */
             
             /* Arkaplanlar */
             --bg-body: #020617;         
@@ -50,17 +50,11 @@
             /* Marker Stili */
             --marker-fill: #ffffff;    
             
-            /* FAY HATTI RENKLERİ (Highlighter Effect) */
-            /* Zon Rengi (Geniş alan - Glow) */
-            --fault-zone-kaf: rgba(239, 68, 68, 0.15);
-            --fault-zone-daf: rgba(249, 115, 22, 0.15);
-            --fault-zone-baf: rgba(217, 70, 239, 0.15);
+            /* FAY HATTI RENKLERİ */
+            --fault-line-kaf: #ef4444;
+            --fault-line-daf: #f97316;
+            --fault-line-baf: #d946ef;
             
-            /* Çekirdek Rengi (Ana Hat - Akışkan) */
-            --fault-core-kaf: rgba(239, 68, 68, 0.4);
-            --fault-core-daf: rgba(249, 115, 22, 0.4);
-            --fault-core-baf: rgba(217, 70, 239, 0.4);
-
             /* Şehir İsimleri */
             --city-text: #94a3b8;      
             --city-dot: #475569;
@@ -96,13 +90,9 @@
 
             --marker-fill: #ffffff;
 
-            --fault-zone-kaf: rgba(220, 38, 38, 0.1);
-            --fault-zone-daf: rgba(234, 88, 12, 0.1);
-            --fault-zone-baf: rgba(147, 51, 234, 0.1);
-
-            --fault-core-kaf: rgba(220, 38, 38, 0.3);
-            --fault-core-daf: rgba(234, 88, 12, 0.3);
-            --fault-core-baf: rgba(147, 51, 234, 0.3);
+            --fault-line-kaf: #dc2626;
+            --fault-line-daf: #ea580c;
+            --fault-line-baf: #9333ea;
             
             --city-text: #64748b;       
             --city-dot: #94a3b8;
@@ -168,7 +158,6 @@
         /* --- HARİTA & ÇİZGİLER --- */
         #map-container { flex-grow: 1; position: relative; background-color: var(--map-bg); background-image: radial-gradient(circle at 50% 50%, var(--map-grad-start) 0%, var(--map-grad-end) 100%); overflow: hidden; width: 100%; }
         
-        /* İl sınırları için daha yumuşak, gölgeli bir görünüm */
         .province-path { 
             fill: var(--province-fill); 
             stroke: var(--province-stroke); 
@@ -194,61 +183,46 @@
         }
         .city-dot { fill: var(--city-dot); pointer-events: none; opacity: 0.4; }
 
-        /* --- FAY HATLARI --- */
+        /* --- FAY HATLARI (DÜZ VE ŞEFFAF) --- */
         .fault-group { pointer-events: none; }
         
-        .fault-zone {
+        .fault-line-simple {
             fill: none;
             stroke-linecap: round;
             stroke-linejoin: round;
-            stroke-width: 22px; 
-            filter: blur(6px);  
+            stroke-width: 5px; /* Belirgin kalınlık */
+            opacity: 0.3; /* DAHA ŞEFFAF YAPILDI */
             vector-effect: non-scaling-stroke;
-            opacity: 1;
-            mix-blend-mode: screen; /* Daha parlak, ışıklı görünüm */
+            /* Efekt yok, düz çizgi */
         }
 
-        .fault-core {
-            fill: none;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            stroke-width: 4px; 
-            vector-effect: non-scaling-stroke;
-            opacity: 0.8;
-        }
-
-        .fault-kaf-zone { stroke: var(--fault-zone-kaf); }
-        .fault-daf-zone { stroke: var(--fault-zone-daf); }
-        .fault-baf-zone { stroke: var(--fault-zone-baf); }
-
-        .fault-kaf-core { stroke: var(--fault-core-kaf); }
-        .fault-daf-core { stroke: var(--fault-core-daf); }
-        .fault-baf-core { stroke: var(--fault-core-baf); }
+        .fault-kaf { stroke: var(--fault-line-kaf); }
+        .fault-daf { stroke: var(--fault-line-daf); }
+        .fault-baf { stroke: var(--fault-line-baf); }
 
 
-        /* --- MARKERS (OVALAR) - HASSAS SEÇİM GÜNCELLEMESİ --- */
+        /* --- MARKERS (OVALAR) --- */
         .plateau-marker { cursor: pointer; }
         
-        /* Hit Area: YARIÇAP KÜÇÜLTÜLDÜ (25px -> 9px) */
-        /* Bu sayede sadece tam üstüne gelince seçilir, yanındaki seçilmez */
+        /* Hit Area */
         .hit-area {
             fill: transparent;
             r: 9; 
             cursor: pointer;
-            pointer-events: all; /* Sadece burası tıklanabilir */
+            pointer-events: all; 
         }
 
-        /* Görsel Halka (Pulse Ring) - Tıklanamaz, sadece görsel */
         .pulse-ring {
             fill: none;
             stroke: currentColor;
             stroke-width: 1px;
             opacity: 0.3;
             r: 6;
-            pointer-events: none; /* Tıklamayı engellemez */
+            pointer-events: none;
             vector-effect: non-scaling-stroke;
         }
 
+        /* İKON GEÇİŞ EFEKTİ (GLOW KALDIRILDI) */
         .plateau-shape {
             fill: var(--marker-fill); 
             stroke-width: 2px;      
@@ -259,21 +233,27 @@
             transform: scale(0.6); 
             
             vector-effect: non-scaling-stroke;
-            filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.4)); 
+            /* filter: drop-shadow(...) KALDIRILDI */
+            filter: none;
+            
             paint-order: stroke;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), stroke-width 0.2s, filter 0.2s;
+
+            /* YUMUŞAK GEÇİŞ AYARLARI */
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        stroke-width 0.3s ease;
+            
             pointer-events: none; 
         }
         
-        /* Hover Effect: Büyüme oranını kontrol altında tutuyoruz */
+        /* Hover durumunda */
         .plateau-marker:hover .plateau-shape { 
-            transform: scale(1.1); /* Çok aşırı büyütmüyoruz ki diğerini kapatmasın */
-            stroke-width: 2.5px;
-            filter: drop-shadow(0px 0px 8px currentColor);
+            transform: scale(1.4); 
+            stroke-width: 3px;
+            /* filter: drop-shadow(...) KALDIRILDI */
+            filter: none;
             z-index: 100;
         }
         
-        /* Renkler (CSS variable'dan currentColor'a aktarım) */
         .plateau-marker[data-type="KAF"] { color: var(--color-kaf); }
         .plateau-marker[data-type="DAF"] { color: var(--color-daf); }
         .plateau-marker[data-type="BAF"] { color: var(--color-baf); }
@@ -288,7 +268,8 @@
             fill: #22d3ee !important; 
             stroke: #cffafe; 
             transform: scale(0.9); 
-            filter: drop-shadow(0px 0px 10px #22d3ee);
+            /* Parlama kaldırıldı, sadece düz renk */
+            filter: none;
         }
         
         .plateau-marker.found .pulse-ring { display: none; }
@@ -311,7 +292,7 @@
         }
         .legend-row { display: flex; gap: 1.5rem; }
         .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
-        .legend-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--marker-fill); border: 2px solid; box-sizing: border-box; box-shadow: 0 0 5px currentColor; }
+        .legend-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--marker-fill); border: 2px solid; box-sizing: border-box; box-shadow: none; } /* Dot shadow removed */
 
         /* Animasyonlar & UI */
         .pulse-text { animation: pulse 2s infinite; }
@@ -414,9 +395,8 @@
                 <g id="map-content">
                     <g id="layer-provinces"></g>
                     <g id="layer-cities"></g>
-                    <!-- Fay Hatları: İki katmanlı sistem (Glow + Core) -->
-                    <g id="layer-faults-zone"></g> 
-                    <g id="layer-faults-core"></g>
+                    <!-- Fay Hatları: Tek katmanlı sistem -->
+                    <g id="layer-faults"></g> 
                     
                     <g id="layer-lines"></g> 
                     <g id="layer-plateaus"></g>
@@ -679,29 +659,26 @@
             },
 
             drawFaultLines: function() {
-                const layerZone = document.getElementById('layer-faults-zone');
-                const layerCore = document.getElementById('layer-faults-core');
+                const layer = document.getElementById('layer-faults');
+                // Artık sadece tek bir katman var (layer-faults), zone ve core yok.
                 
-                // KAF: Saros -> Marmara -> Bolu -> Amasya -> Erzincan -> Varto
                 const kafCoords = [
                     [26.5, 40.5], [28.0, 40.8], [30.5, 40.7], [32.0, 40.7], 
                     [35.0, 40.8], [37.5, 40.2], [39.5, 39.7], [41.0, 39.2]
                 ];
                 
-                // DAF: Hatay -> Maraş -> Malatya -> Bingöl -> Varto
                 const dafCoords = [
                     [36.1, 36.1], [36.8, 37.4], [38.3, 38.3], [40.7, 39.0], [41.0, 39.2]
                 ];
 
-                // BAF: Ege Grabenleri
                 const bafLines = [
-                    [[26.8, 39.1], [27.8, 39.1]], // Bakırçay
-                    [[26.8, 38.6], [28.5, 38.5]], // Gediz
-                    [[27.1, 38.1], [28.2, 38.1]], // K.Menderes
-                    [[27.1, 37.5], [29.0, 37.8]]  // B.Menderes
+                    [[26.8, 39.1], [27.8, 39.1]], 
+                    [[26.8, 38.6], [28.5, 38.5]], 
+                    [[27.1, 38.1], [28.2, 38.1]], 
+                    [[27.1, 37.5], [29.0, 37.8]]
                 ];
 
-                const createFaultSystem = (coords, zoneClass, coreClass) => {
+                const createSimpleFault = (coords, colorClass) => {
                     let d = "M";
                     coords.forEach((pt, i) => {
                         const p = this.project(pt[0], pt[1]);
@@ -709,22 +686,16 @@
                         if (i < coords.length - 1) d += "L";
                     });
 
-                    // 1. Katman: Geniş, şeffaf, blur efektli "Zon"
-                    const zonePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    zonePath.setAttribute("d", d);
-                    zonePath.setAttribute("class", `fault-zone ${zoneClass}`);
-                    layerZone.appendChild(zonePath);
-
-                    // 2. Katman: İnce, kesikli "Çekirdek" hat
-                    const corePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    corePath.setAttribute("d", d);
-                    corePath.setAttribute("class", `fault-core ${coreClass}`);
-                    layerCore.appendChild(corePath);
+                    // Tek, düz çizgi
+                    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    path.setAttribute("d", d);
+                    path.setAttribute("class", `fault-line-simple ${colorClass}`);
+                    layer.appendChild(path);
                 };
 
-                createFaultSystem(kafCoords, "fault-kaf-zone", "fault-kaf-core");
-                createFaultSystem(dafCoords, "fault-daf-zone", "fault-daf-core");
-                bafLines.forEach(line => createFaultSystem(line, "fault-baf-zone", "fault-baf-core"));
+                createSimpleFault(kafCoords, "fault-kaf");
+                createSimpleFault(dafCoords, "fault-daf");
+                bafLines.forEach(line => createSimpleFault(line, "fault-baf"));
             },
 
             drawPlateaus: function() {
@@ -748,7 +719,7 @@
                     pulseRing.setAttribute("class", "pulse-ring");
                     g.appendChild(pulseRing);
 
-                    // 2. HIT AREA: Yarıçap 25'ten 9'a düşürüldü
+                    // 2. HIT AREA
                     const hitArea = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                     hitArea.setAttribute("class", "hit-area");
                     g.appendChild(hitArea);
