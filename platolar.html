@@ -35,7 +35,7 @@
             --accent-success: #4ade80;  
 
             /* UI Detayları */
-            --glass-bg: rgba(15, 23, 42, 0.95); 
+            --glass-bg: rgba(15, 17, 42, 0.95); 
             --border-width: 2px;
             --radius-md: 12px;
             --radius-lg: 16px;
@@ -241,7 +241,8 @@
         .plateau-marker { cursor: pointer; transition: opacity 0.2s; }
         .plateau-shape {
             stroke: var(--bg-body); stroke-width: 2px;
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), fill 0.3s;
+            /* Animasyon süresi 0.7s'ye çıkarıldı (daha yavaş büyümesi için) */
+            transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), fill 0.4s;
             transform: scale(1.4); vector-effect: non-scaling-stroke;
         }
         .plateau-marker:hover .plateau-shape { transform: scale(2.2); fill: var(--accent-primary); stroke: var(--bg-body); z-index: 50; }
@@ -690,9 +691,13 @@
                     g.setAttribute("data-type", pData.type);
                     g.onclick = (e) => { e.stopPropagation(); this.checkAnswer(pData, g); };
 
+                    // NEW: Inner Wrapper Group
+                    const contentG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                    contentG.setAttribute("class", "plateau-content");
+
                     const hitArea = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                     hitArea.setAttribute("class", "hit-area");
-                    g.appendChild(hitArea);
+                    contentG.appendChild(hitArea); // Append to inner
 
                     const shape = document.createElementNS("http://www.w3.org/2000/svg", "path");
                     shape.setAttribute("class", "plateau-shape");
@@ -702,7 +707,9 @@
                     else if (pData.type === 'asinim') shape.setAttribute("d", "M-11,5 Q-5.5,-5 0,1.5 Q5.5,-5 11,5 Z");
                     else if (pData.type === 'tabaka') shape.setAttribute("d", "M-9,-5 L9,-5 L9,5 L-9,5 Z");
 
-                    g.appendChild(shape); layer.appendChild(g);
+                    contentG.appendChild(shape); // Append to inner
+                    g.appendChild(contentG); // Append inner to outer
+                    layer.appendChild(g);
                     pData.el = g;
                 });
             },
@@ -754,8 +761,18 @@
                     setTimeout(() => this.nextQuestion(), 800);
                 } else {
                     audioController.play('error');
-                    el.classList.add('shake');
-                    setTimeout(() => el.classList.remove('shake'), 500);
+                    
+                    // FIX: Shake the inner content so we don't reset the position transform of the outer group
+                    const content = el.querySelector('.plateau-content');
+                    if (content) {
+                        content.classList.add('shake');
+                        setTimeout(() => content.classList.remove('shake'), 500);
+                    } else {
+                        // Fallback just in case
+                        el.classList.add('shake');
+                        setTimeout(() => el.classList.remove('shake'), 500);
+                    }
+
                     this.state.score -= 5; this.state.wrong++;
                     this.spawnFloatingText("-5", el, "text-red-400");
                     this.updateUI();
