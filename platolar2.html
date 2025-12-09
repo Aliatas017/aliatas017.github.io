@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPERASYON: ANADOLU - Coğrafya Simülasyonu</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Fonts: Orbitron (Sci-Fi), Chakra Petch (HUD), Exo 2 (Reading) -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Chakra+Petch:wght@400;600;700&family=Exo+2:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* --- THEME: CYBER COMMANDO --- */
+            --bg-void: #050508;
+            --hud-bg: rgba(10, 20, 30, 0.95);
+            
+            --c-primary: #00f0ff; /* Cyan */
+            --c-secondary: #7000ff; /* Purple */
+            --c-success: #00ff9d; /* Green */
+            --c-danger: #ff0055; /* Red */
+            --c-warn: #ffe600; /* Yellow */
+            
+            --font-head: 'Orbitron', sans-serif;
+            --font-hud: 'Chakra Petch', sans-serif;
+            --font-read: 'Exo 2', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-void);
+            color: white;
+            font-family: var(--font-read);
+            overflow: hidden;
+            user-select: none;
+            background-image: 
+                radial-gradient(circle at 50% 50%, #1a1a2e 0%, #000 100%);
+        }
+
+        /* --- BACKGROUND GRID --- */
+        .cyber-grid {
+            position: fixed; inset: 0; pointer-events: none; z-index: -1;
+            background-image: 
+                linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            transform: perspective(500px) rotateX(20deg) scale(1.5);
+            transform-origin: top center;
+            animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove { from { background-position: 0 0; } to { background-position: 0 40px; } }
+
+        /* --- UI COMPONENTS --- */
+        
+        /* 1. TOP HUD (Player Stats) */
+        .top-hud {
+            position: absolute; top: 0; left: 0; width: 100%; height: 80px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 2rem; z-index: 50; border-bottom: 1px solid rgba(0,240,255,0.2);
+        }
+
+        .player-card {
+            display: flex; gap: 1rem; align-items: center;
+        }
+        .rank-badge {
+            width: 50px; height: 50px; background: var(--hud-bg);
+            border: 2px solid var(--c-primary);
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-head); font-weight: 900; font-size: 1.5rem;
+            color: var(--c-primary); box-shadow: 0 0 15px var(--c-primary);
+            clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%);
+        }
+        .xp-bar-container { width: 200px; height: 6px; background: #333; position: relative; clip-path: skewX(-20deg); }
+        .xp-bar-fill { height: 100%; background: var(--c-primary); width: 0%; transition: width 0.5s; box-shadow: 0 0 10px var(--c-primary); }
+        
+        .health-module {
+            display: flex; gap: 4px; align-items: center;
+        }
+        .health-segment {
+            width: 20px; height: 12px; background: var(--c-danger);
+            transform: skewX(-20deg); opacity: 0.2; transition: all 0.3s;
+        }
+        .health-segment.active { opacity: 1; box-shadow: 0 0 8px var(--c-danger); }
+
+        /* 2. MISSION DISPLAY (Center Top) */
+        .mission-panel {
+            position: absolute; top: 85px; left: 50%; transform: translateX(-50%);
+            background: var(--hud-bg); border: 1px solid var(--c-primary);
+            padding: 0.5rem 2rem; text-align: center;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            z-index: 40;
+            box-shadow: 0 0 20px rgba(0,240,255,0.1);
+        }
+        .mission-label { font-family: var(--font-hud); font-size: 0.7rem; letter-spacing: 0.3em; color: var(--c-secondary); }
+        .mission-target { 
+            font-family: var(--font-head); font-size: 2rem; color: white; text-transform: uppercase;
+            text-shadow: 0 0 10px var(--c-primary); animation: pulseText 2s infinite;
+        }
+        @keyframes pulseText { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+        /* 3. INFO CARD (Educational Popup) */
+        .info-modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+            z-index: 100; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        .info-modal-overlay.active { opacity: 1; pointer-events: auto; }
+        
+        .intel-card {
+            width: 500px; max-width: 90%;
+            background: rgba(5, 10, 20, 0.95);
+            border: 2px solid var(--c-success);
+            box-shadow: 0 0 50px rgba(0, 255, 157, 0.2);
+            padding: 2rem; position: relative;
+            transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .info-modal-overlay.active .intel-card { transform: scale(1); }
+        
+        .intel-header { 
+            display: flex; justify-content: space-between; border-bottom: 1px solid var(--c-success); padding-bottom: 0.5rem; margin-bottom: 1rem;
+        }
+        .intel-title { font-family: var(--font-head); font-size: 1.5rem; color: var(--c-success); }
+        .intel-type { font-family: var(--font-hud); background: var(--c-success); color: black; padding: 2px 8px; font-weight: bold; font-size: 0.8rem; }
+        
+        .intel-body { font-size: 1rem; line-height: 1.6; color: #e0e0e0; margin-bottom: 1.5rem; }
+        .intel-fact { 
+            background: rgba(0, 255, 157, 0.1); border-left: 3px solid var(--c-success); 
+            padding: 0.8rem; font-size: 0.9rem; margin-bottom: 1rem;
+        }
+
+        .btn-continue {
+            width: 100%; background: var(--c-success); color: black; font-family: var(--font-head);
+            padding: 1rem; font-weight: bold; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.1em;
+            cursor: pointer; transition: all 0.2s; clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px);
+        }
+        .btn-continue:hover { background: white; box-shadow: 0 0 20px var(--c-success); }
+
+        /* 4. MAP STYLES */
+        #map-container {
+            width: 100%; height: 100vh; position: relative;
+            /* 3D tilt effect */
+            perspective: 1200px; overflow: hidden;
+        }
+        #game-map {
+            transform: rotateX(10deg) scale(0.9);
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.5));
+            transition: transform 0.5s ease;
+        }
+        
+        .province-path { fill: rgba(20, 25, 40, 0.8); stroke: rgba(0, 240, 255, 0.2); stroke-width: 0.5; transition: all 0.2s; }
+        .province-path:hover { fill: rgba(0, 240, 255, 0.1); stroke: var(--c-primary); stroke-width: 1.5; }
+
+        /* MARKERS */
+        .marker-group { cursor: pointer; transition: all 0.3s; }
+        .marker-shape { fill: transparent; stroke: var(--c-primary); stroke-width: 2; transition: all 0.3s; }
+        .marker-core { fill: var(--c-primary); opacity: 0.5; transition: all 0.3s; }
+        
+        .marker-group:hover .marker-shape { transform: scale(1.5); stroke: white; filter: drop-shadow(0 0 10px white); }
+        .marker-group:hover .marker-core { fill: white; opacity: 1; }
+        
+        .marker-group.found .marker-shape { stroke: var(--c-success); animation: spin 4s linear infinite; }
+        .marker-group.found .marker-core { fill: var(--c-success); opacity: 1; }
+        
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Types Colors */
+        .type-karstik .marker-shape, .type-karstik .marker-core { stroke: var(--c-primary); fill: var(--c-primary); } /* Mavi */
+        .type-volkanik .marker-shape, .type-volkanik .marker-core { stroke: var(--c-danger); fill: var(--c-danger); } /* Kırmızı */
+        .type-tabaka .marker-shape, .type-tabaka .marker-core { stroke: var(--c-warn); fill: var(--c-warn); } /* Sarı */
+        .type-asinim .marker-shape, .type-asinim .marker-core { stroke: var(--c-secondary); fill: var(--c-secondary); } /* Mor */
+
+        /* Labels */
+        .map-label { font-family: var(--font-hud); font-size: 10px; fill: white; font-weight: bold; pointer-events: none; text-shadow: 0 0 4px black; }
+
+        /* 5. START SCREEN */
+        #start-screen {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 200;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .start-title { font-family: var(--font-head); font-size: 4rem; color: var(--c-primary); text-shadow: 0 0 30px var(--c-primary); margin-bottom: 1rem; text-align: center; }
+        .start-btn {
+            background: transparent; border: 2px solid var(--c-primary); color: var(--c-primary);
+            padding: 1rem 3rem; font-size: 1.5rem; font-family: var(--font-head); cursor: pointer;
+            transition: all 0.2s; margin-top: 2rem;
+            box-shadow: 0 0 15px var(--c-primary);
+        }
+        .start-btn:hover { background: var(--c-primary); color: black; box-shadow: 0 0 40px var(--c-primary); transform: scale(1.1); }
+
+        /* Floating Text */
+        .float-text { position: absolute; font-family: var(--font-head); font-weight: bold; font-size: 1.5rem; pointer-events: none; animation: floatUp 1s forwards; text-shadow: 0 0 5px black; }
+        @keyframes floatUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-50px); } }
+
+        /* Combo Counter */
+        .combo-box {
+            position: absolute; right: 20px; top: 100px;
+            text-align: right; font-family: var(--font-head);
+            transform: rotate(-5deg);
+        }
+        .combo-count { font-size: 4rem; color: var(--c-warn); text-shadow: 4px 4px 0px #000; line-height: 1; }
+        .combo-label { font-size: 1rem; color: white; letter-spacing: 0.5em; }
+
+        /* Game Over */
+        #game-over-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 150;
+            display: none; align-items: center; justify-content: center; flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cyber-grid"></div>
+
+    <!-- START SCREEN -->
+    <div id="start-screen">
+        <div class="mb-4 text-sm text-[var(--c-secondary)] tracking-[0.5em] font-bold">COĞRAFYA SİMÜLASYONU V3.0</div>
+        <h1 class="start-title">OPERASYON:<br>ANADOLU</h1>
+        <p class="max-w-md text-center text-gray-400 font-mono text-sm leading-relaxed">
+            Görev: Anadolu coğrafyasındaki platoları tespit et ve analiz et.<br>
+            Hatalı tespitte kalkan enerjisi düşer.<br>
+            Veri toplamak için hedefleri onayla.
+        </p>
+        <button class="start-btn" onclick="game.start()">BAŞLAT</button>
+        <div id="loading-text" class="mt-4 text-[var(--c-warn)] text-xs font-mono hidden">Harita Yükleniyor...</div>
+    </div>
+
+    <!-- UI HUD -->
+    <div class="top-hud">
+        <div class="player-card">
+            <div class="rank-badge" id="rank-badge">1</div>
+            <div>
+                <div class="text-[10px] text-gray-400 tracking-widest">RÜTBE</div>
+                <div class="text-sm font-bold text-[var(--c-primary)]" id="rank-name">ACEMİ GÖZCÜ</div>
+            </div>
+            <div class="ml-4">
+                <div class="text-[10px] text-gray-400 tracking-widest flex justify-between">
+                    <span>TP</span>
+                    <span id="xp-text">0/100</span>
+                </div>
+                <div class="xp-bar-container">
+                    <div class="xp-bar-fill" id="xp-bar"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <div class="text-right">
+                <div class="text-[10px] text-gray-400 tracking-widest">KALKAN DURUMU</div>
+                <div class="health-module" id="health-container">
+                    <!-- JS ile doldurulacak -->
+                </div>
+            </div>
+            <div class="text-right ml-4">
+                <div class="text-[10px] text-gray-400 tracking-widest">SKOR</div>
+                <div class="text-2xl font-bold font-[Orbitron] text-white" id="score">0000</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mission-panel">
+        <div class="mission-label">AKTİF HEDEF</div>
+        <div class="mission-target" id="target-name">BEKLENİYOR...</div>
+    </div>
+
+    <div class="combo-box opacity-0 transition-opacity" id="combo-box">
+        <div class="combo-count" id="combo-count">x2</div>
+        <div class="combo-label">KOMBO</div>
+    </div>
+
+    <!-- MAP -->
+    <div id="map-container">
+        <svg id="game-map" width="100%" height="100%" viewBox="0 0 1000 450" preserveAspectRatio="xMidYMid meet">
+            <g id="map-content">
+                <g id="layer-provinces"></g>
+                <g id="layer-cities"></g>
+                <g id="layer-lines"></g> 
+                <g id="layer-plateaus"></g>
+                <g id="layer-labels"></g> 
+            </g>
+        </svg>
+        
+        <!-- Legend Bottom Right -->
+        <div class="absolute bottom-4 right-4 bg-black/80 border border-[var(--c-primary)] p-3 text-xs rounded-lg backdrop-blur-sm">
+            <div class="flex items-center gap-2 mb-1"><div class="w-3 h-3 rounded-full bg-[var(--c-primary)]"></div> Karstik (Eriyik)</div>
+            <div class="flex items-center gap-2 mb-1"><div class="w-3 h-3 rounded-full bg-[var(--c-danger)]"></div> Volkanik (Lav)</div>
+            <div class="flex items-center gap-2 mb-1"><div class="w-3 h-3 rounded-full bg-[var(--c-secondary)]"></div> Aşınım (Düzlük)</div>
+            <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[var(--c-warn)]"></div> Tabaka (Yatay)</div>
+        </div>
+    </div>
+
+    <!-- EDUCATIONAL MODAL -->
+    <div class="info-modal-overlay" id="info-modal">
+        <div class="intel-card">
+            <div class="intel-header">
+                <div class="intel-title">VERİ ÇÖZÜLDÜ</div>
+                <div class="intel-type" id="modal-type">TÜR</div>
+            </div>
+            <div class="text-2xl font-bold mb-4 text-white" id="modal-name">PLATO İSMİ</div>
+            <div class="intel-body" id="modal-desc">
+                Burada platonun özellikleri yazacak.
+            </div>
+            <div class="intel-fact" id="modal-fact">
+                <i data-lucide="lightbulb" class="inline w-4 h-4 mr-2"></i>
+                <span id="modal-fact-text">Ekstra bilgi.</span>
+            </div>
+            <button class="btn-continue" onclick="game.nextLevel()">SONRAKİ HEDEF</button>
+        </div>
+    </div>
+
+    <!-- GAME OVER MODAL -->
+    <div id="game-over-modal">
+        <div class="text-[var(--c-danger)] text-6xl font-[Orbitron] font-bold mb-4">GÖREV BAŞARISIZ</div>
+        <div class="text-gray-400 mb-8 font-mono">Kalkan enerjisi tükendi. Bağlantı koptu.</div>
+        <div class="text-4xl text-white mb-8">SKOR: <span id="final-score">0</span></div>
+        <button class="btn-continue max-w-xs" onclick="location.reload()">SİSTEMİ YENİDEN BAŞLAT</button>
+    </div>
+    
+    <!-- VICTORY MODAL -->
+    <div id="victory-modal" style="display:none;" class="fixed inset-0 z-[160] bg-black/95 flex flex-col items-center justify-center">
+        <div class="text-[var(--c-success)] text-6xl font-[Orbitron] font-bold mb-4">GÖREV TAMAMLANDI</div>
+        <div class="text-white text-xl mb-8 font-mono tracking-widest">ANADOLU HARİTALANDI</div>
+        <div class="text-4xl text-white mb-8 border-b-2 border-[var(--c-primary)] pb-2">TOPLAM SKOR: <span id="victory-score">0</span></div>
+        <button class="btn-continue max-w-xs" onclick="location.reload()">YENİ OPERASYON</button>
+    </div>
+
+    <script>
+        const MAP_DATA_URL = 'https://raw.githubusercontent.com/Aliatas017/aliatas017.github.io/main/tr.json'; 
+        const FALLBACK_URL = 'https://raw.githubusercontent.com/alpers/Turkey-Maps-GeoJSON/master/tr-cities-utf8.json';
+
+        const EDUCATIONAL_DB = {
+            "Teke Platosu": {
+                type: "Karstik",
+                desc: "Akdeniz bölgesinde yer alır. Kalkerli (kireçtaşı) arazinin erimesi sonucu oluşmuştur. Zemin geçirgen olduğu için yüzey suyu azdır.",
+                fact: "Engebeli yapısı nedeniyle tarıma elverişli değildir, kıl keçisi yetiştiriciliği yaygındır."
+            },
+            "Taşeli Platosu": {
+                type: "Karstik",
+                desc: "Mersin ve Antalya arasında yer alan, kalker tabakalarından oluşan engebeli bir platodur.",
+                fact: "Nüfus yoğunluğu çok azdır. Mağara ve kanyon oluşumları yaygındır."
+            },
+            "Erzurum-Kars Platosu": {
+                type: "Volkanik",
+                desc: "Lavların çukur alanları doldurmasıyla oluşmuş, Türkiye'nin en yüksek ve en soğuk platosudur.",
+                fact: "Yaz yağışları sayesinde 'Çernezyom' (kara toprak) oluşmuştur. Büyükbaş hayvancılık merkezidir."
+            },
+            "Ardahan Platosu": {
+                type: "Volkanik",
+                desc: "Erzurum-Kars platosunun kuzey uzantısıdır. Volkanik kökenli verimli topraklara sahiptir.",
+                fact: "Yüksekliğinden dolayı tarım süresi çok kısadır, mera hayvancılığı temel geçim kaynağıdır."
+            },
+            "Kapadokya Platosu": {
+                type: "Volkanik",
+                desc: "Volkanik tüflerin oluşturduğu, peri bacaları ile ünlü plato sahasıdır.",
+                fact: "Hem tarım (bağcılık, patates) hem de turizm açısından çok değerlidir."
+            },
+            "Kırşehir Platosu": {
+                type: "Volkanik / Karma",
+                desc: "Kızılırmak yayı içerisinde yer alır. Volkanik materyaller ve tortul tabakalar bir aradadır.",
+                fact: "Tahıl tarımı için önemli bir merkezdir."
+            },
+            "Çatalca-Kocaeli": {
+                type: "Aşınım (Peneplen)",
+                desc: "Akarsu aşındırması sonucu deniz seviyesine yaklaşmış, Türkiye'nin en alçak platosudur.",
+                fact: "Türkiye'nin en yoğun nüfuslu ve en sanayileşmiş bölgesidir."
+            },
+            "Perşembe Platosu": {
+                type: "Aşınım",
+                desc: "Ordu ilinde bulunan, menderesler çizen akarsularıyla ünlü bir yayla-plato özelliğindedir.",
+                fact: "Turizm potansiyeli yüksektir, şenlikleriyle tanınır."
+            },
+            "Haymana Platosu": {
+                type: "Tabaka Düzlüğü",
+                desc: "Ankara'nın güneyinde yer alan, yatay duruşlu tortul tabakaların yarılmasıyla oluşmuş düzlüktür.",
+                fact: "Tiftik keçisi yetiştiriciliği ve tahıl tarımı yapılır."
+            },
+            "Cihanbeyli Platosu": {
+                type: "Tabaka Düzlüğü",
+                desc: "Tuz Gölü'nün batısında yer alan geniş düzlüklerdir.",
+                fact: "Türkiye'nin en önemli buğday ambarlarından biridir."
+            },
+            "Obruk Platosu": {
+                type: "Tabaka Düzlüğü",
+                desc: "Konya Ovası ile Tuz Gölü arasındadır. Kalkerli yapıda derin 'Obruk' adı verilen çukurluklar bulunur.",
+                fact: "Yeraltı sularının çekilmesiyle oluşan obruklar tarım alanlarını tehdit etmektedir."
+            },
+            "Bozok Platosu": {
+                type: "Tabaka Düzlüğü",
+                desc: "Yozgat il sınırları içinde, Kızılırmak yayının ortasında kalır.",
+                fact: "Karasal iklim hakimdir, küçükbaş hayvancılık ve tahıl tarımı yaygındır."
+            },
+            "Uzunyayla Platosu": {
+                type: "Tabaka Düzlüğü",
+                desc: "Sivas ve Kayseri arasında yer alan yüksek bir platodur.",
+                fact: "Demir yolu ulaşımı açısından önemli bir geçiş güzergahıdır."
+            },
+            "Yazılıkaya (Ege)": {
+                type: "Tabaka Düzlüğü",
+                desc: "Eskişehir-Afyon arasında yer alır. Volkanik tüfler üzerinde Frigyalılara ait kalıntılar bulunur.",
+                fact: "Tarihi ve turistik değeri yüksektir (Midas Anıtı)."
+            },
+            "Gaziantep Platosu": {
+                type: "Tabaka Düzlüğü",
+                desc: "Fırat Nehri tarafından parçalanmış, güneydoğu Anadolu'nun batısında yer alır.",
+                fact: "Antep fıstığı ve zeytin tarımı için çok elverişlidir."
+            },
+            "Şanlıurfa Platosu": {
+                type: "Tabaka Düzlüğü",
+                desc: "Geniş düzlüklerden oluşur. GAP projesi ile sulu tarıma geçilmiştir.",
+                fact: "Pamuk üretiminde Türkiye'nin en önemli merkezlerinden biridir."
+            }
+        };
+
+        const PLATEAU_COORDS = [
+            { name: "Teke Platosu", lat: 36.95, lon: 29.90, type: "karstik" },
+            { name: "Taşeli Platosu", lat: 36.60, lon: 33.10, type: "karstik" },
+            { name: "Erzurum-Kars Platosu", lat: 40.50, lon: 42.70, type: "volkanik" },
+            { name: "Ardahan Platosu", lat: 41.10, lon: 42.70, type: "volkanik" },
+            { name: "Kapadokya Platosu", lat: 38.65, lon: 34.85, type: "volkanik" },
+            { name: "Kırşehir Platosu", lat: 39.15, lon: 34.15, type: "volkanik" },
+            { name: "Çatalca-Kocaeli", lat: 41.05, lon: 29.30, type: "asinim" },
+            { name: "Perşembe Platosu", lat: 40.80, lon: 37.75, type: "asinim" },
+            { name: "Haymana Platosu", lat: 39.40, lon: 32.50, type: "tabaka" },
+            { name: "Cihanbeyli Platosu", lat: 38.65, lon: 32.90, type: "tabaka" },
+            { name: "Obruk Platosu", lat: 38.10, lon: 33.30, type: "tabaka" },
+            { name: "Bozok Platosu", lat: 39.60, lon: 35.20, type: "tabaka" },
+            { name: "Uzunyayla Platosu", lat: 38.90, lon: 36.40, type: "tabaka" },
+            { name: "Yazılıkaya (Ege)", lat: 39.10, lon: 30.70, type: "tabaka" },
+            { name: "Gaziantep Platosu", lat: 37.10, lon: 37.35, type: "tabaka" }, 
+            { name: "Şanlıurfa Platosu", lat: 37.20, lon: 38.80, type: "tabaka" }
+        ];
+
+        const RANKS = [
+            { title: "ACEMİ GÖZCÜ", xp: 0 },
+            { title: "HARİTA TEKNİKERİ", xp: 100 },
+            { title: "SAHA OPERATÖRÜ", xp: 300 },
+            { title: "UZMAN ANALİST", xp: 600 },
+            { title: "BÖLGE KOMUTANI", xp: 1000 },
+            { title: "COĞRAFYA MAREŞALİ", xp: 1500 }
+        ];
+
+        // --- GAME ENGINE ---
+        const game = {
+            state: {
+                active: false,
+                score: 0,
+                xp: 0,
+                maxHealth: 3,
+                health: 3,
+                combo: 0,
+                current: null,
+                remaining: [],
+                rankIndex: 0
+            },
+            
+            geo: {
+                scale: 1, offsetX: 0, offsetY: 0,
+                bounds: { minLon: 180, maxLon: -180, minLat: 90, maxLat: -90 }
+            },
+
+            init: function() {
+                this.setupMap();
+                this.renderHealth();
+                lucide.createIcons();
+            },
+
+            start: function() {
+                document.getElementById('start-screen').style.display = 'none';
+                this.state.active = true;
+                this.state.remaining = [...PLATEAU_COORDS];
+                this.state.score = 0;
+                this.state.xp = 0;
+                this.state.health = 3;
+                this.state.combo = 0;
+                
+                this.updateUI();
+                this.renderHealth();
+                this.nextTurn();
+                
+                // Play ambience (simulated)
+                // audio.play('start');
+            },
+
+            setupMap: function() {
+                // Global MAP_DATA_URL kullan
+                const url = (MAP_DATA_URL === 'tr.json') ? FALLBACK_URL : MAP_DATA_URL;
+                document.getElementById('loading-text').classList.remove('hidden');
+                
+                fetch(url)
+                    .then(r => {
+                        if (!r.ok) throw new Error(r.status);
+                        return r.json();
+                    })
+                    .then(data => {
+                        if (!data.features) throw new Error("Invalid GeoJSON");
+                        this.processGeoJSON(data);
+                        this.drawMap(data);
+                        this.drawMarkers();
+                        document.getElementById('loading-text').innerText = "HARİTA HAZIR";
+                        document.getElementById('loading-text').style.color = "var(--c-success)";
+                    })
+                    .catch(err => {
+                        console.error("Harita yüklenemedi, yedek deneniyor...", err);
+                        document.getElementById('loading-text').innerText = "YEDEK SUNUCUYA BAĞLANILIYOR...";
+                        
+                        // Yedek URL dene
+                        fetch(FALLBACK_URL)
+                            .then(r => r.json())
+                            .then(data => {
+                                this.processGeoJSON(data);
+                                this.drawMap(data);
+                                this.drawMarkers();
+                                document.getElementById('loading-text').innerText = "HARİTA HAZIR";
+                                document.getElementById('loading-text').style.color = "var(--c-success)";
+                            })
+                            .catch(e => {
+                                document.getElementById('loading-text').innerText = "BAĞLANTI HATASI!";
+                                document.getElementById('loading-text').style.color = "var(--c-danger)";
+                            });
+                    });
+            },
+
+            processGeoJSON: function(data) {
+                // Önce bounds'u sıfırla, yoksa eski verilerle çakışabilir
+                this.geo.bounds = { minLon: 180, maxLon: -180, minLat: 90, maxLat: -90 };
+                
+                data.features.forEach(f => this.scanCoords(f.geometry.coordinates));
+                const viewBox = { w: 1000, h: 450 };
+                const lonSpan = this.geo.bounds.maxLon - this.geo.bounds.minLon;
+                const latSpan = this.geo.bounds.maxLat - this.geo.bounds.minLat;
+                const padding = 20;
+                this.geo.scale = Math.min((viewBox.w - 2 * padding) / lonSpan, (viewBox.h - 2 * padding) / latSpan);
+                this.geo.offsetX = (viewBox.w - lonSpan * this.geo.scale) / 2;
+                this.geo.offsetY = (viewBox.h - latSpan * this.geo.scale) / 2;
+            },
+
+            scanCoords: function(coords) {
+                if (Array.isArray(coords) && typeof coords[0] === 'number') {
+                    if (coords[0] < this.geo.bounds.minLon) this.geo.bounds.minLon = coords[0];
+                    if (coords[0] > this.geo.bounds.maxLon) this.geo.bounds.maxLon = coords[0];
+                    if (coords[1] < this.geo.bounds.minLat) this.geo.bounds.minLat = coords[1];
+                    if (coords[1] > this.geo.bounds.maxLat) this.geo.bounds.maxLat = coords[1];
+                } else if (Array.isArray(coords)) coords.forEach(c => this.scanCoords(c));
+            },
+
+            project: function(lon, lat) {
+                return {
+                    x: (lon - this.geo.bounds.minLon) * this.geo.scale + this.geo.offsetX,
+                    y: 450 - ((lat - this.geo.bounds.minLat) * this.geo.scale + this.geo.offsetY)
+                };
+            },
+
+            drawMap: function(data) {
+                const layer = document.getElementById('layer-provinces');
+                layer.innerHTML = ""; // Temizle
+                
+                data.features.forEach(f => {
+                    let d = "";
+                    const polys = f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates;
+                    polys.forEach(poly => {
+                        poly.forEach(ring => {
+                            let ringD = "M";
+                            ring.forEach((pt, i) => {
+                                const p = this.project(pt[0], pt[1]);
+                                ringD += `${p.x.toFixed(1)},${p.y.toFixed(1)} `;
+                                if (i === 0) ringD += "L";
+                            });
+                            ringD += "Z ";
+                            d += ringD;
+                        });
+                    });
+                    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    path.setAttribute("d", d);
+                    path.setAttribute("class", "province-path");
+                    layer.appendChild(path);
+                });
+            },
+
+            drawMarkers: function() {
+                const layer = document.getElementById('layer-plateaus');
+                layer.innerHTML = "";
+                
+                PLATEAU_COORDS.forEach(pData => {
+                    const p = this.project(pData.lon, pData.lat);
+                    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                    g.setAttribute("class", `marker-group type-${pData.type.toLowerCase()}`);
+                    g.setAttribute("transform", `translate(${p.x}, ${p.y})`);
+                    
+                    // Click Event
+                    g.onclick = (e) => { e.stopPropagation(); this.checkAnswer(pData, g); };
+
+                    // Visuals
+                    // 1. Hit Area
+                    const hit = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    hit.setAttribute("r", 20); hit.setAttribute("fill", "transparent");
+                    g.appendChild(hit);
+
+                    // 2. Shape (Hexagon-ish)
+                    const shape = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    shape.setAttribute("d", "M-10,-5 L0,-10 L10,-5 L10,5 L0,10 L-10,5 Z");
+                    shape.setAttribute("class", "marker-shape");
+                    g.appendChild(shape);
+
+                    // 3. Core
+                    const core = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    core.setAttribute("r", 3); core.setAttribute("class", "marker-core");
+                    g.appendChild(core);
+
+                    layer.appendChild(g);
+                    pData.el = g;
+                });
+            },
+
+            nextTurn: function() {
+                if (this.state.remaining.length === 0) {
+                    this.victory();
+                    return;
+                }
+                const idx = Math.floor(Math.random() * this.state.remaining.length);
+                this.state.current = this.state.remaining[idx];
+                
+                // Update HUD
+                const targetEl = document.getElementById('target-name');
+                targetEl.style.opacity = 0;
+                setTimeout(() => {
+                    targetEl.innerText = this.state.current.name;
+                    targetEl.style.opacity = 1;
+                }, 200);
+            },
+
+            checkAnswer: function(data, el) {
+                if (!this.state.active) return;
+                if (el.classList.contains('found')) return;
+
+                if (data.name === this.state.current.name) {
+                    // CORRECT
+                    this.handleCorrect(data, el);
+                } else {
+                    // WRONG
+                    this.handleWrong(el);
+                }
+            },
+
+            handleCorrect: function(data, el) {
+                // Audio
+                // audio.play('success');
+                
+                // State Update
+                this.state.combo++;
+                const multiplier = Math.min(this.state.combo, 5);
+                const points = 100 * multiplier;
+                this.state.score += points;
+                this.state.xp += 50;
+                
+                // Remove from remaining
+                this.state.remaining = this.state.remaining.filter(m => m.name !== data.name);
+                
+                // Visuals
+                el.classList.add('found');
+                this.addLabel(data);
+                this.showFloatingText(`+${points}`, el, "#00ff9d");
+                
+                // Update UI
+                this.checkRankUp();
+                this.updateUI();
+                this.updateComboUI();
+
+                // SHOW EDUCATIONAL MODAL
+                setTimeout(() => {
+                    this.showInfoModal(data);
+                }, 600);
+            },
+
+            handleWrong: function(el) {
+                // Audio
+                // audio.play('error');
+
+                // State
+                this.state.health--;
+                this.state.combo = 0;
+                this.state.score = Math.max(0, this.state.score - 50);
+
+                // Visuals
+                el.querySelector('.marker-shape').style.stroke = "var(--c-danger)";
+                setTimeout(() => el.querySelector('.marker-shape').style.stroke = "", 500);
+                
+                this.showFloatingText("HATA!", el, "#ff0055");
+                this.renderHealth();
+                this.updateUI();
+                this.updateComboUI();
+
+                if (this.state.health <= 0) {
+                    this.gameOver();
+                }
+            },
+
+            showInfoModal: function(data) {
+                const info = EDUCATIONAL_DB[data.name] || { type: data.type, desc: "Bilgi yok.", fact: "..." };
+                
+                document.getElementById('modal-type').innerText = info.type.toUpperCase();
+                document.getElementById('modal-name').innerText = data.name;
+                document.getElementById('modal-desc').innerText = info.desc;
+                document.getElementById('modal-fact-text').innerText = info.fact;
+                
+                document.getElementById('info-modal').classList.add('active');
+            },
+
+            nextLevel: function() {
+                // Modal'dan devam et butonu
+                document.getElementById('info-modal').classList.remove('active');
+                this.nextTurn();
+            },
+
+            addLabel: function(data) {
+                const layer = document.getElementById('layer-labels');
+                const p = this.project(data.lon, data.lat);
+                
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", p.x); text.setAttribute("y", p.y - 15);
+                text.setAttribute("class", "map-label");
+                text.setAttribute("text-anchor", "middle");
+                text.textContent = data.name;
+                
+                layer.appendChild(text);
+            },
+
+            renderHealth: function() {
+                const container = document.getElementById('health-container');
+                container.innerHTML = '';
+                for (let i = 0; i < this.state.maxHealth; i++) {
+                    const div = document.createElement('div');
+                    div.className = `health-segment ${i < this.state.health ? 'active' : ''}`;
+                    container.appendChild(div);
+                }
+            },
+
+            checkRankUp: function() {
+                const nextRankIdx = RANKS.findIndex(r => this.state.xp < r.xp);
+                let currentRankIdx = nextRankIdx === -1 ? RANKS.length - 1 : nextRankIdx - 1;
+                if (currentRankIdx < 0) currentRankIdx = 0;
+                
+                if (currentRankIdx > this.state.rankIndex) {
+                    this.state.rankIndex = currentRankIdx;
+                    // Rank Up Animation could go here
+                    this.triggerConfetti();
+                }
+            },
+
+            updateUI: function() {
+                document.getElementById('score').innerText = this.state.score.toString().padStart(4, '0');
+                
+                // Rank UI
+                const currentRank = RANKS[this.state.rankIndex];
+                const nextRank = RANKS[this.state.rankIndex + 1];
+                document.getElementById('rank-badge').innerText = this.state.rankIndex + 1;
+                document.getElementById('rank-name').innerText = currentRank.title;
+                
+                if (nextRank) {
+                    const prevXp = currentRank.xp;
+                    const targetXp = nextRank.xp;
+                    const currentXp = this.state.xp;
+                    const percent = ((currentXp - prevXp) / (targetXp - prevXp)) * 100;
+                    document.getElementById('xp-bar').style.width = `${Math.min(percent, 100)}%`;
+                    document.getElementById('xp-text').innerText = `${Math.floor(currentXp)} / ${targetXp}`;
+                } else {
+                    document.getElementById('xp-bar').style.width = '100%';
+                    document.getElementById('xp-text').innerText = 'MAX';
+                }
+            },
+            
+            updateComboUI: function() {
+                const box = document.getElementById('combo-box');
+                const count = document.getElementById('combo-count');
+                
+                if (this.state.combo > 1) {
+                    box.classList.remove('opacity-0');
+                    count.innerText = `x${this.state.combo}`;
+                    // Shake effect
+                    count.animate([
+                        { transform: 'scale(1)' }, { transform: 'scale(1.5)' }, { transform: 'scale(1)' }
+                    ], { duration: 200 });
+                } else {
+                    box.classList.add('opacity-0');
+                }
+            },
+
+            showFloatingText: function(text, el, color) {
+                const rect = el.getBoundingClientRect();
+                const float = document.createElement('div');
+                float.className = 'float-text';
+                float.innerText = text;
+                float.style.color = color;
+                float.style.left = (rect.left + 20) + 'px';
+                float.style.top = (rect.top - 20) + 'px';
+                document.body.appendChild(float);
+                setTimeout(() => float.remove(), 1000);
+            },
+
+            triggerConfetti: function() {
+                confetti({
+                    particleCount: 100, spread: 70, origin: { y: 0.6 },
+                    colors: ['#00f0ff', '#00ff9d', '#ff0055']
+                });
+            },
+
+            gameOver: function() {
+                this.state.active = false;
+                document.getElementById('final-score').innerText = this.state.score;
+                document.getElementById('game-over-modal').style.display = 'flex';
+            },
+            
+            victory: function() {
+                this.state.active = false;
+                document.getElementById('victory-score').innerText = this.state.score;
+                document.getElementById('victory-modal').style.display = 'flex';
+                this.triggerConfetti();
+            }
+        };
+        
+        // Init Game on Load
+        game.init();
+
+    </script>
+</body>
+</html>
