@@ -974,21 +974,26 @@
             }
         };
 
+        // GÜNCELLENMİŞ MENÜ FONKSİYONU
         window.toggleMobileMenu = () => {
             const menu = document.getElementById('mobile-menu');
             const menuIcon = document.getElementById('menu-icon');
             const closeIcon = document.getElementById('close-icon');
 
-            // Toggle 'hidden' class for the menu
+            // 'hidden' sınıfını aç/kapat (toggle et)
             menu.classList.toggle('hidden');
 
-            // Check if menu is hidden to set icon state
-            if (menu.classList.contains('hidden')) {
-                menuIcon.classList.remove('hidden');
-                closeIcon.classList.add('hidden');
-            } else {
+            // Menünün GÖRÜNÜR olup olmadığına bak (hidden sınıfı YOKSA görünürdür)
+            const isMenuOpen = !menu.classList.contains('hidden');
+
+            if (isMenuOpen) {
+                // Menü açıksa: Menü ikonunu gizle, Çarpı ikonunu göster
                 menuIcon.classList.add('hidden');
                 closeIcon.classList.remove('hidden');
+            } else {
+                // Menü kapalıysa: Menü ikonunu göster, Çarpı ikonunu gizle
+                menuIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
             }
         };
 
