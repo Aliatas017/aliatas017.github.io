@@ -14,56 +14,55 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* --- RENK PALETİ --- */
+            /* --- RENK PALETİ (PROFESYONEL KOYU TEMA) --- */
             
             /* Arkaplanlar */
-            --bg-body: #0f172a;         
+            --bg-body: #020617;         
             --bg-dots: #1e293b;         
             
-            --panel-bg: rgba(15, 23, 42, 0.90);        
-            --panel-border: #334155;    
+            --panel-bg: rgba(15, 23, 42, 0.85);        
+            --panel-border: rgba(148, 163, 184, 0.1);    
             
-            --text-primary: #f1f5f9;    
+            --text-primary: #f8fafc;    
             --text-secondary: #94a3b8;  
             
             /* UI Renkleri */
             --accent-primary: #f43f5e; 
-            --accent-glow: rgba(244, 63, 94, 0.2);  
+            --accent-glow: rgba(244, 63, 94, 0.4);  
             --accent-warn: #fbbf24;     
             --accent-success: #10b981;  
 
-            /* Harita */
-            --map-bg: #0f172a;          
-            --map-grad-start: #1e293b;
+            /* Harita - Sinematik Görünüm */
+            --map-bg: #020617;          
+            --map-grad-start: #0f172a;
             --map-grad-end: #020617;
 
             --province-fill: #1e293b;   
             --province-stroke: #334155; 
             --province-hover: #334155;
 
-            /* KATEGORİ RENKLERİ */
+            /* KATEGORİ RENKLERİ (Neon) */
             --color-kaf: #ef4444;      
             --color-daf: #f97316;      
-            --color-baf: #a855f7;      
-            --color-diger: #14b8a6;    
+            --color-baf: #d946ef;      
+            --color-diger: #2dd4bf;    
             
             /* Marker Stili */
             --marker-fill: #ffffff;    
             
-            /* FAY HATTI RENKLERİ (Modern & Şeffaf) */
+            /* FAY HATTI RENKLERİ (Highlighter Effect) */
             /* Zon Rengi (Geniş alan - Glow) */
-            --fault-zone-kaf: rgba(239, 68, 68, 0.1);
-            --fault-zone-daf: rgba(249, 115, 22, 0.1);
-            --fault-zone-baf: rgba(168, 85, 247, 0.1);
+            --fault-zone-kaf: rgba(239, 68, 68, 0.15);
+            --fault-zone-daf: rgba(249, 115, 22, 0.15);
+            --fault-zone-baf: rgba(217, 70, 239, 0.15);
             
             /* Çekirdek Rengi (Ana Hat - Akışkan) */
-            /* Biraz daha opak ama şeffaf, neon etkisi */
-            --fault-core-kaf: rgba(239, 68, 68, 0.5);
-            --fault-core-daf: rgba(249, 115, 22, 0.5);
-            --fault-core-baf: rgba(168, 85, 247, 0.5);
+            --fault-core-kaf: rgba(239, 68, 68, 0.4);
+            --fault-core-daf: rgba(249, 115, 22, 0.4);
+            --fault-core-baf: rgba(217, 70, 239, 0.4);
 
             /* Şehir İsimleri */
-            --city-text: #cbd5e1;      
+            --city-text: #94a3b8;      
             --city-dot: #475569;
             
             --radius-lg: 24px;
@@ -71,40 +70,39 @@
 
         /* --- LIGHT MODE --- */
         body.light-mode {
-            --bg-body: #f8fafc;         
-            --bg-dots: #e2e8f0;         
+            --bg-body: #f1f5f9;         
+            --bg-dots: #cbd5e1;         
             
-            --panel-bg: rgba(255, 255, 255, 0.90);        
-            --panel-border: #cbd5e1;    
+            --panel-bg: rgba(255, 255, 255, 0.85);        
+            --panel-border: rgba(0,0,0,0.1);    
             
             --text-primary: #0f172a;    
             --text-secondary: #64748b;  
 
             --accent-primary: #e11d48;
             
-            --map-bg: #f1f5f9;          
+            --map-bg: #e2e8f0;          
             --map-grad-start: #ffffff;
-            --map-grad-end: #f1f5f9;
+            --map-grad-end: #cbd5e1;
 
             --province-fill: #ffffff;   
             --province-stroke: #cbd5e1; 
-            --province-hover: #f8fafc;
+            --province-hover: #f1f5f9;
 
             --color-kaf: #dc2626;
             --color-daf: #ea580c;
-            --color-baf: #7c3aed;
+            --color-baf: #9333ea;
             --color-diger: #0d9488;
 
             --marker-fill: #ffffff;
 
-            /* Light modda daha belirgin ama yumuşak */
-            --fault-zone-kaf: rgba(220, 38, 38, 0.08);
-            --fault-zone-daf: rgba(234, 88, 12, 0.08);
-            --fault-zone-baf: rgba(124, 58, 237, 0.08);
+            --fault-zone-kaf: rgba(220, 38, 38, 0.1);
+            --fault-zone-daf: rgba(234, 88, 12, 0.1);
+            --fault-zone-baf: rgba(147, 51, 234, 0.1);
 
-            --fault-core-kaf: rgba(220, 38, 38, 0.4);
-            --fault-core-daf: rgba(234, 88, 12, 0.4);
-            --fault-core-baf: rgba(124, 58, 237, 0.4);
+            --fault-core-kaf: rgba(220, 38, 38, 0.3);
+            --fault-core-daf: rgba(234, 88, 12, 0.3);
+            --fault-core-baf: rgba(147, 51, 234, 0.3);
             
             --city-text: #64748b;       
             --city-dot: #94a3b8;
@@ -114,7 +112,7 @@
             font-family: 'Inter', system-ui, sans-serif;
             background-color: var(--bg-body);
             background-image: radial-gradient(var(--bg-dots) 1px, transparent 1px);
-            background-size: 24px 24px;
+            background-size: 32px 32px;
             color: var(--text-primary);
             overflow: hidden; 
             user-select: none;
@@ -124,7 +122,8 @@
         /* --- HEADER --- */
         header {
             background-color: var(--panel-bg);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--panel-border);
             z-index: 50;
         }
@@ -132,80 +131,92 @@
         .theme-toggle-btn { 
             width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; 
             background: rgba(255,255,255,0.05); border: 1px solid var(--panel-border); 
-            border-radius: 12px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; 
+            border-radius: 10px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; 
         }
         .theme-toggle-btn:hover { color: var(--accent-primary); border-color: var(--accent-primary); background: var(--bg-dots); }
 
         /* --- OYUN PANELİ --- */
-        .stats-bar { display: flex; gap: 1rem; padding: 0.5rem 1rem; background: var(--panel-bg); border-bottom: 1px solid var(--panel-border); justify-content: center; align-items: center; backdrop-filter: blur(8px); }
+        .stats-bar { display: flex; gap: 1rem; padding: 0.5rem 1rem; background: var(--panel-bg); border-bottom: 1px solid var(--panel-border); justify-content: center; align-items: center; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
         .stat-chip { display: flex; flex-direction: column; align-items: center; padding: 0.25rem 0.8rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--panel-border); min-width: 70px; }
         .stat-label { font-size: 0.6rem; text-transform: uppercase; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.05em; }
         .stat-value { font-size: 1rem; font-weight: 800; line-height: 1.1; }
 
         #question-panel {
             background: var(--panel-bg);
-            border: 1px solid var(--accent-primary);
-            border-radius: 30px; 
+            border: 1px solid var(--panel-border);
+            border-left: 4px solid var(--accent-primary);
+            border-radius: 16px; 
             padding: 0.8rem 2.5rem;
-            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             display: flex; align-items: center; justify-content: center; gap: 1.5rem;
             width: fit-content; max-width: 90vw; 
             position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
             z-index: 40; transition: all 0.3s;
         }
-        .target-name { font-size: clamp(1.1rem, 2.5vw, 1.6rem); font-weight: 900; color: var(--accent-primary); white-space: nowrap; text-shadow: 0 0 20px var(--accent-glow); }
+        .target-name { font-size: clamp(1.2rem, 2.5vw, 1.8rem); font-weight: 800; color: var(--accent-primary); white-space: nowrap; text-shadow: 0 0 30px var(--accent-glow); letter-spacing: -0.02em; }
 
         #hint-btn {
-            background: linear-gradient(135deg, #f59e0b, #ea580c);
-            color: white; width: 28px; height: 28px; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; 
-            box-shadow: 0 4px 10px rgba(234, 88, 12, 0.4); transition: transform 0.2s;
+            background: rgba(255,255,255,0.05);
+            color: var(--text-secondary); width: 32px; height: 32px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; border: 1px solid var(--panel-border); cursor: pointer; 
+            transition: all 0.2s;
         }
-        #hint-btn:hover { transform: scale(1.1); }
+        #hint-btn:hover { background: var(--accent-primary); color: white; border-color: var(--accent-primary); box-shadow: 0 0 15px var(--accent-glow); }
 
         /* --- HARİTA & ÇİZGİLER --- */
         #map-container { flex-grow: 1; position: relative; background-color: var(--map-bg); background-image: radial-gradient(circle at 50% 50%, var(--map-grad-start) 0%, var(--map-grad-end) 100%); overflow: hidden; width: 100%; }
         
-        .province-path { fill: var(--province-fill); stroke: var(--province-stroke); stroke-width: 0.5px; transition: all 0.2s ease; vector-effect: non-scaling-stroke; }
-        .province-path:hover { fill: var(--province-hover); stroke: var(--text-secondary); stroke-width: 1px; }
+        /* İl sınırları için daha yumuşak, gölgeli bir görünüm */
+        .province-path { 
+            fill: var(--province-fill); 
+            stroke: var(--province-stroke); 
+            stroke-width: 0.5px; 
+            transition: all 0.2s ease; 
+            vector-effect: non-scaling-stroke;
+            filter: drop-shadow(0 0 1px rgba(0,0,0,0.2)); 
+        }
+        .province-path:hover { 
+            fill: var(--province-hover); 
+            stroke: var(--text-secondary); 
+            stroke-width: 0.8px; 
+            filter: drop-shadow(0 0 4px rgba(255,255,255,0.1));
+        }
         
         .city-label { 
             fill: var(--city-text); 
-            font-weight: 700;       
-            font-size: 6.5px;       
+            font-weight: 600;       
+            font-size: 5.5px;       
             pointer-events: none; 
-            opacity: 0.8;           
+            opacity: 0.6;
+            text-shadow: 0 0 2px var(--bg-body);           
         }
-        .city-dot { fill: var(--city-dot); pointer-events: none; opacity: 0.6; }
+        .city-dot { fill: var(--city-dot); pointer-events: none; opacity: 0.4; }
 
-        /* --- FAY HATLARI (PROFESYONEL VE ŞEFFAF) --- */
+        /* --- FAY HATLARI --- */
         .fault-group { pointer-events: none; }
         
-        /* Geniş Zon (Arkada kalan blur'lu alan - Glow) */
         .fault-zone {
             fill: none;
             stroke-linecap: round;
             stroke-linejoin: round;
-            stroke-width: 25px; /* Çok geniş ve yumuşak */
-            filter: blur(8px);  /* Yüksek blur ile ortam ışığı etkisi */
+            stroke-width: 22px; 
+            filter: blur(6px);  
             vector-effect: non-scaling-stroke;
             opacity: 1;
+            mix-blend-mode: screen; /* Daha parlak, ışıklı görünüm */
         }
 
-        /* Çekirdek Hat (Modern, kalın, şeffaf çizgi) */
-        /* Kesikli çizgiyi (dasharray) kaldırdık */
         .fault-core {
             fill: none;
             stroke-linecap: round;
             stroke-linejoin: round;
-            stroke-width: 6px; /* İnce değil, dolgun bir hat */
+            stroke-width: 4px; 
             vector-effect: non-scaling-stroke;
-            opacity: 1; /* Opaklığı renkten alıyor */
-            filter: drop-shadow(0 0 2px rgba(0,0,0,0.2)); /* Hafif gölge ile derinlik */
+            opacity: 0.8;
         }
 
-        /* Renk Atamaları */
         .fault-kaf-zone { stroke: var(--fault-zone-kaf); }
         .fault-daf-zone { stroke: var(--fault-zone-daf); }
         .fault-baf-zone { stroke: var(--fault-zone-baf); }
@@ -215,35 +226,58 @@
         .fault-baf-core { stroke: var(--fault-core-baf); }
 
 
-        /* MARKERS (OVALAR) */
+        /* --- MARKERS (OVALAR) - HASSAS SEÇİM GÜNCELLEMESİ --- */
         .plateau-marker { cursor: pointer; }
         
-        /* Hit Area */
+        /* Hit Area: YARIÇAP KÜÇÜLTÜLDÜ (25px -> 9px) */
+        /* Bu sayede sadece tam üstüne gelince seçilir, yanındaki seçilmez */
         .hit-area {
             fill: transparent;
-            r: 25; 
+            r: 9; 
             cursor: pointer;
-            pointer-events: all; 
+            pointer-events: all; /* Sadece burası tıklanabilir */
+        }
+
+        /* Görsel Halka (Pulse Ring) - Tıklanamaz, sadece görsel */
+        .pulse-ring {
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1px;
+            opacity: 0.3;
+            r: 6;
+            pointer-events: none; /* Tıklamayı engellemez */
+            vector-effect: non-scaling-stroke;
         }
 
         .plateau-shape {
             fill: var(--marker-fill); 
-            stroke-width: 2.5px;      
+            stroke-width: 2px;      
             transform-origin: center;
             transform-box: fill-box;
-            transform: scale(0.65); 
+            
+            /* Başlangıç boyutu */
+            transform: scale(0.6); 
+            
             vector-effect: non-scaling-stroke;
-            filter: drop-shadow(0px 3px 2px rgba(0,0,0,0.3)); 
+            filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.4)); 
             paint-order: stroke;
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), stroke-width 0.3s;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), stroke-width 0.2s, filter 0.2s;
             pointer-events: none; 
         }
         
+        /* Hover Effect: Büyüme oranını kontrol altında tutuyoruz */
         .plateau-marker:hover .plateau-shape { 
-            transform: scale(1.4); 
-            z-index: 50; 
-            stroke-width: 3px;
+            transform: scale(1.1); /* Çok aşırı büyütmüyoruz ki diğerini kapatmasın */
+            stroke-width: 2.5px;
+            filter: drop-shadow(0px 0px 8px currentColor);
+            z-index: 100;
         }
+        
+        /* Renkler (CSS variable'dan currentColor'a aktarım) */
+        .plateau-marker[data-type="KAF"] { color: var(--color-kaf); }
+        .plateau-marker[data-type="DAF"] { color: var(--color-daf); }
+        .plateau-marker[data-type="BAF"] { color: var(--color-baf); }
+        .plateau-marker[data-type="Diğer"] { color: var(--color-diger); }
         
         .plateau-marker[data-type="KAF"] .plateau-shape { stroke: var(--color-kaf); } 
         .plateau-marker[data-type="DAF"] .plateau-shape { stroke: var(--color-daf); } 
@@ -253,15 +287,16 @@
         .plateau-marker.found .plateau-shape { 
             fill: #22d3ee !important; 
             stroke: #cffafe; 
-            stroke-width: 2px; 
-            transform: scale(1.0); 
-            filter: drop-shadow(0px 0px 8px #22d3ee);
+            transform: scale(0.9); 
+            filter: drop-shadow(0px 0px 10px #22d3ee);
         }
+        
+        .plateau-marker.found .pulse-ring { display: none; }
 
         /* Labels */
-        .map-label-bg { fill: rgba(15, 23, 42, 0.95); stroke: var(--text-secondary); stroke-width: 0.5px; rx: 4; }
+        .map-label-bg { fill: rgba(15, 23, 42, 0.95); stroke: var(--panel-border); stroke-width: 0.5px; rx: 4; }
         .map-label-text { fill: #fff; font-weight: 700; font-size: 7px; pointer-events: none; text-anchor: middle; dominant-baseline: central; }
-        .label-connector { stroke: var(--text-secondary); stroke-dasharray: 2,2; stroke-width: 1px; opacity: 0.6; }
+        .label-connector { stroke: var(--text-secondary); stroke-dasharray: 2,2; stroke-width: 1px; opacity: 0.4; }
         .label-animate { animation: labelPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 0; }
         @keyframes labelPop { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 
@@ -269,18 +304,18 @@
         .legend-box {
             position: absolute; bottom: 30px; left: 30px;
             background: var(--panel-bg); border: 1px solid var(--panel-border);
-            border-radius: 20px; padding: 1rem 1.2rem;
+            border-radius: 16px; padding: 1rem 1.2rem;
             display: flex; flex-direction: column; gap: 0.6rem;
-            pointer-events: none; backdrop-filter: blur(12px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            pointer-events: none; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         .legend-row { display: flex; gap: 1.5rem; }
         .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
-        .legend-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--marker-fill); border: 2.5px solid; box-sizing: border-box; }
+        .legend-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--marker-fill); border: 2px solid; box-sizing: border-box; box-shadow: 0 0 5px currentColor; }
 
         /* Animasyonlar & UI */
         .pulse-text { animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
         
         .score-float { 
             position: fixed; 
@@ -393,12 +428,12 @@
             <!-- Legend -->
             <div class="legend-box hidden sm:flex">
                 <div class="legend-row">
-                    <div class="legend-item"><div class="legend-dot" style="border-color: var(--color-kaf)"></div>KAF (Kuzey)</div>
-                    <div class="legend-item"><div class="legend-dot" style="border-color: var(--color-daf)"></div>DAF (Doğu)</div>
+                    <div class="legend-item"><div class="legend-dot" style="border-color: var(--color-kaf); color: var(--color-kaf)"></div>KAF (Kuzey)</div>
+                    <div class="legend-item"><div class="legend-dot" style="border-color: var(--color-daf); color: var(--color-daf)"></div>DAF (Doğu)</div>
                 </div>
                 <div class="legend-row">
-                    <div class="legend-item"><div class="legend-dot" style="border-color: var(--color-baf)"></div>BAF (Batı)</div>
-                    <div class="legend-item"><div class="legend-dot" style="border-color: var(--color-diger)"></div>Diğer</div>
+                    <div class="legend-item"><div class="legend-dot" style="border-color: var(--color-baf); color: var(--color-baf)"></div>BAF (Batı)</div>
+                    <div class="legend-item"><div class="legend-dot" style="border-color: var(--color-diger); color: var(--color-diger)"></div>Diğer</div>
                 </div>
             </div>
 
@@ -708,12 +743,17 @@
                     g.setAttribute("data-type", pData.type);
                     g.onclick = (e) => { e.stopPropagation(); this.checkAnswer(pData, g); };
 
-                    // HIT AREA: Görünmez ama tıklanabilir geniş alan
+                    // 1. Görsel Halka (Pulse)
+                    const pulseRing = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    pulseRing.setAttribute("class", "pulse-ring");
+                    g.appendChild(pulseRing);
+
+                    // 2. HIT AREA: Yarıçap 25'ten 9'a düşürüldü
                     const hitArea = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                     hitArea.setAttribute("class", "hit-area");
                     g.appendChild(hitArea);
 
-                    // GÖRSEL ŞEKİL
+                    // 3. GÖRSEL ŞEKİL
                     const shape = document.createElementNS("http://www.w3.org/2000/svg", "path");
                     shape.setAttribute("class", "plateau-shape");
                     
