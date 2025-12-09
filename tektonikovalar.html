@@ -20,25 +20,25 @@
             --bg-body: #020617;         
             --bg-dots: #1e293b;         
             
-            --panel-bg: rgba(15, 23, 42, 0.85);        
-            --panel-border: rgba(148, 163, 184, 0.1);    
+            --panel-bg: rgba(15, 23, 42, 0.90); /* Biraz daha opak */
+            --panel-border: rgba(148, 163, 184, 0.2);    
             
             --text-primary: #f8fafc;    
             --text-secondary: #94a3b8;  
             
             /* UI Renkleri */
             --accent-primary: #f43f5e; 
-            --accent-glow: rgba(244, 63, 94, 0.4);  
+            --accent-glow: rgba(244, 63, 94, 0.5);  
             --accent-warn: #fbbf24;     
             --accent-success: #10b981;  
 
-            /* Harita - Sinematik Görünüm */
-            --map-bg: #020617;          
-            --map-grad-start: #0f172a;
+            /* Harita - Daha Belirgin */
+            --map-bg: #0f172a;          
+            --map-grad-start: #1e293b;
             --map-grad-end: #020617;
 
             --province-fill: #1e293b;   
-            --province-stroke: #334155; 
+            --province-stroke: #475569; /* Daha belirgin sınır çizgisi */
             --province-hover: #334155;
 
             /* KATEGORİ RENKLERİ (Neon) */
@@ -57,7 +57,7 @@
             
             /* Şehir İsimleri */
             --city-text: #94a3b8;      
-            --city-dot: #475569;
+            --city-dot: #64748b;
             
             --radius-lg: 24px;
         }
@@ -67,7 +67,7 @@
             --bg-body: #f1f5f9;         
             --bg-dots: #cbd5e1;         
             
-            --panel-bg: rgba(255, 255, 255, 0.85);        
+            --panel-bg: rgba(255, 255, 255, 0.90);        
             --panel-border: rgba(0,0,0,0.1);    
             
             --text-primary: #0f172a;    
@@ -80,7 +80,7 @@
             --map-grad-end: #cbd5e1;
 
             --province-fill: #ffffff;   
-            --province-stroke: #cbd5e1; 
+            --province-stroke: #94a3b8; /* Light modda daha belirgin */
             --province-hover: #f1f5f9;
 
             --color-kaf: #dc2626;
@@ -161,16 +161,17 @@
         .province-path { 
             fill: var(--province-fill); 
             stroke: var(--province-stroke); 
-            stroke-width: 0.5px; 
+            stroke-width: 0.7px; /* Çizgi kalınlığı artırıldı */
             transition: all 0.2s ease; 
             vector-effect: non-scaling-stroke;
-            filter: drop-shadow(0 0 1px rgba(0,0,0,0.2)); 
+            filter: drop-shadow(0 0 2px rgba(0,0,0,0.3)); /* Hafif gölge eklendi */
         }
         .province-path:hover { 
             fill: var(--province-hover); 
             stroke: var(--text-secondary); 
-            stroke-width: 0.8px; 
-            filter: drop-shadow(0 0 4px rgba(255,255,255,0.1));
+            stroke-width: 1.2px; 
+            filter: drop-shadow(0 0 6px rgba(255,255,255,0.15));
+            z-index: 10;
         }
         
         .city-label { 
@@ -178,22 +179,21 @@
             font-weight: 600;       
             font-size: 5.5px;       
             pointer-events: none; 
-            opacity: 0.6;
-            text-shadow: 0 0 2px var(--bg-body);           
+            opacity: 0.7; /* Opaklık artırıldı */
+            text-shadow: 0 0 3px var(--bg-body);           
         }
-        .city-dot { fill: var(--city-dot); pointer-events: none; opacity: 0.4; }
+        .city-dot { fill: var(--city-dot); pointer-events: none; opacity: 0.6; }
 
-        /* --- FAY HATLARI (DÜZ VE ŞEFFAF) --- */
+        /* --- FAY HATLARI --- */
         .fault-group { pointer-events: none; }
         
         .fault-line-simple {
             fill: none;
             stroke-linecap: round;
             stroke-linejoin: round;
-            stroke-width: 5px; /* Belirgin kalınlık */
-            opacity: 0.3; /* DAHA ŞEFFAF YAPILDI */
+            stroke-width: 6px; /* Biraz daha kalın */
+            opacity: 0.4; /* Biraz daha belirgin */
             vector-effect: non-scaling-stroke;
-            /* Efekt yok, düz çizgi */
         }
 
         .fault-kaf { stroke: var(--fault-line-kaf); }
@@ -207,7 +207,7 @@
         /* Hit Area */
         .hit-area {
             fill: transparent;
-            r: 9; 
+            r: 12; /* Hit alanı genişletildi */
             cursor: pointer;
             pointer-events: all; 
         }
@@ -215,42 +215,45 @@
         .pulse-ring {
             fill: none;
             stroke: currentColor;
-            stroke-width: 1px;
-            opacity: 0.3;
-            r: 6;
+            stroke-width: 2px;
+            opacity: 0.5;
+            r: 8;
             pointer-events: none;
             vector-effect: non-scaling-stroke;
         }
 
-        /* İKON GEÇİŞ EFEKTİ (GLOW KALDIRILDI) */
+        /* İKON (SHAPE) STİLİ */
         .plateau-shape {
             fill: var(--marker-fill); 
-            stroke-width: 2px;      
+            stroke-width: 3px; /* Çizgi kalınlaştırıldı */
             transform-origin: center;
             transform-box: fill-box;
             
-            /* Başlangıç boyutu */
-            transform: scale(0.6); 
+            /* Başlangıç boyutu BÜYÜTÜLDÜ */
+            transform: scale(1.0); /* 0.6'dan 1.0'a çıkarıldı */
             
             vector-effect: non-scaling-stroke;
-            /* filter: drop-shadow(...) KALDIRILDI */
-            filter: none;
-            
             paint-order: stroke;
 
-            /* YUMUŞAK GEÇİŞ AYARLARI */
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                        stroke-width 0.3s ease;
+            /* YENİ GEÇİŞ AYARLARI */
+            transition: 
+                transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                stroke-width 0.3s ease,
+                fill 0.3s ease,
+                filter 0.3s ease; /* Filter geçişi eklendi */
             
             pointer-events: none; 
+            /* Hafif gölge ile daha belirgin */
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
         }
         
-        /* Hover durumunda */
+        /* --- HOVER ETKİLEŞİMİ --- */
         .plateau-marker:hover .plateau-shape { 
-            transform: scale(1.4); 
-            stroke-width: 3px;
-            /* filter: drop-shadow(...) KALDIRILDI */
-            filter: none;
+            /* Hoverda büyüme ve döndürme efekti */
+            transform: scale(1.6) rotate(15deg); 
+            stroke-width: 4px;
+            /* Hoverda parlama efekti */
+            filter: drop-shadow(0 0 10px currentColor);
             z-index: 100;
         }
         
@@ -264,11 +267,11 @@
         .plateau-marker[data-type="BAF"] .plateau-shape { stroke: var(--color-baf); } 
         .plateau-marker[data-type="Diğer"] .plateau-shape { stroke: var(--color-diger); } 
         
+        /* BULUNMUŞ OVALAR */
         .plateau-marker.found .plateau-shape { 
             fill: #22d3ee !important; 
             stroke: #cffafe; 
-            transform: scale(0.9); 
-            /* Parlama kaldırıldı, sadece düz renk */
+            transform: scale(1.1); /* Bulunanlar da biraz büyük kalsın */
             filter: none;
         }
         
@@ -292,7 +295,7 @@
         }
         .legend-row { display: flex; gap: 1.5rem; }
         .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
-        .legend-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--marker-fill); border: 2px solid; box-sizing: border-box; box-shadow: none; } /* Dot shadow removed */
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--marker-fill); border: 2px solid; box-sizing: border-box; }
 
         /* Animasyonlar & UI */
         .pulse-text { animation: pulse 2s infinite; }
@@ -309,8 +312,18 @@
             100% { transform: translateY(-40px) scale(1.2); opacity: 0; } 
         }
         
-        .shake { animation: shake 0.5s; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        /* SHAKE animasyonu artık 'transform' yerine 'translate' kullanıyor */
+        .shake-element { 
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; 
+        }
+        
+        @keyframes shake { 
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
         .loader { width: 48px; height: 48px; border: 5px solid var(--panel-border); border-bottom-color: var(--accent-primary); border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -395,9 +408,7 @@
                 <g id="map-content">
                     <g id="layer-provinces"></g>
                     <g id="layer-cities"></g>
-                    <!-- Fay Hatları: Tek katmanlı sistem -->
                     <g id="layer-faults"></g> 
-                    
                     <g id="layer-lines"></g> 
                     <g id="layer-plateaus"></g>
                     <g id="layer-labels"></g> 
@@ -706,6 +717,7 @@
 
                 plainData.forEach((pData, index) => {
                     const p = this.project(pData.lon, pData.lat);
+                    // Ana kapsayıcı g - pozisyonu belirler
                     const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
                     g.setAttribute("class", "plateau-marker entrance-anim");
                     g.style.animationDelay = `${index * 0.05}s`;
@@ -714,17 +726,23 @@
                     g.setAttribute("data-type", pData.type);
                     g.onclick = (e) => { e.stopPropagation(); this.checkAnswer(pData, g); };
 
-                    // 1. Görsel Halka (Pulse)
+                    // 0. SALLANMA SARMALAYICISI (SHAKE WRAPPER)
+                    // Yanlış cevapta tüm içeriği sallamak için, ama pozisyonu bozmadan.
+                    const shakeWrapper = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                    shakeWrapper.setAttribute("class", "shake-wrapper");
+                    g.appendChild(shakeWrapper);
+
+                    // 1. Görsel Halka (Pulse) - Wrapper içine
                     const pulseRing = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                     pulseRing.setAttribute("class", "pulse-ring");
-                    g.appendChild(pulseRing);
+                    shakeWrapper.appendChild(pulseRing);
 
-                    // 2. HIT AREA
+                    // 2. HIT AREA - Wrapper dışına da koyulabilir ama sallanması sorun olmaz
                     const hitArea = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                     hitArea.setAttribute("class", "hit-area");
-                    g.appendChild(hitArea);
+                    shakeWrapper.appendChild(hitArea);
 
-                    // 3. GÖRSEL ŞEKİL
+                    // 3. GÖRSEL ŞEKİL - Wrapper içine
                     const shape = document.createElementNS("http://www.w3.org/2000/svg", "path");
                     shape.setAttribute("class", "plateau-shape");
                     
@@ -733,8 +751,12 @@
                     else if (pData.type === 'BAF') shape.setAttribute("d", "M0,-7 L6,0 L0,7 L-6,0 Z"); // Baklava
                     else shape.setAttribute("d", "M0,0 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0"); // Daire
 
-                    g.appendChild(shape); layer.appendChild(g);
+                    shakeWrapper.appendChild(shape);
+                    
+                    layer.appendChild(g);
+                    // Element referansına shape'i de ekleyelim animasyon için
                     pData.el = g;
+                    pData.shakeEl = shakeWrapper; // Sallanacak element
                 });
             },
 
@@ -785,8 +807,13 @@
                     setTimeout(() => this.nextQuestion(), 800);
                 } else {
                     audioController.play('error');
-                    el.classList.add('shake');
-                    setTimeout(() => el.classList.remove('shake'), 500);
+                    
+                    // DÜZELTME: Doğrudan 'shake' sınıfını eklemek yerine, wrapper elementini sallıyoruz.
+                    // Böylece transform koordinatları bozulmuyor.
+                    const shaker = el.querySelector('.shake-wrapper');
+                    shaker.classList.add('shake-element');
+                    setTimeout(() => shaker.classList.remove('shake-element'), 500);
+                    
                     this.state.score -= 5; this.state.wrong++;
                     this.spawnFloatingText("-5", el, "text-red-400");
                     this.updateUI();
