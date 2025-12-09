@@ -31,6 +31,7 @@
             --accent-glow: rgba(244, 63, 94, 0.5);  
             --accent-warn: #fbbf24;     
             --accent-success: #10b981;  
+            --accent-info: #3b82f6;
 
             /* Harita - Daha Belirgin */
             --map-bg: #0f172a;          
@@ -297,6 +298,28 @@
         .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
         .legend-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--marker-fill); border: 2px solid; box-sizing: border-box; }
 
+        /* INFO CARD (Yeni) */
+        #info-card {
+            position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px; padding: 1.2rem 1.5rem;
+            width: 90%; max-width: 400px;
+            text-align: center;
+            opacity: 0; pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            backdrop-filter: blur(16px);
+            display: flex; flex-direction: column; gap: 0.5rem; align-items: center;
+        }
+        #info-card.active {
+            opacity: 1; pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+        .info-title { font-weight: 800; font-size: 1.1rem; color: var(--accent-info); letter-spacing: -0.02em; }
+        .info-text { font-size: 0.85rem; color: #e2e8f0; line-height: 1.5; font-weight: 500; }
+        .info-icon { margin-bottom: 0.2rem; color: var(--accent-info); width: 24px; height: 24px; }
+
         /* Animasyonlar & UI */
         .pulse-text { animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
@@ -428,6 +451,13 @@
                 </div>
             </div>
 
+            <!-- KPSS Bilgi Kartı -->
+            <div id="info-card">
+                <i data-lucide="info" class="info-icon"></i>
+                <div class="info-title" id="info-title">Ova Adı</div>
+                <div class="info-text" id="info-text">Burada KPSS ile ilgili önemli bir bilgi yazacak.</div>
+            </div>
+
             <div id="status-msg" class="absolute bottom-16 left-1/2 -translate-x-1/2 px-6 py-3 rounded-2xl shadow-2xl font-bold text-sm transition-all opacity-0 translate-y-4 pointer-events-none z-50 flex items-center gap-2 border border-white/10 backdrop-blur-md"></div>
         </div>
     </main>
@@ -476,39 +506,39 @@
 
         const plainData = [
             // KAF
-            { name: "Tercan Ovası", lat: 39.78, lon: 40.39, type: "KAF" },
-            { name: "Erzincan Ovası", lat: 39.75, lon: 39.49, type: "KAF" },
-            { name: "Niksar Ovası", lat: 40.58, lon: 36.95, type: "KAF" },
-            { name: "Erbaa Ovası", lat: 40.69, lon: 36.56, type: "KAF" },
-            { name: "Taşova Ovası", lat: 40.76, lon: 36.32, type: "KAF" },
-            { name: "Suluova Ovası", lat: 40.83, lon: 35.66, type: "KAF" },
-            { name: "Merzifon Ovası", lat: 40.87, lon: 35.46, type: "KAF" },
-            { name: "Tosya Ovası", lat: 41.01, lon: 34.03, type: "KAF" },
-            { name: "Bolu Ovası", lat: 40.73, lon: 31.58, type: "KAF" },
-            { name: "Düzce Ovası", lat: 40.84, lon: 31.15, type: "KAF" },
-            { name: "Adapazarı Ovası", lat: 40.77, lon: 30.40, type: "KAF" },
+            { name: "Tercan Ovası", lat: 39.78, lon: 40.39, type: "KAF", info: "Fırat Nehri'nin yukarı havzasında yer alır. Volkanik arazi özellikleri görülür." },
+            { name: "Erzincan Ovası", lat: 39.75, lon: 39.49, type: "KAF", info: "1939 ve 1992 depremleriyle bilinir. Fırat Nehri (Karasu) tarafından sulanır." },
+            { name: "Niksar Ovası", lat: 40.58, lon: 36.95, type: "KAF", info: "Kelkit Çayı havzasındadır. Karadeniz iklimi ile Karasal iklim arası geçiş özelliğindedir." },
+            { name: "Erbaa Ovası", lat: 40.69, lon: 36.56, type: "KAF", info: "Tütün üretimi ve tuğla-kiremit sanayisi ile öne çıkar. Kelkit Çayı üzerindedir." },
+            { name: "Taşova Ovası", lat: 40.76, lon: 36.32, type: "KAF", info: "Amasya'nın ilçesidir. Yeşilırmak vadisinde yer alır, tarımsal verim yüksektir." },
+            { name: "Suluova Ovası", lat: 40.83, lon: 35.66, type: "KAF", info: "Şeker pancarı tarımı yoğundur. Besi hayvancılığı gelişmiştir." },
+            { name: "Merzifon Ovası", lat: 40.87, lon: 35.46, type: "KAF", info: "Karasal iklim hakimdir. Tahıl, ayçiçeği ve şeker pancarı yetiştirilir." },
+            { name: "Tosya Ovası", lat: 41.01, lon: 34.03, type: "KAF", info: "Pirinç üretimiyle (Tosya Pirinci) markalaşmıştır. Devrez Çayı vadi tabanındadır." },
+            { name: "Bolu Ovası", lat: 40.73, lon: 31.58, type: "KAF", info: "Patates üretimi ve kanatlı hayvancılık (tavukçuluk) çok gelişmiştir." },
+            { name: "Düzce Ovası", lat: 40.84, lon: 31.15, type: "KAF", info: "Eskiden göl tabanıydı. Fındık ve mısır tarımı yaygındır. Deprem riski çok yüksektir." },
+            { name: "Adapazarı Ovası", lat: 40.77, lon: 30.40, type: "KAF", info: "'Akova' olarak da bilinir. Mısır ve patates deposudur. Otomotiv sanayisi gelişmiştir." },
             // DAF
-            { name: "Amik Ovası", lat: 36.35, lon: 36.35, type: "DAF" },
-            { name: "Kahramanmaraş Ovası", lat: 37.57, lon: 36.93, type: "DAF" },
-            { name: "Afşin-Elbistan Ovası", lat: 38.20, lon: 37.19, type: "DAF" },
-            { name: "Malatya Ovası", lat: 38.35, lon: 38.31, type: "DAF" },
-            { name: "Elazığ Ovası", lat: 38.67, lon: 39.22, type: "DAF" },
-            { name: "Bingöl Ovası", lat: 38.88, lon: 40.49, type: "DAF" },
-            { name: "Muş Ovası", lat: 38.74, lon: 41.49, type: "DAF" },
+            { name: "Amik Ovası", lat: 36.35, lon: 36.35, type: "DAF", info: "Asi Nehri sular. Eski bir göl tabanıdır (Kurutulmuştur). Pamuk tarımı çok yaygındır." },
+            { name: "Kahramanmaraş Ovası", lat: 37.57, lon: 36.93, type: "DAF", info: "Kırmızı biber (Maraş Biberi), pamuk ve dondurma hammaddesi salep üretimi önemlidir." },
+            { name: "Afşin-Elbistan Ovası", lat: 38.20, lon: 37.19, type: "DAF", info: "Türkiye'nin en büyük linyit rezervlerine ve termik santrallerine sahiptir." },
+            { name: "Malatya Ovası", lat: 38.35, lon: 38.31, type: "DAF", info: "Dünya kayısı üretiminin merkezidir. Kuru kayısı ihracatında liderdir." },
+            { name: "Elazığ Ovası", lat: 38.67, lon: 39.22, type: "DAF", info: "Kuzova ve Uluova gibi verimli bölümleri vardır. Şeker pancarı ve üzüm (öküzgözü) yetişir." },
+            { name: "Bingöl Ovası", lat: 38.88, lon: 40.49, type: "DAF", info: "Karasal iklim serttir. Hayvancılık ve yem bitkileri üretimi yaygındır." },
+            { name: "Muş Ovası", lat: 38.74, lon: 41.49, type: "DAF", info: "Türkiye'nin en büyük ovalarından biridir. Şeker pancarı ve tütün ekimi yapılır." },
             // BAF
-            { name: "Akhisar Ovası", lat: 38.92, lon: 27.83, type: "BAF" },
-            { name: "Turgutlu Ovası", lat: 38.49, lon: 27.70, type: "BAF" },
-            { name: "Salihli Ovası", lat: 38.48, lon: 28.13, type: "BAF" },
-            { name: "Alaşehir Ovası", lat: 38.35, lon: 28.51, type: "BAF" },
-            { name: "Nazilli Ovası", lat: 37.91, lon: 28.32, type: "BAF" },
-            { name: "Söke Ovası", lat: 37.75, lon: 27.40, type: "BAF" },
-            { name: "Tire Ovası", lat: 38.08, lon: 27.73, type: "BAF" },
-            { name: "Torbalı Ovası", lat: 38.15, lon: 27.36, type: "BAF" },
-            { name: "Ödemiş Ovası", lat: 38.22, lon: 27.97, type: "BAF" },
-            { name: "Bergama Ovası", lat: 39.12, lon: 27.18, type: "BAF" },
+            { name: "Akhisar Ovası", lat: 38.92, lon: 27.83, type: "BAF", info: "Zeytin ve tütün üretiminde Ege'nin en önemli merkezlerindendir." },
+            { name: "Turgutlu Ovası", lat: 38.49, lon: 27.70, type: "BAF", info: "Gediz Grabeni içindedir. Tuğla-toprak sanayisi ve bağcılık gelişmiştir." },
+            { name: "Salihli Ovası", lat: 38.48, lon: 28.13, type: "BAF", info: "Çekirdeksiz kuru üzüm üretiminde dünyada söz sahibidir. Jeotermal kaynakları vardır." },
+            { name: "Alaşehir Ovası", lat: 38.35, lon: 28.51, type: "BAF", info: "Dünyaca ünlü 'Sultaniye' üzümünün başkentidir. İhracat potansiyeli yüksektir." },
+            { name: "Nazilli Ovası", lat: 37.91, lon: 28.32, type: "BAF", info: "Büyük Menderes Grabeni'ndedir. İncir (Kuru incir) üretiminde merkezdir." },
+            { name: "Söke Ovası", lat: 37.75, lon: 27.40, type: "BAF", info: "Türkiye'nin pamuk ambarıdır. Denize yakınlığı nedeniyle verimi yüksektir." },
+            { name: "Tire Ovası", lat: 38.08, lon: 27.73, type: "BAF", info: "Küçük Menderes havzasındadır. Süt hayvancılığı ve incir üretimi çok gelişmiştir." },
+            { name: "Torbalı Ovası", lat: 38.15, lon: 27.36, type: "BAF", info: "Sanayi ve tarım (özellikle sebzecilik) iç içedir. İzmir'in sanayi merkezidir." },
+            { name: "Ödemiş Ovası", lat: 38.22, lon: 27.97, type: "BAF", info: "Patates üretimiyle ünlüdür. Ayrıca süs bitkileri yetiştiriciliği yaygındır." },
+            { name: "Bergama Ovası", lat: 39.12, lon: 27.18, type: "BAF", info: "Bakırçay Grabeni'ndedir. Pamuk, zeytin ve fıstık çamı (Kozak) önemlidir." },
             // Diğer
-            { name: "Bursa Ovası", lat: 40.18, lon: 29.06, type: "Diğer" },
-            { name: "Kayseri-Develi Ovası", lat: 38.45, lon: 35.40, type: "Diğer" }
+            { name: "Bursa Ovası", lat: 40.18, lon: 29.06, type: "Diğer", info: "Şeftali üretimi, tekstil ve otomotiv sanayisi ile bilinir. Hızla şehirleşmektedir." },
+            { name: "Kayseri-Develi Ovası", lat: 38.45, lon: 35.40, type: "Diğer", info: "Erciyes volkanından çıkan materyallerle beslenmiştir. Kabak çekirdeği meşhurdur." }
         ];
 
         const audioController = {
@@ -789,12 +819,17 @@
                 const idx = Math.floor(Math.random() * this.state.remaining.length);
                 this.state.current = this.state.remaining[idx];
                 document.getElementById('target-name').innerText = this.state.current.name;
+                // Kartı gizle
+                document.getElementById('info-card').classList.remove('active');
             },
 
             checkAnswer: function(plateau, el) {
                 if (!this.state.active) return;
                 if (el.classList.contains('found')) return; 
                 
+                // Eğer bilgi kartı açıksa tıklamaları engelle
+                if (document.getElementById('info-card').classList.contains('active')) return;
+
                 if (plateau.name === this.state.current.name) {
                     audioController.play('success');
                     el.classList.add('found');
@@ -803,13 +838,23 @@
                     this.spawnFloatingText("+10", el, "text-green-400");
                     this.state.remaining = this.state.remaining.filter(m => m.name !== plateau.name);
                     this.updateUI();
-                    this.showStatus("Doğru!", "bg-green-600/90 text-white border-green-500");
-                    setTimeout(() => this.nextQuestion(), 800);
+                    
+                    // Show Info Card
+                    const infoCard = document.getElementById('info-card');
+                    const infoTitle = document.getElementById('info-title');
+                    const infoText = document.getElementById('info-text');
+                    
+                    infoTitle.innerText = plateau.name;
+                    infoText.innerText = plateau.info || "Tektonik kökenli bir ovadır.";
+                    
+                    infoCard.classList.add('active');
+                    
+                    // Daha uzun bekle (Okuma süresi)
+                    setTimeout(() => this.nextQuestion(), 3500);
+
                 } else {
                     audioController.play('error');
                     
-                    // DÜZELTME: Doğrudan 'shake' sınıfını eklemek yerine, wrapper elementini sallıyoruz.
-                    // Böylece transform koordinatları bozulmuyor.
                     const shaker = el.querySelector('.shake-wrapper');
                     shaker.classList.add('shake-element');
                     setTimeout(() => shaker.classList.remove('shake-element'), 500);
