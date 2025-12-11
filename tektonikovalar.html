@@ -46,7 +46,6 @@
             --color-kaf: #ff0055;      /* Canlı Kırmızı/Pembe */
             --color-daf: #ff9900;      /* Canlı Turuncu */
             --color-baf: #aa00ff;      /* Canlı Mor */
-            --color-diger: #00e5ff;    /* Canlı Turkuaz */
             
             /* Marker Stili */
             --marker-stroke: #ffffff;    
@@ -87,7 +86,6 @@
             --color-kaf: #d60040;
             --color-daf: #d97706;
             --color-baf: #7e22ce;
-            --color-diger: #0891b2;
 
             --marker-stroke: #ffffff;
 
@@ -107,14 +105,13 @@
             color: var(--text-primary);
             overflow: hidden; 
             user-select: none;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* --- HEADER --- */
         header {
             background-color: var(--panel-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--panel-border);
             z-index: 50;
         }
@@ -122,15 +119,16 @@
         .theme-toggle-btn { 
             width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; 
             background: rgba(255,255,255,0.05); border: 1px solid var(--panel-border); 
-            border-radius: 10px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; 
+            border-radius: 10px; color: var(--text-secondary); cursor: pointer; 
+            transition: background-color 0.2s, color 0.2s, transform 0.1s;
         }
-        .theme-toggle-btn:hover { color: var(--accent-primary); border-color: var(--accent-primary); background: var(--bg-dots); }
+        .theme-toggle-btn:hover { color: var(--accent-primary); border-color: var(--accent-primary); background: var(--bg-dots); transform: scale(1.05); }
 
         /* --- OYUN PANELİ --- */
-        .stats-bar { display: flex; gap: 1rem; padding: 0.5rem 1rem; background: var(--panel-bg); border-bottom: 1px solid var(--panel-border); justify-content: center; align-items: center; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .stats-bar { display: flex; gap: 1rem; padding: 0.5rem 1rem; background: var(--panel-bg); border-bottom: 1px solid var(--panel-border); justify-content: center; align-items: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
         .stat-chip { display: flex; flex-direction: column; align-items: center; padding: 0.25rem 0.8rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--panel-border); min-width: 70px; }
         .stat-label { font-size: 0.6rem; text-transform: uppercase; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.05em; }
-        .stat-value { font-size: 1rem; font-weight: 800; line-height: 1.1; }
+        .stat-value { font-size: 1rem; font-weight: 800; line-height: 1.1; transition: color 0.3s; }
 
         #question-panel {
             background: var(--panel-bg);
@@ -139,22 +137,31 @@
             border-radius: 16px; 
             padding: 0.8rem 2.5rem;
             box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             display: flex; align-items: center; justify-content: center; gap: 1.5rem;
             width: fit-content; max-width: 90vw; 
             position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-            z-index: 40; transition: all 0.3s;
+            z-index: 40; 
+            transition: opacity 0.3s ease;
         }
-        .target-name { font-size: clamp(1.2rem, 2.5vw, 1.8rem); font-weight: 800; color: var(--accent-primary); white-space: nowrap; text-shadow: 0 0 30px var(--accent-glow); letter-spacing: -0.02em; }
+        
+        .target-name-container {
+            display: flex; flex-direction: column; align-items: center;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .target-name-container.fade-out { opacity: 0; transform: translateY(-3px); }
+        .target-name-container.fade-in { opacity: 1; transform: translateY(0); }
+
+        .target-name { font-size: clamp(1.2rem, 2.5vw, 1.8rem); font-weight: 800; color: var(--accent-primary); white-space: nowrap; text-shadow: 0 0 20px var(--accent-glow); letter-spacing: -0.02em; }
 
         #hint-btn {
             background: rgba(255,255,255,0.05);
             color: var(--text-secondary); width: 32px; height: 32px; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; border: 1px solid var(--panel-border); cursor: pointer; 
-            transition: all 0.2s;
+            transition: transform 0.1s, background-color 0.2s;
         }
-        #hint-btn:hover { background: var(--accent-primary); color: white; border-color: var(--accent-primary); box-shadow: 0 0 15px var(--accent-glow); }
+        #hint-btn:hover { background: var(--accent-primary); color: white; border-color: var(--accent-primary); transform: scale(1.1); }
 
         /* --- HARİTA & ÇİZGİLER --- */
         #map-container { flex-grow: 1; position: relative; background-color: var(--map-bg); background-image: radial-gradient(circle at 50% 50%, var(--map-grad-start) 0%, var(--map-grad-end) 100%); overflow: hidden; width: 100%; }
@@ -162,16 +169,14 @@
         .province-path { 
             fill: var(--province-fill); 
             stroke: var(--province-stroke); 
-            stroke-width: 1px; /* Daha belirgin sınır */
-            transition: all 0.2s ease; 
+            stroke-width: 1px; 
+            transition: fill 0.2s, stroke 0.2s;
             vector-effect: non-scaling-stroke;
-            filter: drop-shadow(0 0 1px rgba(0,0,0,0.5));
         }
         .province-path:hover { 
             fill: var(--province-hover); 
             stroke: var(--text-secondary); 
             stroke-width: 1.5px; 
-            filter: drop-shadow(0 0 6px rgba(255,255,255,0.2));
             z-index: 10;
         }
         
@@ -181,7 +186,7 @@
             font-size: 5.5px;       
             pointer-events: none; 
             opacity: 0.8;
-            text-shadow: 0 0 3px var(--bg-body);           
+            text-shadow: 0 0 2px var(--bg-body);
         }
         .city-dot { fill: var(--city-dot); pointer-events: none; opacity: 0.6; }
 
@@ -192,10 +197,9 @@
             fill: none;
             stroke-linecap: round;
             stroke-linejoin: round;
-            stroke-width: 4px; /* Kalın ve net çizgi */
+            stroke-width: 4px; 
             opacity: 0.8;
             vector-effect: non-scaling-stroke;
-            /* Glow/Blur efektleri kaldırıldı */
         }
 
         .fault-kaf-simple { stroke: var(--fault-line-kaf); }
@@ -209,48 +213,46 @@
         /* Hit Area - HASSAS */
         .hit-area {
             fill: transparent;
-            r: 10; /* Tıklama alanı yeterli büyüklükte kalsın */
+            r: 10; 
             cursor: pointer;
             pointer-events: all; 
-            /* Hit area konumu SVG içinde ayarlanıyor */
         }
 
-        /* İKON (SHAPE) STİLİ - KÜÇÜLTÜLDÜ */
+        /* İKON (SHAPE) STİLİ */
         .plateau-shape {
             fill: var(--bg-body);
             stroke-width: 0; 
             transform-origin: center;
             transform-box: fill-box;
             
-            /* GÜNCELLEME: Boyutlar küçültüldü (1.2 -> 0.75) */
+            /* Boyutlar küçük */
             transform: scale(0.75); 
             
             vector-effect: non-scaling-stroke;
             paint-order: stroke;
             
-            /* GELİŞMİŞ TRANSITION: Daha sade */
-            transition: transform 0.2s ease-out;
+            /* PERFORMANS: Sadece transform ve fill */
+            transition: transform 0.15s ease-out;
+            will-change: transform;
             
             pointer-events: none; 
-            /* Sabit hafif gölge */
             filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
         }
 
         .plateau-pin-bg {
             stroke-width: 2px;
             stroke: var(--marker-stroke);
-            transition: fill 0.2s ease, stroke 0.2s ease; /* Renk geçişleri */
+            transition: fill 0.3s, stroke 0.3s;
         }
 
         .plateau-symbol {
             fill: currentColor;
             stroke: none;
-            transition: fill 0.2s ease;
+            transition: opacity 0.3s;
         }
         
-        /* --- HOVER ETKİLEŞİMİ (SADE) --- */
+        /* --- HOVER ETKİLEŞİMİ --- */
         .plateau-marker:hover .plateau-shape { 
-            /* Hafif büyüme */
             transform: scale(1.0); 
             z-index: 100;
         }
@@ -258,32 +260,43 @@
         .plateau-marker[data-type="KAF"] { color: var(--color-kaf); }
         .plateau-marker[data-type="DAF"] { color: var(--color-daf); }
         .plateau-marker[data-type="BAF"] { color: var(--color-baf); }
-        .plateau-marker[data-type="Diğer"] { color: var(--color-diger); }
         
         .plateau-marker[data-type="KAF"] .plateau-pin-bg { fill: var(--color-kaf); } 
         .plateau-marker[data-type="DAF"] .plateau-pin-bg { fill: var(--color-daf); } 
         .plateau-marker[data-type="BAF"] .plateau-pin-bg { fill: var(--color-baf); } 
-        .plateau-marker[data-type="Diğer"] .plateau-pin-bg { fill: var(--color-diger); }
         
         .plateau-marker .plateau-symbol { fill: #fff; }
 
-        /* BULUNMUŞ OVALAR */
+        /* BULUNMUŞ OVALAR (PASİF & KOYU & ŞEFFAF) */
         .plateau-marker.found .plateau-pin-bg { 
-            fill: #10b981 !important; /* Yeşil */
-            stroke: #fff;
+            fill: rgba(30, 41, 59, 0.7) !important; /* Koyu Slate - Şeffaf */
+            stroke: #475569; /* Soluk sınır */
         }
         .plateau-marker.found .plateau-shape {
-            transform: scale(0.8); /* Bulunanlar biraz daha büyük kalabilir */
-            filter: none;
+            /* Bulununca biraz genişlesin ki yazı sığsın */
+            transform: scale(1.2); 
+            filter: none; 
+            cursor: default;
+        }
+        .plateau-marker.found .plateau-symbol {
+            /* Sembolü gizle */
+            opacity: 0; 
         }
         
-
-        /* Labels - KÜÇÜLTÜLDÜ */
-        .map-label-bg { fill: rgba(15, 23, 42, 0.95); stroke: var(--panel-border); stroke-width: 0.5px; rx: 4; }
-        .map-label-text { fill: #fff; font-weight: 700; font-size: 6.5px; pointer-events: none; text-anchor: middle; dominant-baseline: central; }
-        .label-connector { stroke: var(--text-secondary); stroke-dasharray: 2,2; stroke-width: 1px; opacity: 0.6; }
-        .label-animate { animation: labelPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 0; }
-        @keyframes labelPop { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        /* MINIMALIST LABEL (MARKER ÜZERİNDE) */
+        .minimal-label-text {
+            fill: #fff;
+            font-size: 4px;
+            font-weight: 800;
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
+            opacity: 0;
+            animation: fadeInText 0.4s ease-out forwards;
+            text-shadow: 0 0 2px #000; /* Okunabilirlik için gölge */
+        }
+        
+        @keyframes fadeInText { to { opacity: 1; } }
 
         /* Legend */
         .legend-box {
@@ -291,7 +304,7 @@
             background: var(--panel-bg); border: 1px solid var(--panel-border);
             border-radius: 16px; padding: 1rem 1.2rem;
             display: flex; flex-direction: column; gap: 0.8rem;
-            pointer-events: none; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            pointer-events: none; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         .legend-row { display: flex; gap: 1.5rem; }
@@ -306,7 +319,7 @@
             width: 90%; max-width: 400px;
             text-align: center;
             opacity: 0; pointer-events: none;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: opacity 0.3s, transform 0.3s;
             z-index: 100;
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
             backdrop-filter: blur(16px);
@@ -327,36 +340,37 @@
         .score-float { 
             position: fixed; 
             font-weight: 900; font-size: 1.5rem; pointer-events: none; 
-            animation: floatUp 0.8s ease-out forwards; z-index: 9999; 
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            animation: floatUp 0.6s ease-out forwards; z-index: 9999; 
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
         @keyframes floatUp { 
             0% { transform: translateY(0) scale(1); opacity: 1; } 
-            100% { transform: translateY(-40px) scale(1.2); opacity: 0; } 
+            100% { transform: translateY(-30px) scale(1.1); opacity: 0; } 
         }
         
         .shake-element { 
-            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; 
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; 
         }
         
         @keyframes shake { 
             10%, 90% { transform: translate3d(-1px, 0, 0); }
             20%, 80% { transform: translate3d(2px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-            40%, 60% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+            40%, 60% { transform: translate3d(3px, 0, 0); }
         }
 
         .loader { width: 48px; height: 48px; border: 5px solid var(--panel-border); border-bottom-color: var(--accent-primary); border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        #game-over-modal { background-color: rgba(0,0,0,0.8); backdrop-filter: blur(8px); }
-        .modal-content { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 24px; padding: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        #game-over-modal { background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px); transition: opacity 0.3s ease; }
+        .modal-content { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 24px; padding: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); transform: scale(0.9); transition: transform 0.3s ease; }
+        #game-over-modal.flex .modal-content { transform: scale(1); }
     </style>
 </head>
 <body class="h-screen flex flex-col">
 
     <!-- Loading Screen -->
-    <div id="loading-overlay" class="fixed inset-0 z-[60] bg-[var(--bg-body)] flex items-center justify-center">
+    <div id="loading-overlay" class="fixed inset-0 z-[60] bg-[var(--bg-body)] flex items-center justify-center transition-opacity duration-500">
         <div class="text-center">
             <span class="loader mb-6"></span>
             <h2 class="text-xl font-bold tracking-tight" style="color:var(--text-primary)">Fay Hatları Yükleniyor...</h2>
@@ -416,7 +430,7 @@
         <div id="map-container">
             <!-- Soru Paneli -->
             <div id="question-panel" class="opacity-0 pointer-events-none">
-                <div class="text-content-wrapper text-center">
+                <div class="target-name-container text-center">
                     <div class="text-[0.6rem] uppercase tracking-widest text-[var(--text-secondary)] font-bold mb-1">Bulunması Gereken Ova</div>
                     <div class="target-name pulse-text" id="target-name">...</div>
                 </div>
@@ -427,30 +441,18 @@
 
             <!-- SVG Map -->
             <svg id="game-map" width="100%" height="100%" viewBox="0 0 1000 450" preserveAspectRatio="xMidYMid meet">
-                <defs>
-                    <!-- Marker Glow Filter -->
-                    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
-                        <feMerge>
-                            <feMergeNode in="coloredBlur"/>
-                            <feMergeNode in="SourceGraphic"/>
-                        </feMerge>
-                    </filter>
-                </defs>
                 <g id="map-content">
                     <g id="layer-provinces"></g>
                     <g id="layer-cities"></g>
-                    <!-- Fay Hatları: Tek katmanlı sade sistem -->
                     <g id="layer-faults"></g> 
-                    
                     <g id="layer-lines"></g> 
                     <g id="layer-plateaus"></g>
-                    <g id="layer-labels"></g> 
+                    <g id="layer-labels"></g> <!-- Etiketler artık markerların içinde olacak ama bu grup yine de dursun -->
                     <g id="layer-effects"></g>
                 </g>
             </svg>
 
-            <!-- Legend (YENİ İKONLARLA) -->
+            <!-- Legend (YENİ İKONLARLA - Diğer Kaldırıldı) -->
             <div class="legend-box hidden sm:flex">
                 <div class="legend-row">
                     <div class="legend-item">
@@ -475,13 +477,6 @@
                             <path d="M10 4L14 10L10 16L6 10L10 4Z" fill="white"/>
                         </svg>
                         BAF (Batı)
-                    </div>
-                    <div class="legend-item">
-                        <svg class="legend-icon" viewBox="0 0 20 20">
-                            <circle cx="10" cy="10" r="8" fill="var(--color-diger)" stroke="white" stroke-width="2"/>
-                            <circle cx="10" cy="10" r="3" fill="white"/>
-                        </svg>
-                        Diğer
                     </div>
                 </div>
             </div>
@@ -541,39 +536,33 @@
 
         const plainData = [
             // KAF
-            { name: "Tercan Ovası", lat: 39.78, lon: 40.39, type: "KAF", info: "Fırat Nehri'nin yukarı havzasında yer alır. Volkanik arazi özellikleri görülür." },
             { name: "Erzincan Ovası", lat: 39.75, lon: 39.49, type: "KAF", info: "1939 ve 1992 depremleriyle bilinir. Fırat Nehri (Karasu) tarafından sulanır." },
-            { name: "Niksar Ovası", lat: 40.58, lon: 36.95, type: "KAF", info: "Kelkit Çayı havzasındadır. Karadeniz iklimi ile Karasal iklim arası geçiş özelliğindedir." },
-            { name: "Erbaa Ovası", lat: 40.69, lon: 36.56, type: "KAF", info: "Tütün üretimi ve tuğla-kiremit sanayisi ile öne çıkar. Kelkit Çayı üzerindedir." },
-            { name: "Taşova Ovası", lat: 40.76, lon: 36.32, type: "KAF", info: "Amasya'nın ilçesidir. Yeşilırmak vadisinde yer alır, tarımsal verim yüksektir." },
-            { name: "Suluova Ovası", lat: 40.83, lon: 35.66, type: "KAF", info: "Şeker pancarı tarımı yoğundur. Besi hayvancılığı gelişmiştir." },
-            { name: "Merzifon Ovası", lat: 40.87, lon: 35.46, type: "KAF", info: "Karasal iklim hakimdir. Tahıl, ayçiçeği ve şeker pancarı yetiştirilir." },
-            { name: "Tosya Ovası", lat: 41.01, lon: 34.03, type: "KAF", info: "Pirinç üretimiyle (Tosya Pirinci) markalaşmıştır. Devrez Çayı vadi tabanındadır." },
-            { name: "Bolu Ovası", lat: 40.73, lon: 31.58, type: "KAF", info: "Patates üretimi ve kanatlı hayvancılık (tavukçuluk) çok gelişmiştir." },
-            { name: "Düzce Ovası", lat: 40.84, lon: 31.15, type: "KAF", info: "Eskiden göl tabanıydı. Fındık ve mısır tarımı yaygındır. Deprem riski çok yüksektir." },
-            { name: "Adapazarı Ovası", lat: 40.77, lon: 30.40, type: "KAF", info: "'Akova' olarak da bilinir. Mısır ve patates deposudur. Otomotiv sanayisi gelişmiştir." },
+            { name: "Tercan Ovası", lat: 39.78, lon: 40.39, type: "KAF", info: "Fırat Nehri'nin yukarı havzasında yer alır." },
+            { name: "Niksar Ovası", lat: 40.58, lon: 36.95, type: "KAF", info: "Kelkit Çayı havzasındadır. Mikro klima özelliği gösterir." },
+            { name: "Erbaa Ovası", lat: 40.69, lon: 36.56, type: "KAF", info: "Tütün ve tuğla-toprak sanayisi ile öne çıkar." },
+            { name: "Amasya Ovası", lat: 40.65, lon: 35.83, type: "KAF", info: "Yeşilırmak vadisindedir. Elma ve sebze üretimi yaygındır." },
+            { name: "Suluova Ovası", lat: 40.83, lon: 35.66, type: "KAF", info: "Şeker pancarı tarımı ve besi hayvancılığı gelişmiştir." },
+            { name: "Taşova Ovası", lat: 40.76, lon: 36.32, type: "KAF", info: "Yeşilırmak kenarında verimli bir ovadır." },
+            { name: "Merzifon Ovası", lat: 40.87, lon: 35.46, type: "KAF", info: "Karasal iklim hakimdir. Tahıl ve ayçiçeği yetişir." },
+            { name: "Tosya Ovası", lat: 41.01, lon: 34.03, type: "KAF", info: "Pirinç (Çeltik) üretimiyle markalaşmıştır." },
+            { name: "Bolu-Düzce Ovası", lat: 40.78, lon: 31.36, type: "KAF", info: "İstanbul-Ankara yolu üzerindedir. Sanayi ve tarım iç içedir." },
+            { name: "Adapazarı Ovası", lat: 40.77, lon: 30.40, type: "KAF", info: "Akova olarak bilinir. Mısır, patates ve sanayi bölgesidir." },
+            
             // DAF
-            { name: "Amik Ovası", lat: 36.35, lon: 36.35, type: "DAF", info: "Asi Nehri sular. Eski bir göl tabanıdır (Kurutulmuştur). Pamuk tarımı çok yaygındır." },
-            { name: "Kahramanmaraş Ovası", lat: 37.57, lon: 36.93, type: "DAF", info: "Kırmızı biber (Maraş Biberi), pamuk ve dondurma hammaddesi salep üretimi önemlidir." },
-            { name: "Afşin-Elbistan Ovası", lat: 38.20, lon: 37.19, type: "DAF", info: "Türkiye'nin en büyük linyit rezervlerine ve termik santrallerine sahiptir." },
-            { name: "Malatya Ovası", lat: 38.35, lon: 38.31, type: "DAF", info: "Dünya kayısı üretiminin merkezidir. Kuru kayısı ihracatında liderdir." },
-            { name: "Elazığ Ovası", lat: 38.67, lon: 39.22, type: "DAF", info: "Kuzova ve Uluova gibi verimli bölümleri vardır. Şeker pancarı ve üzüm (öküzgözü) yetişir." },
-            { name: "Bingöl Ovası", lat: 38.88, lon: 40.49, type: "DAF", info: "Karasal iklim serttir. Hayvancılık ve yem bitkileri üretimi yaygındır." },
-            { name: "Muş Ovası", lat: 38.74, lon: 41.49, type: "DAF", info: "Türkiye'nin en büyük ovalarından biridir. Şeker pancarı ve tütün ekimi yapılır." },
+            { name: "Amik Ovası", lat: 36.35, lon: 36.35, type: "DAF", info: "Asi Nehri sular. Türkiye'nin en önemli pamuk üretim alanlarındandır." },
+            { name: "Maraş Ovası", lat: 37.57, lon: 36.93, type: "DAF", info: "Kırmızı biber ve dondurma hammaddesi üretimi önemlidir." },
+            { name: "Elbistan Ovası", lat: 38.20, lon: 37.19, type: "DAF", info: "Büyük linyit yataklarına ve termik santrallere sahiptir." },
+            { name: "Malatya Ovası", lat: 38.35, lon: 38.31, type: "DAF", info: "Dünya kayısı üretim merkezidir." },
+            { name: "Elazığ Ovası", lat: 38.67, lon: 39.22, type: "DAF", info: "Uluova ve Kuzova gibi bölümleri vardır. Şeker pancarı yetişir." },
+            { name: "Bingöl Ovası", lat: 38.88, lon: 40.49, type: "DAF", info: "Hayvancılık faaliyetleri ve yem bitkileri ön plandadır." },
+            { name: "Muş Ovası", lat: 38.74, lon: 41.49, type: "DAF", info: "Türkiye'nin en büyük tektonik ovalarından biridir." },
+
             // BAF
-            { name: "Akhisar Ovası", lat: 38.92, lon: 27.83, type: "BAF", info: "Zeytin ve tütün üretiminde Ege'nin en önemli merkezlerindendir." },
-            { name: "Turgutlu Ovası", lat: 38.49, lon: 27.70, type: "BAF", info: "Gediz Grabeni içindedir. Tuğla-toprak sanayisi ve bağcılık gelişmiştir." },
-            { name: "Salihli Ovası", lat: 38.48, lon: 28.13, type: "BAF", info: "Çekirdeksiz kuru üzüm üretiminde dünyada söz sahibidir. Jeotermal kaynakları vardır." },
-            { name: "Alaşehir Ovası", lat: 38.35, lon: 28.51, type: "BAF", info: "Dünyaca ünlü 'Sultaniye' üzümünün başkentidir. İhracat potansiyeli yüksektir." },
-            { name: "Nazilli Ovası", lat: 37.91, lon: 28.32, type: "BAF", info: "Büyük Menderes Grabeni'ndedir. İncir (Kuru incir) üretiminde merkezdir." },
-            { name: "Söke Ovası", lat: 37.75, lon: 27.40, type: "BAF", info: "Türkiye'nin pamuk ambarıdır. Denize yakınlığı nedeniyle verimi yüksektir." },
-            { name: "Tire Ovası", lat: 38.08, lon: 27.73, type: "BAF", info: "Küçük Menderes havzasındadır. Süt hayvancılığı ve incir üretimi çok gelişmiştir." },
-            { name: "Torbalı Ovası", lat: 38.15, lon: 27.36, type: "BAF", info: "Sanayi ve tarım (özellikle sebzecilik) iç içedir. İzmir'in sanayi merkezidir." },
-            { name: "Ödemiş Ovası", lat: 38.22, lon: 27.97, type: "BAF", info: "Patates üretimiyle ünlüdür. Ayrıca süs bitkileri yetiştiriciliği yaygındır." },
-            { name: "Bergama Ovası", lat: 39.12, lon: 27.18, type: "BAF", info: "Bakırçay Grabeni'ndedir. Pamuk, zeytin ve fıstık çamı (Kozak) önemlidir." },
-            // Diğer
-            { name: "Bursa Ovası", lat: 40.18, lon: 29.06, type: "Diğer", info: "Şeftali üretimi, tekstil ve otomotiv sanayisi ile bilinir. Hızla şehirleşmektedir." },
-            { name: "Kayseri-Develi Ovası", lat: 38.45, lon: 35.40, type: "Diğer", info: "Erciyes volkanından çıkan materyallerle beslenmiştir. Kabak çekirdeği meşhurdur." }
+            { name: "Bakırçay Ovası", lat: 39.12, lon: 27.18, type: "BAF", info: "Bakırçay Grabeni içindedir. Pamuk ve zeytin tarımı yapılır." },
+            { name: "Akhisar Ovası", lat: 38.92, lon: 27.83, type: "BAF", info: "Zeytin ve tütün üretiminde önemli bir merkezdir." },
+            { name: "Alaşehir Ovası", lat: 38.35, lon: 28.51, type: "BAF", info: "Sultaniye üzümünün başkentidir." },
+            { name: "Küçük Menderes Ovası", lat: 38.15, lon: 27.85, type: "BAF", info: "İncir, zeytin ve sebze üretimiyle çok verimli bir graben ovasıdır." },
+            { name: "Büyük Menderes Ovası", lat: 37.85, lon: 28.00, type: "BAF", info: "Türkiye'nin en büyük graben ovasıdır. İncir ve pamuk deposudur." }
         ];
 
         const audioController = {
@@ -872,7 +861,17 @@
                 if (this.state.remaining.length === 0) { this.endGame(); return; }
                 const idx = Math.floor(Math.random() * this.state.remaining.length);
                 this.state.current = this.state.remaining[idx];
-                document.getElementById('target-name').innerText = this.state.current.name;
+                
+                // Yumuşak geçiş efekti
+                const nameContainer = document.querySelector('.target-name-container');
+                nameContainer.classList.add('fade-out');
+                setTimeout(() => {
+                    document.getElementById('target-name').innerText = this.state.current.name;
+                    nameContainer.classList.remove('fade-out');
+                    nameContainer.classList.add('fade-in');
+                    setTimeout(() => nameContainer.classList.remove('fade-in'), 200); // 300->200ms
+                }, 200); // 300->200ms
+
                 // Kartı gizle
                 document.getElementById('info-card').classList.remove('active');
             },
@@ -887,7 +886,7 @@
                 if (plateau.name === this.state.current.name) {
                     audioController.play('success');
                     el.classList.add('found');
-                    this.addLabel(plateau);
+                    this.addLabel(plateau, el);
                     this.state.score += 10; this.state.correct++;
                     this.spawnFloatingText("+10", el, "text-green-400");
                     this.state.remaining = this.state.remaining.filter(m => m.name !== plateau.name);
@@ -944,144 +943,28 @@
                 }
             },
 
-            // SMART LABELING: Çakışma önleyici akıllı etiket sistemi
-            addLabel: function(plateau) {
-                const g = document.getElementById('layer-labels');
-                const lineLayer = document.getElementById('layer-lines');
+            // MINIMALIST ON-MARKER LABEL
+            addLabel: function(plateau, el) {
+                // Labeli doğrudan markerın içine (shake wrapper'ın içine) ekleyelim ki onunla hareket etsin
+                // Ama yazı ayrı bir katmanda olsun istiyorsak layer-labels kullanabiliriz.
+                // Burada "üzerine yazsın" dendiği için en temiz yöntem layer-labels'a tam koordinata basmak.
+                
+                const layer = document.getElementById('layer-labels');
                 const p = this.project(plateau.lon, plateau.lat);
-                const textHeight = 16;
-                const charWidth = 5.5; 
-                const estimateWidth = plateau.name.length * charWidth + 20; 
-                
-                // Tüm markerların pozisyonlarını önceden al (Çarpışma kontrolü için)
-                const allMarkerPositions = plainData.map(d => this.project(d.lon, d.lat));
-                const markerSafeRadius = 15; // Marker çevresinde güvenli alan
-
-                // Etiket konum denemeleri (Genişletildi: 8 Yön + Uzak Versiyonlar)
-                const attempts = [
-                    { dx: 0, dy: -20, type: 'top' },    // Üst
-                    { dx: 0, dy: 20, type: 'bottom' },  // Alt
-                    { dx: estimateWidth/2 + 12, dy: 0, type: 'right' }, // Sağ
-                    { dx: -(estimateWidth/2 + 12), dy: 0, type: 'left' }, // Sol
-                    // Çaprazlar
-                    { dx: estimateWidth/2 + 10, dy: -15, type: 'top-right' },
-                    { dx: -(estimateWidth/2 + 10), dy: -15, type: 'top-left' },
-                    { dx: estimateWidth/2 + 10, dy: 15, type: 'bottom-right' },
-                    { dx: -(estimateWidth/2 + 10), dy: 15, type: 'bottom-left' },
-                    // Uzak Versiyonlar (Eğer yakın yerler doluysa)
-                    { dx: 0, dy: -35, type: 'top-far' },
-                    { dx: 0, dy: 35, type: 'bottom-far' },
-                    { dx: estimateWidth/2 + 25, dy: 0, type: 'right-far' },
-                    { dx: -(estimateWidth/2 + 25), dy: 0, type: 'left-far' }
-                ];
-
-                let bestPos = null;
-
-                for (let attempt of attempts) {
-                    let lx = p.x + attempt.dx;
-                    let ly = p.y + attempt.dy;
-                    
-                    // Box sınırları (Etiketin kaplayacağı alan)
-                    const box = {
-                        left: lx - estimateWidth / 2,
-                        right: lx + estimateWidth / 2,
-                        top: ly - textHeight / 2,
-                        bottom: ly + textHeight / 2
-                    };
-
-                    // 1. Harita dışına taşıyor mu?
-                    if (box.left < 5 || box.right > this.viewBox.w - 5 || box.top < 5 || box.bottom > this.viewBox.h - 5) {
-                        continue;
-                    }
-
-                    // 2. Diğer etiketlerle çakışma kontrolü
-                    let labelCollision = false;
-                    for (let drawn of this.drawnLabels) {
-                        if (box.left < drawn.right && box.right > drawn.left && box.top < drawn.bottom && box.bottom > drawn.top) {
-                            labelCollision = true;
-                            break;
-                        }
-                    }
-                    if (labelCollision) continue;
-
-                    // 3. MARKER ÇAKIŞMA KONTROLÜ (ÇOK ÖNEMLİ)
-                    // Etiket hiçbir markerın (bulunmuş veya bulunmamış) üzerine gelmemeli
-                    let markerCollision = false;
-                    for (let mp of allMarkerPositions) {
-                        // Marker noktası (mp.x, mp.y) etiket kutusunun içinde mi?
-                        // Güvenlik payı ekleyerek kontrol et
-                        if (mp.x > box.left - markerSafeRadius && 
-                            mp.x < box.right + markerSafeRadius && 
-                            mp.y > box.top - markerSafeRadius && 
-                            mp.y < box.bottom + markerSafeRadius) {
-                            markerCollision = true;
-                            break;
-                        }
-                    }
-                    if (markerCollision) continue;
-
-                    // Eğer buraya geldiyse pozisyon temizdir
-                    bestPos = { x: lx, y: ly, type: attempt.type };
-                    break;
-                }
-
-                // Hiçbir yer bulunamazsa mecburen üste koy (biraz daha yukarı)
-                if (!bestPos) {
-                    bestPos = { x: p.x, y: p.y - 30, type: 'top-force' };
-                }
-
-                // Çizgi çizimi (Eğer etiket markerın merkezinden uzaktaysa)
-                const dist = Math.sqrt(Math.pow(bestPos.x - p.x, 2) + Math.pow(bestPos.y - p.y, 2));
-                
-                // Çizgi her zaman çizilsin ki karışıklık olmasın (mesafe > 10 ise)
-                if (dist > 10) {
-                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                    line.setAttribute("x1", p.x); 
-                    line.setAttribute("y1", p.y - 5); // Markerın biraz üzerinden başla
-                    
-                    // Çizgi etiketin neresine yapışacak?
-                    if (bestPos.type.includes('top')) line.setAttribute("y2", bestPos.y + textHeight/2);
-                    else if (bestPos.type.includes('bottom')) line.setAttribute("y2", bestPos.y - textHeight/2);
-                    else if (bestPos.type.includes('right')) line.setAttribute("x2", bestPos.x - estimateWidth/2);
-                    else if (bestPos.type.includes('left')) line.setAttribute("x2", bestPos.x + estimateWidth/2);
-                    else { line.setAttribute("x2", bestPos.x); line.setAttribute("y2", bestPos.y); } // Fallback
-
-                    // Fallback coord fix
-                    if(!line.getAttribute("x2")) line.setAttribute("x2", bestPos.x);
-                    if(!line.getAttribute("y2")) line.setAttribute("y2", bestPos.y);
-
-                    line.setAttribute("class", "label-connector");
-                    lineLayer.appendChild(line);
-                }
-
-                const positionGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-                positionGroup.setAttribute("transform", `translate(${bestPos.x}, ${bestPos.y})`);
-                const animGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-                animGroup.setAttribute("class", "label-animate");
                 
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                text.setAttribute("class", "map-label-text");
-                text.setAttribute("text-anchor", "middle"); text.setAttribute("dominant-baseline", "central");
-                text.setAttribute("x", "0"); text.setAttribute("y", "0.5"); 
-                text.textContent = plateau.name;
+                text.setAttribute("x", p.x);
+                text.setAttribute("y", p.y - 8); // Pinin gövdesine denk gelecek şekilde yukarı kaydır
+                text.setAttribute("class", "minimal-label-text");
                 
-                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-                rect.setAttribute("class", "map-label-bg");
-                rect.setAttribute("height", textHeight); rect.setAttribute("y", -textHeight/2);
+                // İsim çok uzunsa kısalt veya alt satıra geç (SVG'de alt satır zordur, şimdilik sığdırmaya çalışalım)
+                let displayName = plateau.name.replace(" Ovası", ""); // "Ovası" kelimesini atarak yer açalım
+                if(displayName.length > 8) {
+                    text.style.fontSize = "3.5px"; // Çok uzunsa fontu daha da küçült
+                }
                 
-                animGroup.appendChild(rect); animGroup.appendChild(text);
-                positionGroup.appendChild(animGroup); g.appendChild(positionGroup);
-                
-                const realWidth = text.getComputedTextLength(); 
-                const boxWidth = realWidth + 20; 
-                rect.setAttribute("width", boxWidth); rect.setAttribute("x", -boxWidth / 2);
-
-                this.drawnLabels.push({ 
-                    left: bestPos.x - boxWidth / 2, 
-                    right: bestPos.x + boxWidth / 2, 
-                    top: bestPos.y - textHeight / 2, 
-                    bottom: bestPos.y + textHeight / 2 
-                });
+                text.textContent = displayName;
+                layer.appendChild(text);
             },
             
             spawnFloatingText: function(text, el, colorClass) {
