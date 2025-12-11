@@ -242,7 +242,7 @@
         .plateau-pin-bg {
             stroke-width: 2px;
             stroke: var(--marker-stroke);
-            transition: fill 0.3s, stroke 0.3s;
+            transition: fill 0.3s, stroke 0.3s, fill-opacity 0.3s;
         }
 
         .plateau-symbol {
@@ -267,33 +267,46 @@
         
         .plateau-marker .plateau-symbol { fill: #fff; }
 
-        /* BULUNMUŞ OVALAR (PASİF & KOYU & ŞEFFAF) */
+        /* BULUNMUŞ OVALAR (YENİ TASARIM: Tonu koru ama pasifleştir) */
         .plateau-marker.found .plateau-pin-bg { 
-            fill: rgba(30, 41, 59, 0.7) !important; /* Koyu Slate - Şeffaf */
-            stroke: #475569; /* Soluk sınır */
+            /* Rengi değiştirmiyoruz, opacity ile zemine yediriyoruz */
+            fill-opacity: 0.3; 
+            stroke: #ffffff;
+            stroke-opacity: 0.6;
         }
+        
+        /* Bulununca marker büyür */
         .plateau-marker.found .plateau-shape {
-            /* Bulununca biraz genişlesin ki yazı sığsın */
-            transform: scale(1.2); 
+            transform: scale(1.4); 
             filter: none; 
             cursor: default;
         }
+        
+        /* Sembol kaybolur */
         .plateau-marker.found .plateau-symbol {
-            /* Sembolü gizle */
             opacity: 0; 
         }
         
-        /* MINIMALIST LABEL (MARKER ÜZERİNDE) */
+        /* MINIMALIST LABEL (MARKER ÜZERİNDE - YÜKSEK OKUNABİLİRLİK) */
         .minimal-label-text {
-            fill: #fff;
-            font-size: 4px;
-            font-weight: 800;
+            fill: #ffffff;
+            font-family: 'Inter', sans-serif;
+            font-size: 4.5px; 
+            font-weight: 900; /* Extra Bold */
             text-anchor: middle;
             dominant-baseline: central;
             pointer-events: none;
             opacity: 0;
-            animation: fadeInText 0.4s ease-out forwards;
-            text-shadow: 0 0 2px #000; /* Okunabilirlik için gölge */
+            animation: fadeInText 0.4s ease-out forwards 0.1s;
+            
+            /* Yüksek Kontrastlı Dış Çizgi (Stroke) */
+            stroke: rgba(0, 0, 0, 0.9);
+            stroke-width: 0.6px;
+            stroke-linejoin: round;
+            paint-order: stroke fill; /* Stroke yazının dışına taşsın, içini yemesin */
+            
+            /* Hafif Gölge */
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6));
         }
         
         @keyframes fadeInText { to { opacity: 1; } }
@@ -945,9 +958,7 @@
 
             // MINIMALIST ON-MARKER LABEL
             addLabel: function(plateau, el) {
-                // Labeli doğrudan markerın içine (shake wrapper'ın içine) ekleyelim ki onunla hareket etsin
-                // Ama yazı ayrı bir katmanda olsun istiyorsak layer-labels kullanabiliriz.
-                // Burada "üzerine yazsın" dendiği için en temiz yöntem layer-labels'a tam koordinata basmak.
+                // Labeli layer-labels'a tam koordinata basmak.
                 
                 const layer = document.getElementById('layer-labels');
                 const p = this.project(plateau.lon, plateau.lat);
@@ -960,7 +971,7 @@
                 // İsim çok uzunsa kısalt veya alt satıra geç (SVG'de alt satır zordur, şimdilik sığdırmaya çalışalım)
                 let displayName = plateau.name.replace(" Ovası", ""); // "Ovası" kelimesini atarak yer açalım
                 if(displayName.length > 8) {
-                    text.style.fontSize = "3.5px"; // Çok uzunsa fontu daha da küçült
+                    text.style.fontSize = "4px"; // Çok uzunsa fontu daha da küçült
                 }
                 
                 text.textContent = displayName;
