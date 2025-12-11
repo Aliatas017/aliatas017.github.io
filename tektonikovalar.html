@@ -267,12 +267,14 @@
         
         .plateau-marker .plateau-symbol { fill: #fff; }
 
-        /* BULUNMUŞ OVALAR (YENİ TASARIM: Tonu koru ama pasifleştir) */
+        /* BULUNMUŞ OVALAR (MODERN & OKUNAKLI) */
         .plateau-marker.found .plateau-pin-bg { 
-            /* Rengi değiştirmiyoruz, opacity ile zemine yediriyoruz */
-            fill-opacity: 0.3; 
-            stroke: #ffffff;
-            stroke-opacity: 0.6;
+            /* Modern Mat Görünüm - Solid Renk */
+            fill: #1e293b !important;  /* Slate 800 - Koyu Antrasit */
+            fill-opacity: 1;           /* Tam opak - harita çizgilerini gizler */
+            stroke: #cbd5e1;           /* Açık gri çerçeve */
+            stroke-width: 1.5px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); /* Rozet efekti için gölge */
         }
         
         /* Bulununca marker büyür */
@@ -290,23 +292,18 @@
         /* MINIMALIST LABEL (MARKER ÜZERİNDE - YÜKSEK OKUNABİLİRLİK) */
         .minimal-label-text {
             fill: #ffffff;
-            font-family: 'Inter', sans-serif;
-            font-size: 4.5px; 
-            font-weight: 900; /* Extra Bold */
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 4px; 
+            font-weight: 800; /* Extra Bold */
             text-anchor: middle;
-            dominant-baseline: central;
+            dominant-baseline: middle; /* Dikeyde tam ortala */
             pointer-events: none;
             opacity: 0;
-            animation: fadeInText 0.4s ease-out forwards 0.1s;
+            animation: fadeInText 0.3s ease-out forwards 0.1s;
             
-            /* Yüksek Kontrastlı Dış Çizgi (Stroke) */
-            stroke: rgba(0, 0, 0, 0.9);
-            stroke-width: 0.6px;
-            stroke-linejoin: round;
-            paint-order: stroke fill; /* Stroke yazının dışına taşsın, içini yemesin */
-            
-            /* Hafif Gölge */
-            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6));
+            /* Stroke yerine gölge kullanımı - Daha temiz modern görünüm */
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.9));
+            letter-spacing: 0.05em;
         }
         
         @keyframes fadeInText { to { opacity: 1; } }
@@ -965,7 +962,7 @@
                 
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("x", p.x);
-                text.setAttribute("y", p.y - 8); // Pinin gövdesine denk gelecek şekilde yukarı kaydır
+                text.setAttribute("y", p.y - 9); // Pinin gövdesine denk gelecek şekilde yukarı kaydır
                 text.setAttribute("class", "minimal-label-text");
                 
                 // İsim çok uzunsa kısalt veya alt satıra geç (SVG'de alt satır zordur, şimdilik sığdırmaya çalışalım)
