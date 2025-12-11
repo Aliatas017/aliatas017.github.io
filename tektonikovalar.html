@@ -17,44 +17,44 @@
             /* --- RENK PALETİ --- */
             
             /* Arkaplanlar */
-            --bg-body: #020617;         
-            --bg-dots: #1e293b;         
+            --bg-body: #0f172a;         
+            --bg-dots: #334155;         
             
-            --panel-bg: rgba(15, 23, 42, 0.90); /* Biraz daha opak */
-            --panel-border: rgba(148, 163, 184, 0.2);    
+            --panel-bg: rgba(15, 23, 42, 0.95);
+            --panel-border: rgba(148, 163, 184, 0.3);    
             
             --text-primary: #f8fafc;    
-            --text-secondary: #94a3b8;  
+            --text-secondary: #cbd5e1;  
             
             /* UI Renkleri */
             --accent-primary: #f43f5e; 
-            --accent-glow: rgba(244, 63, 94, 0.5);  
+            --accent-glow: rgba(244, 63, 94, 0.6);  
             --accent-warn: #fbbf24;     
             --accent-success: #10b981;  
             --accent-info: #3b82f6;
 
-            /* Harita - Daha Belirgin */
-            --map-bg: #0f172a;          
+            /* Harita - Daha Yüksek Kontrast */
+            --map-bg: #020617;          
             --map-grad-start: #1e293b;
             --map-grad-end: #020617;
 
             --province-fill: #1e293b;   
-            --province-stroke: #475569; /* Daha belirgin sınır çizgisi */
+            --province-stroke: #475569; 
             --province-hover: #334155;
 
-            /* KATEGORİ RENKLERİ (Neon) */
-            --color-kaf: #ef4444;      
-            --color-daf: #f97316;      
-            --color-baf: #d946ef;      
-            --color-diger: #2dd4bf;    
+            /* KATEGORİ RENKLERİ (Neon & Canlı) */
+            --color-kaf: #ff0055;      /* Canlı Kırmızı/Pembe */
+            --color-daf: #ff9900;      /* Canlı Turuncu */
+            --color-baf: #aa00ff;      /* Canlı Mor */
+            --color-diger: #00e5ff;    /* Canlı Turkuaz */
             
             /* Marker Stili */
-            --marker-fill: #ffffff;    
+            --marker-stroke: #ffffff;    
             
             /* FAY HATTI RENKLERİ */
-            --fault-line-kaf: #ef4444;
-            --fault-line-daf: #f97316;
-            --fault-line-baf: #d946ef;
+            --fault-line-kaf: #ff0055;
+            --fault-line-daf: #ff9900;
+            --fault-line-baf: #aa00ff;
             
             /* Şehir İsimleri */
             --city-text: #94a3b8;      
@@ -65,35 +65,35 @@
 
         /* --- LIGHT MODE --- */
         body.light-mode {
-            --bg-body: #f1f5f9;         
+            --bg-body: #f8fafc;         
             --bg-dots: #cbd5e1;         
             
-            --panel-bg: rgba(255, 255, 255, 0.90);        
-            --panel-border: rgba(0,0,0,0.1);    
+            --panel-bg: rgba(255, 255, 255, 0.95);        
+            --panel-border: rgba(0,0,0,0.15);    
             
             --text-primary: #0f172a;    
-            --text-secondary: #64748b;  
+            --text-secondary: #475569;  
 
             --accent-primary: #e11d48;
             
-            --map-bg: #e2e8f0;          
-            --map-grad-start: #ffffff;
-            --map-grad-end: #cbd5e1;
+            --map-bg: #cbd5e1;          
+            --map-grad-start: #f1f5f9;
+            --map-grad-end: #e2e8f0;
 
             --province-fill: #ffffff;   
-            --province-stroke: #94a3b8; /* Light modda daha belirgin */
-            --province-hover: #f1f5f9;
+            --province-stroke: #94a3b8; 
+            --province-hover: #f8fafc;
 
-            --color-kaf: #dc2626;
-            --color-daf: #ea580c;
-            --color-baf: #9333ea;
-            --color-diger: #0d9488;
+            --color-kaf: #d60040;
+            --color-daf: #d97706;
+            --color-baf: #7e22ce;
+            --color-diger: #0891b2;
 
-            --marker-fill: #ffffff;
+            --marker-stroke: #ffffff;
 
-            --fault-line-kaf: #dc2626;
-            --fault-line-daf: #ea580c;
-            --fault-line-baf: #9333ea;
+            --fault-line-kaf: #d60040;
+            --fault-line-daf: #d97706;
+            --fault-line-baf: #7e22ce;
             
             --city-text: #64748b;       
             --city-dot: #94a3b8;
@@ -162,16 +162,16 @@
         .province-path { 
             fill: var(--province-fill); 
             stroke: var(--province-stroke); 
-            stroke-width: 0.7px; /* Çizgi kalınlığı artırıldı */
+            stroke-width: 1px; /* Daha belirgin sınır */
             transition: all 0.2s ease; 
             vector-effect: non-scaling-stroke;
-            filter: drop-shadow(0 0 2px rgba(0,0,0,0.3)); /* Hafif gölge eklendi */
+            filter: drop-shadow(0 0 1px rgba(0,0,0,0.5));
         }
         .province-path:hover { 
             fill: var(--province-hover); 
             stroke: var(--text-secondary); 
-            stroke-width: 1.2px; 
-            filter: drop-shadow(0 0 6px rgba(255,255,255,0.15));
+            stroke-width: 1.5px; 
+            filter: drop-shadow(0 0 6px rgba(255,255,255,0.2));
             z-index: 10;
         }
         
@@ -180,81 +180,78 @@
             font-weight: 600;       
             font-size: 5.5px;       
             pointer-events: none; 
-            opacity: 0.7; /* Opaklık artırıldı */
+            opacity: 0.8;
             text-shadow: 0 0 3px var(--bg-body);           
         }
         .city-dot { fill: var(--city-dot); pointer-events: none; opacity: 0.6; }
 
-        /* --- FAY HATLARI --- */
+        /* --- FAY HATLARI (SADE TASARIM) --- */
         .fault-group { pointer-events: none; }
         
         .fault-line-simple {
             fill: none;
             stroke-linecap: round;
             stroke-linejoin: round;
-            stroke-width: 6px; /* Biraz daha kalın */
-            opacity: 0.4; /* Biraz daha belirgin */
+            stroke-width: 4px; /* Kalın ve net çizgi */
+            opacity: 0.8;
             vector-effect: non-scaling-stroke;
+            /* Glow/Blur efektleri kaldırıldı */
         }
 
-        .fault-kaf { stroke: var(--fault-line-kaf); }
-        .fault-daf { stroke: var(--fault-line-daf); }
-        .fault-baf { stroke: var(--fault-line-baf); }
+        .fault-kaf-simple { stroke: var(--fault-line-kaf); }
+        .fault-daf-simple { stroke: var(--fault-line-daf); }
+        .fault-baf-simple { stroke: var(--fault-line-baf); }
 
 
-        /* --- MARKERS (OVALAR) --- */
+        /* --- MARKERS (KÜÇÜLTÜLMÜŞ PİN TASARIMI) --- */
         .plateau-marker { cursor: pointer; }
         
-        /* Hit Area */
+        /* Hit Area - HASSAS */
         .hit-area {
             fill: transparent;
-            r: 12; /* Hit alanı genişletildi */
+            r: 10; /* Tıklama alanı yeterli büyüklükte kalsın */
             cursor: pointer;
             pointer-events: all; 
+            /* Hit area konumu SVG içinde ayarlanıyor */
         }
 
-        .pulse-ring {
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 2px;
-            opacity: 0.5;
-            r: 8;
-            pointer-events: none;
-            vector-effect: non-scaling-stroke;
-        }
-
-        /* İKON (SHAPE) STİLİ */
+        /* İKON (SHAPE) STİLİ - KÜÇÜLTÜLDÜ */
         .plateau-shape {
-            fill: var(--marker-fill); 
-            stroke-width: 3px; /* Çizgi kalınlaştırıldı */
+            fill: var(--bg-body);
+            stroke-width: 0; 
             transform-origin: center;
             transform-box: fill-box;
             
-            /* Başlangıç boyutu BÜYÜTÜLDÜ */
-            transform: scale(1.0); /* 0.6'dan 1.0'a çıkarıldı */
+            /* GÜNCELLEME: Boyutlar küçültüldü (1.2 -> 0.75) */
+            transform: scale(0.75); 
             
             vector-effect: non-scaling-stroke;
             paint-order: stroke;
-
-            /* YENİ GEÇİŞ AYARLARI */
-            transition: 
-                transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-                stroke-width 0.3s ease,
-                fill 0.3s ease,
-                filter 0.3s ease; /* Filter geçişi eklendi */
+            
+            /* GELİŞMİŞ TRANSITION: Daha sade */
+            transition: transform 0.2s ease-out;
             
             pointer-events: none; 
-            /* Hafif gölge ile daha belirgin */
-            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+            /* Sabit hafif gölge */
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
+        }
+
+        .plateau-pin-bg {
+            stroke-width: 2px;
+            stroke: var(--marker-stroke);
+            transition: fill 0.2s ease, stroke 0.2s ease; /* Renk geçişleri */
+        }
+
+        .plateau-symbol {
+            fill: currentColor;
+            stroke: none;
+            transition: fill 0.2s ease;
         }
         
-        /* --- HOVER ETKİLEŞİMİ --- */
+        /* --- HOVER ETKİLEŞİMİ (SADE) --- */
         .plateau-marker:hover .plateau-shape { 
-            /* Hoverda büyüme ve döndürme efekti */
-            transform: scale(1.6) rotate(15deg); 
-            stroke-width: 4px;
-            /* Hoverda parlama efekti */
-            filter: drop-shadow(0 0 10px currentColor);
+            /* Hafif büyüme */
+            transform: scale(1.0); 
             z-index: 100;
         }
         
@@ -263,25 +260,28 @@
         .plateau-marker[data-type="BAF"] { color: var(--color-baf); }
         .plateau-marker[data-type="Diğer"] { color: var(--color-diger); }
         
-        .plateau-marker[data-type="KAF"] .plateau-shape { stroke: var(--color-kaf); } 
-        .plateau-marker[data-type="DAF"] .plateau-shape { stroke: var(--color-daf); } 
-        .plateau-marker[data-type="BAF"] .plateau-shape { stroke: var(--color-baf); } 
-        .plateau-marker[data-type="Diğer"] .plateau-shape { stroke: var(--color-diger); } 
+        .plateau-marker[data-type="KAF"] .plateau-pin-bg { fill: var(--color-kaf); } 
+        .plateau-marker[data-type="DAF"] .plateau-pin-bg { fill: var(--color-daf); } 
+        .plateau-marker[data-type="BAF"] .plateau-pin-bg { fill: var(--color-baf); } 
+        .plateau-marker[data-type="Diğer"] .plateau-pin-bg { fill: var(--color-diger); }
         
+        .plateau-marker .plateau-symbol { fill: #fff; }
+
         /* BULUNMUŞ OVALAR */
-        .plateau-marker.found .plateau-shape { 
-            fill: #22d3ee !important; 
-            stroke: #cffafe; 
-            transform: scale(1.1); /* Bulunanlar da biraz büyük kalsın */
+        .plateau-marker.found .plateau-pin-bg { 
+            fill: #10b981 !important; /* Yeşil */
+            stroke: #fff;
+        }
+        .plateau-marker.found .plateau-shape {
+            transform: scale(0.8); /* Bulunanlar biraz daha büyük kalabilir */
             filter: none;
         }
         
-        .plateau-marker.found .pulse-ring { display: none; }
 
-        /* Labels */
+        /* Labels - KÜÇÜLTÜLDÜ */
         .map-label-bg { fill: rgba(15, 23, 42, 0.95); stroke: var(--panel-border); stroke-width: 0.5px; rx: 4; }
-        .map-label-text { fill: #fff; font-weight: 700; font-size: 7px; pointer-events: none; text-anchor: middle; dominant-baseline: central; }
-        .label-connector { stroke: var(--text-secondary); stroke-dasharray: 2,2; stroke-width: 1px; opacity: 0.4; }
+        .map-label-text { fill: #fff; font-weight: 700; font-size: 6.5px; pointer-events: none; text-anchor: middle; dominant-baseline: central; }
+        .label-connector { stroke: var(--text-secondary); stroke-dasharray: 2,2; stroke-width: 1px; opacity: 0.6; }
         .label-animate { animation: labelPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 0; }
         @keyframes labelPop { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 
@@ -290,15 +290,15 @@
             position: absolute; bottom: 30px; left: 30px;
             background: var(--panel-bg); border: 1px solid var(--panel-border);
             border-radius: 16px; padding: 1rem 1.2rem;
-            display: flex; flex-direction: column; gap: 0.6rem;
+            display: flex; flex-direction: column; gap: 0.8rem;
             pointer-events: none; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         .legend-row { display: flex; gap: 1.5rem; }
-        .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
-        .legend-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--marker-fill); border: 2px solid; box-sizing: border-box; }
+        .legend-item { display: flex; align-items: center; gap: 0.6rem; font-size: 0.75rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+        .legend-icon { width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; }
 
-        /* INFO CARD (Yeni) */
+        /* INFO CARD */
         #info-card {
             position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
             background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.1);
@@ -317,7 +317,7 @@
             transform: translateX(-50%) translateY(0);
         }
         .info-title { font-weight: 800; font-size: 1.1rem; color: var(--accent-info); letter-spacing: -0.02em; }
-        .info-text { font-size: 0.85rem; color: #e2e8f0; line-height: 1.5; font-weight: 500; }
+        .info-text { font-size: 0.9rem; color: #e2e8f0; line-height: 1.5; font-weight: 500; }
         .info-icon { margin-bottom: 0.2rem; color: var(--accent-info); width: 24px; height: 24px; }
 
         /* Animasyonlar & UI */
@@ -335,7 +335,6 @@
             100% { transform: translateY(-40px) scale(1.2); opacity: 0; } 
         }
         
-        /* SHAKE animasyonu artık 'transform' yerine 'translate' kullanıyor */
         .shake-element { 
             animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; 
         }
@@ -428,10 +427,22 @@
 
             <!-- SVG Map -->
             <svg id="game-map" width="100%" height="100%" viewBox="0 0 1000 450" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                    <!-- Marker Glow Filter -->
+                    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+                        <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
                 <g id="map-content">
                     <g id="layer-provinces"></g>
                     <g id="layer-cities"></g>
+                    <!-- Fay Hatları: Tek katmanlı sade sistem -->
                     <g id="layer-faults"></g> 
+                    
                     <g id="layer-lines"></g> 
                     <g id="layer-plateaus"></g>
                     <g id="layer-labels"></g> 
@@ -439,15 +450,39 @@
                 </g>
             </svg>
 
-            <!-- Legend -->
+            <!-- Legend (YENİ İKONLARLA) -->
             <div class="legend-box hidden sm:flex">
                 <div class="legend-row">
-                    <div class="legend-item"><div class="legend-dot" style="border-color: var(--color-kaf); color: var(--color-kaf)"></div>KAF (Kuzey)</div>
-                    <div class="legend-item"><div class="legend-dot" style="border-color: var(--color-daf); color: var(--color-daf)"></div>DAF (Doğu)</div>
+                    <div class="legend-item">
+                        <svg class="legend-icon" viewBox="0 0 20 20">
+                            <circle cx="10" cy="10" r="8" fill="var(--color-kaf)" stroke="white" stroke-width="2"/>
+                            <path d="M10 5L11.5 8.5H15L12 11L13 15L10 12.5L7 15L8 11L5 8.5H8.5L10 5Z" fill="white"/>
+                        </svg>
+                        KAF (Kuzey)
+                    </div>
+                    <div class="legend-item">
+                        <svg class="legend-icon" viewBox="0 0 20 20">
+                            <circle cx="10" cy="10" r="8" fill="var(--color-daf)" stroke="white" stroke-width="2"/>
+                            <path d="M5 7L15 7L10 14L5 7Z" fill="white"/>
+                        </svg>
+                        DAF (Doğu)
+                    </div>
                 </div>
                 <div class="legend-row">
-                    <div class="legend-item"><div class="legend-dot" style="border-color: var(--color-baf); color: var(--color-baf)"></div>BAF (Batı)</div>
-                    <div class="legend-item"><div class="legend-dot" style="border-color: var(--color-diger); color: var(--color-diger)"></div>Diğer</div>
+                    <div class="legend-item">
+                        <svg class="legend-icon" viewBox="0 0 20 20">
+                            <circle cx="10" cy="10" r="8" fill="var(--color-baf)" stroke="white" stroke-width="2"/>
+                            <path d="M10 4L14 10L10 16L6 10L10 4Z" fill="white"/>
+                        </svg>
+                        BAF (Batı)
+                    </div>
+                    <div class="legend-item">
+                        <svg class="legend-icon" viewBox="0 0 20 20">
+                            <circle cx="10" cy="10" r="8" fill="var(--color-diger)" stroke="white" stroke-width="2"/>
+                            <circle cx="10" cy="10" r="3" fill="white"/>
+                        </svg>
+                        Diğer
+                    </div>
                 </div>
             </div>
 
@@ -701,7 +736,8 @@
 
             drawFaultLines: function() {
                 const layer = document.getElementById('layer-faults');
-                // Artık sadece tek bir katman var (layer-faults), zone ve core yok.
+                // Önceki çizimleri temizle
+                layer.innerHTML = "";
                 
                 const kafCoords = [
                     [26.5, 40.5], [28.0, 40.8], [30.5, 40.7], [32.0, 40.7], 
@@ -719,7 +755,7 @@
                     [[27.1, 37.5], [29.0, 37.8]]
                 ];
 
-                const createSimpleFault = (coords, colorClass) => {
+                const createSimpleFault = (coords, typeClass) => {
                     let d = "M";
                     coords.forEach((pt, i) => {
                         const p = this.project(pt[0], pt[1]);
@@ -727,16 +763,16 @@
                         if (i < coords.length - 1) d += "L";
                     });
 
-                    // Tek, düz çizgi
+                    // Tek ve net çizgi
                     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
                     path.setAttribute("d", d);
-                    path.setAttribute("class", `fault-line-simple ${colorClass}`);
+                    path.setAttribute("class", `fault-line-simple fault-${typeClass}-simple`);
                     layer.appendChild(path);
                 };
 
-                createSimpleFault(kafCoords, "fault-kaf");
-                createSimpleFault(dafCoords, "fault-daf");
-                bafLines.forEach(line => createSimpleFault(line, "fault-baf"));
+                createSimpleFault(kafCoords, "kaf");
+                createSimpleFault(dafCoords, "daf");
+                bafLines.forEach(line => createSimpleFault(line, "baf"));
             },
 
             drawPlateaus: function() {
@@ -747,7 +783,6 @@
 
                 plainData.forEach((pData, index) => {
                     const p = this.project(pData.lon, pData.lat);
-                    // Ana kapsayıcı g - pozisyonu belirler
                     const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
                     g.setAttribute("class", "plateau-marker entrance-anim");
                     g.style.animationDelay = `${index * 0.05}s`;
@@ -756,37 +791,56 @@
                     g.setAttribute("data-type", pData.type);
                     g.onclick = (e) => { e.stopPropagation(); this.checkAnswer(pData, g); };
 
-                    // 0. SALLANMA SARMALAYICISI (SHAKE WRAPPER)
-                    // Yanlış cevapta tüm içeriği sallamak için, ama pozisyonu bozmadan.
                     const shakeWrapper = document.createElementNS("http://www.w3.org/2000/svg", "g");
                     shakeWrapper.setAttribute("class", "shake-wrapper");
                     g.appendChild(shakeWrapper);
 
-                    // 1. Görsel Halka (Pulse) - Wrapper içine
-                    const pulseRing = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    pulseRing.setAttribute("class", "pulse-ring");
-                    shakeWrapper.appendChild(pulseRing);
-
-                    // 2. HIT AREA - Wrapper dışına da koyulabilir ama sallanması sorun olmaz
+                    // 1. HIT AREA - Artık çok daha büyük ve tıklanabilir
                     const hitArea = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                     hitArea.setAttribute("class", "hit-area");
                     shakeWrapper.appendChild(hitArea);
+                    // Hit area'yı yukarı kaydır (-12) ki gövdeyi kapsasın
+                    hitArea.setAttribute("cy", "-12");
 
-                    // 3. GÖRSEL ŞEKİL - Wrapper içine
-                    const shape = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    shape.setAttribute("class", "plateau-shape");
+                    // 2. MARKER SHAPE GROUP
+                    const shapeGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                    shapeGroup.setAttribute("class", "plateau-shape");
+                    shakeWrapper.appendChild(shapeGroup);
+
+                    // Pin Background (Damla şeklinde)
+                    const pinBg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    pinBg.setAttribute("class", "plateau-pin-bg");
+                    pinBg.setAttribute("d", "M0,0 C-6,-6 -6,-10 0,-10 C6,-10 6,-6 0,0"); // Basit pin şekli
+                    // Daha belirgin pin şekli:
+                    pinBg.setAttribute("d", "M0,0 L-5,-8 A6,6 0 1,1 5,-8 L0,0 Z");
+                    shapeGroup.appendChild(pinBg);
+
+                    // İç Sembol
+                    const symbol = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    symbol.setAttribute("class", "plateau-symbol");
+                    symbol.setAttribute("transform", "translate(0, -8) scale(0.4)"); 
                     
-                    if (pData.type === 'KAF') shape.setAttribute("d", "M-6,-6 L6,-6 L6,6 L-6,6 Z"); // Kare
-                    else if (pData.type === 'DAF') shape.setAttribute("d", "M0,-7 L7,5 L-7,5 Z"); // Üçgen
-                    else if (pData.type === 'BAF') shape.setAttribute("d", "M0,-7 L6,0 L0,7 L-6,0 Z"); // Baklava
-                    else shape.setAttribute("d", "M0,0 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0"); // Daire
-
-                    shakeWrapper.appendChild(shape);
+                    if (pData.type === 'KAF') { 
+                        // Yıldız
+                        symbol.setAttribute("d", "M0,-10 L2.5,-3 L10,-3 L4,1.5 L6,9 L0,5 L-6,9 L-4,1.5 L-10,-3 L-2.5,-3 Z");
+                    }
+                    else if (pData.type === 'DAF') {
+                        // Aşağı Bakan Üçgen
+                        symbol.setAttribute("d", "M-10,-5 L10,-5 L0,10 Z");
+                    }
+                    else if (pData.type === 'BAF') {
+                        // Baklava (Diamond)
+                        symbol.setAttribute("d", "M0,-10 L8,0 L0,10 L-8,0 Z");
+                    }
+                    else {
+                        // Daire
+                        symbol.setAttribute("d", "M0,0 m-7,0 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0");
+                    }
+                    shapeGroup.appendChild(symbol);
                     
                     layer.appendChild(g);
-                    // Element referansına shape'i de ekleyelim animasyon için
                     pData.el = g;
-                    pData.shakeEl = shakeWrapper; // Sallanacak element
+                    pData.shakeEl = shakeWrapper;
                 });
             },
 
@@ -896,15 +950,29 @@
                 const lineLayer = document.getElementById('layer-lines');
                 const p = this.project(plateau.lon, plateau.lat);
                 const textHeight = 16;
-                const charWidth = 6.5; 
-                const estimateWidth = plateau.name.length * charWidth + 24; 
+                const charWidth = 5.5; 
+                const estimateWidth = plateau.name.length * charWidth + 20; 
                 
-                // Etiket konum denemeleri (Öncelik sırası: Üst -> Alt -> Sağ -> Sol)
+                // Tüm markerların pozisyonlarını önceden al (Çarpışma kontrolü için)
+                const allMarkerPositions = plainData.map(d => this.project(d.lon, d.lat));
+                const markerSafeRadius = 15; // Marker çevresinde güvenli alan
+
+                // Etiket konum denemeleri (Genişletildi: 8 Yön + Uzak Versiyonlar)
                 const attempts = [
-                    { dx: 0, dy: -18, type: 'top' },    // Üst
-                    { dx: 0, dy: 18, type: 'bottom' },  // Alt
-                    { dx: estimateWidth/2 + 10, dy: 0, type: 'right' }, // Sağ
-                    { dx: -(estimateWidth/2 + 10), dy: 0, type: 'left' } // Sol
+                    { dx: 0, dy: -20, type: 'top' },    // Üst
+                    { dx: 0, dy: 20, type: 'bottom' },  // Alt
+                    { dx: estimateWidth/2 + 12, dy: 0, type: 'right' }, // Sağ
+                    { dx: -(estimateWidth/2 + 12), dy: 0, type: 'left' }, // Sol
+                    // Çaprazlar
+                    { dx: estimateWidth/2 + 10, dy: -15, type: 'top-right' },
+                    { dx: -(estimateWidth/2 + 10), dy: -15, type: 'top-left' },
+                    { dx: estimateWidth/2 + 10, dy: 15, type: 'bottom-right' },
+                    { dx: -(estimateWidth/2 + 10), dy: 15, type: 'bottom-left' },
+                    // Uzak Versiyonlar (Eğer yakın yerler doluysa)
+                    { dx: 0, dy: -35, type: 'top-far' },
+                    { dx: 0, dy: 35, type: 'bottom-far' },
+                    { dx: estimateWidth/2 + 25, dy: 0, type: 'right-far' },
+                    { dx: -(estimateWidth/2 + 25), dy: 0, type: 'left-far' }
                 ];
 
                 let bestPos = null;
@@ -913,7 +981,7 @@
                     let lx = p.x + attempt.dx;
                     let ly = p.y + attempt.dy;
                     
-                    // Box sınırları
+                    // Box sınırları (Etiketin kaplayacağı alan)
                     const box = {
                         left: lx - estimateWidth / 2,
                         right: lx + estimateWidth / 2,
@@ -921,55 +989,61 @@
                         bottom: ly + textHeight / 2
                     };
 
-                    // Harita dışına taşıyor mu kontrolü
-                    if (box.left < 0 || box.right > this.viewBox.w || box.top < 0 || box.bottom > this.viewBox.h) {
+                    // 1. Harita dışına taşıyor mu?
+                    if (box.left < 5 || box.right > this.viewBox.w - 5 || box.top < 5 || box.bottom > this.viewBox.h - 5) {
                         continue;
                     }
 
-                    // Diğer etiketlerle çakışma kontrolü
-                    let collision = false;
+                    // 2. Diğer etiketlerle çakışma kontrolü
+                    let labelCollision = false;
                     for (let drawn of this.drawnLabels) {
                         if (box.left < drawn.right && box.right > drawn.left && box.top < drawn.bottom && box.bottom > drawn.top) {
-                            collision = true;
+                            labelCollision = true;
                             break;
                         }
                     }
+                    if (labelCollision) continue;
 
-                    // Henüz bulunmamış markerlarla çakışma kontrolü (markerın üstüne binmesin)
-                    if (!collision) {
-                        for (let remainingPlato of this.state.remaining) {
-                            if (remainingPlato.name === plateau.name) continue; 
-                            const pRem = this.project(remainingPlato.lon, remainingPlato.lat);
-                            const markerBox = { left: pRem.x - 20, right: pRem.x + 20, top: pRem.y - 20, bottom: pRem.y + 20 };
-                            if (box.left < markerBox.right && box.right > markerBox.left && box.top < markerBox.bottom && box.bottom > markerBox.top) {
-                                collision = true;
-                                break;
-                            }
+                    // 3. MARKER ÇAKIŞMA KONTROLÜ (ÇOK ÖNEMLİ)
+                    // Etiket hiçbir markerın (bulunmuş veya bulunmamış) üzerine gelmemeli
+                    let markerCollision = false;
+                    for (let mp of allMarkerPositions) {
+                        // Marker noktası (mp.x, mp.y) etiket kutusunun içinde mi?
+                        // Güvenlik payı ekleyerek kontrol et
+                        if (mp.x > box.left - markerSafeRadius && 
+                            mp.x < box.right + markerSafeRadius && 
+                            mp.y > box.top - markerSafeRadius && 
+                            mp.y < box.bottom + markerSafeRadius) {
+                            markerCollision = true;
+                            break;
                         }
                     }
+                    if (markerCollision) continue;
 
-                    if (!collision) {
-                        bestPos = { x: lx, y: ly, type: attempt.type };
-                        break;
-                    }
+                    // Eğer buraya geldiyse pozisyon temizdir
+                    bestPos = { x: lx, y: ly, type: attempt.type };
+                    break;
                 }
 
-                // Hiçbiri olmazsa varsayılan olarak yukarı koy (eski yöntem ama biraz kaydırarak)
+                // Hiçbir yer bulunamazsa mecburen üste koy (biraz daha yukarı)
                 if (!bestPos) {
-                    bestPos = { x: p.x, y: p.y - 25, type: 'top' };
+                    bestPos = { x: p.x, y: p.y - 30, type: 'top-force' };
                 }
 
-                // Çizgi çizimi (Eğer etiket çok uzaktaysa)
+                // Çizgi çizimi (Eğer etiket markerın merkezinden uzaktaysa)
                 const dist = Math.sqrt(Math.pow(bestPos.x - p.x, 2) + Math.pow(bestPos.y - p.y, 2));
-                if (dist > 15) {
+                
+                // Çizgi her zaman çizilsin ki karışıklık olmasın (mesafe > 10 ise)
+                if (dist > 10) {
                     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                    line.setAttribute("x1", p.x); line.setAttribute("y1", p.y); 
+                    line.setAttribute("x1", p.x); 
+                    line.setAttribute("y1", p.y - 5); // Markerın biraz üzerinden başla
                     
                     // Çizgi etiketin neresine yapışacak?
-                    if (bestPos.type === 'top') line.setAttribute("y2", bestPos.y + textHeight/2);
-                    else if (bestPos.type === 'bottom') line.setAttribute("y2", bestPos.y - textHeight/2);
-                    else if (bestPos.type === 'right') line.setAttribute("x2", bestPos.x - estimateWidth/2);
-                    else if (bestPos.type === 'left') line.setAttribute("x2", bestPos.x + estimateWidth/2);
+                    if (bestPos.type.includes('top')) line.setAttribute("y2", bestPos.y + textHeight/2);
+                    else if (bestPos.type.includes('bottom')) line.setAttribute("y2", bestPos.y - textHeight/2);
+                    else if (bestPos.type.includes('right')) line.setAttribute("x2", bestPos.x - estimateWidth/2);
+                    else if (bestPos.type.includes('left')) line.setAttribute("x2", bestPos.x + estimateWidth/2);
                     else { line.setAttribute("x2", bestPos.x); line.setAttribute("y2", bestPos.y); } // Fallback
 
                     // Fallback coord fix
@@ -999,7 +1073,7 @@
                 positionGroup.appendChild(animGroup); g.appendChild(positionGroup);
                 
                 const realWidth = text.getComputedTextLength(); 
-                const boxWidth = realWidth + 24; 
+                const boxWidth = realWidth + 20; 
                 rect.setAttribute("width", boxWidth); rect.setAttribute("x", -boxWidth / 2);
 
                 this.drawnLabels.push({ 
