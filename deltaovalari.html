@@ -677,34 +677,42 @@
                 data.features.forEach(f => this.scanCoords(f.geometry.coordinates));
                 deltaData.forEach(d => this.scanCoords([[d.lon, d.lat]]));
                 
-                // --- RESPONSIVE ADJUSTMENTS ---
-                // Add more bottom padding on mobile to accommodate UI elements
+                // --- RESPONSIVE ADJUSTMENTS (MAXIMIZED MAP WITH SAFE SPACE) ---
                 const isMobile = window.innerWidth < 768;
-                const bottomPadding = isMobile ? 2.5 : 1.5; // Degree padding
-                this.geoBounds.minLat -= bottomPadding;
-
-                // Adjust top spacing (SVG units) to clear the top panel
-                // We reserve 100 units of SVG height at the top for the Question Panel
-                const topReservedSpace = 100;
+                
+                // 1. Reserve exact space for Question Panel (Top) and Legend (Bottom)
+                const topReserved = isMobile ? 80 : 60; // Space for Question Panel
+                const bottomReserved = isMobile ? 60 : 40; // Space for Legend
+                
+                // 2. Adjust geo-bounds to include Hatay comfortably
+                this.geoBounds.minLat -= 1.0; 
 
                 const latSpan = this.geoBounds.maxLat - this.geoBounds.minLat;
                 const lonSpan = this.geoBounds.maxLon - this.geoBounds.minLon;
-                const padding = 20;
+                const padding = 10; // Minimal side padding for max width
                 
-                // Calculate scale to fit width
+                // 3. Calculate Scale based on AVAILABLE height (Total Height - Reserved Spaces)
+                const availableHeight = this.viewBox.h - topReserved - bottomReserved;
+                
                 const scaleW = (this.viewBox.w - 2 * padding) / lonSpan;
-                // Calculate scale to fit height MINUS top reserved space
-                const scaleH = (this.viewBox.h - topReservedSpace - padding) / latSpan;
+                const scaleH = (availableHeight - 2 * padding) / latSpan;
                 
                 this.scale = Math.min(scaleW, scaleH);
                 
                 this.offsetX = (this.viewBox.w - lonSpan * this.scale) / 2;
                 
-                // Position map:
-                // We want the TOP of the map (maxLat) to be at 'topReservedSpace'
-                // y_maxLat = H - (latSpan * scale + offsetY) = topReservedSpace
-                // offsetY = H - topReservedSpace - latSpan * scale
-                this.offsetY = this.viewBox.h - topReservedSpace - (latSpan * this.scale);
+                // 4. Position Map: Start drawing AFTER the top reserved space
+                // Y = TopReserved + Padding + (Visual Centering Offset if any)
+                // Since svg coordinates start at 0 (top), we shift the map down by topReserved
+                // The standard projection formula is: Y = H - (lat * scale) ...
+                // We need: MaxLat to be at y = topReserved + padding
+                
+                // Standard: y = H - ((lat - minLat) * scale + offsetY)
+                // We want y(maxLat) = topReserved
+                // topReserved = H - ((maxLat - minLat) * scale + offsetY)
+                // offsetY = H - topReserved - (latSpan * scale)
+                
+                this.offsetY = this.viewBox.h - topReserved - (latSpan * this.scale);
 
                 data.features.forEach(f => {
                     const d = this.createPathD(f.geometry);
