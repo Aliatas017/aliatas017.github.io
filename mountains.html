@@ -61,9 +61,6 @@
             
             --city-text: #475569;       /* Şehir isimleri için renk */
             --city-dot: #334155;
-            
-            --label-bg-color: rgba(15, 23, 42, 0.95);
-            --label-border-color: #38bdf8;
         }
 
         /* --- LIGHT MODE --- */
@@ -105,9 +102,6 @@
             
             --city-text: #cbd5e1;
             --city-dot: #e2e8f0;
-            
-            --label-bg-color: rgba(255, 255, 255, 0.95);
-            --label-border-color: #0369a1;
         }
 
         body { 
@@ -169,7 +163,7 @@
 
         /* --- RIGHT: SIDEBAR (STATS) --- */
         .stats-sidebar {
-            width: 100px; /* DAHA İNCE (140px -> 100px) */
+            width: 100px;
             background: var(--panel-bg);
             border-left: 2px solid var(--panel-border);
             display: flex;
@@ -182,7 +176,7 @@
             overflow-y: auto;
         }
 
-        /* Stat Chips (Küçültülmüş) */
+        /* Stat Chips */
         .stat-chip {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 0.5rem 0.25rem;
@@ -197,7 +191,7 @@
         .stat-value { font-size: 1rem; font-weight: 900; line-height: 1; }
         .stat-icon { width: 14px; height: 14px; margin-bottom: 4px; opacity: 0.8; }
 
-        /* --- QUESTION PANEL (TOP CENTER) --- */
+        /* --- QUESTION PANEL --- */
         #question-panel {
             background: var(--panel-bg);
             border: 3px solid var(--accent-primary);
@@ -208,7 +202,7 @@
             width: fit-content; max-width: 80vw;
             
             position: absolute;
-            top: 5px; /* DAHA YUKARIDA: 20px -> 5px */
+            top: 5px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 40;
@@ -231,11 +225,10 @@
         .province-path { fill: var(--province-fill); stroke: var(--province-stroke); stroke-width: 0.5px; transition: all 0.2s ease; vector-effect: non-scaling-stroke; }
         .province-path:hover { fill: var(--province-hover); stroke: var(--accent-primary); stroke-width: 2px; }
         
-        /* Şehir Etiketleri Stili */
         .city-label { 
             fill: var(--city-text); 
             font-weight: 500; 
-            font-size: 5px; /* Küçük font */
+            font-size: 5px; 
             pointer-events: none; 
             text-anchor: middle;
             opacity: 0.7;
@@ -251,12 +244,28 @@
         .mountain-marker[data-type="kivrim"] .mountain-shape { fill: var(--marker-kivrim); } 
         .mountain-marker.found .mountain-shape { fill: var(--marker-found-fill) !important; stroke: var(--marker-found-stroke); stroke-width: 2px; transform: scale(1.3); }
 
-        /* Labels */
-        .map-label-bg { fill: var(--label-bg-color); stroke: var(--label-border-color); stroke-width: 1.5px; rx: 4; }
-        .map-label-text { fill: var(--text-primary); font-weight: 800; font-size: 8px; pointer-events: none; text-anchor: middle; dominant-baseline: central; }
-        .label-connector { stroke: var(--text-secondary); stroke-dasharray: 2,2; stroke-width: 1.5px; }
-        .label-animate { animation: labelPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 0; }
-        @keyframes labelPop { from { opacity: 0; transform: scale(0.8) translateY(5px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        /* --- YENİ MİNİMAL ETİKET STİLİ --- */
+        .simple-label {
+            font-size: 6px;  /* Küçük, kibar font */
+            font-weight: 900;
+            fill: var(--text-primary); /* Tema rengine uygun */
+            text-anchor: middle;
+            pointer-events: none;
+            
+            /* HALO EFEKTİ: Arka plan rengiyle kalın bir kontur çizerek yazıyı her zeminde okunur kılar */
+            stroke: var(--map-bg); 
+            stroke-width: 2px;
+            paint-order: stroke; /* Stroke yazının arkasında kalsın */
+            stroke-linejoin: round;
+            
+            opacity: 0;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: translateY(3px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
         /* Legend */
         .legend-box {
@@ -314,7 +323,7 @@
         </div>
     </div>
 
-    <!-- Header (GÜNCELLENDİ: Navigasyon Eklendi) -->
+    <!-- Header -->
     <header class="border-b-2 border-[var(--panel-border)]">
         <div class="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between relative bg-inherit">
             
@@ -362,7 +371,7 @@
             </div>
         </div>
 
-        <!-- Mobil Menü - DÜZELTME: 'hidden' sınıfı eklendi -->
+        <!-- Mobil Menü -->
         <div id="mobile-menu" class="hidden md:hidden bg-[var(--panel-bg)] border-b border-[var(--panel-border)] w-full absolute top-16 left-0 z-40 shadow-xl">
             <div class="p-4 flex flex-col gap-2">
                 <a href="index.html" class="block px-4 py-3 font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-dots)] rounded-lg text-sm">Ana Sayfa</a>
@@ -397,8 +406,8 @@
                 <g id="map-content">
                     <g id="layer-provinces"></g>
                     <g id="layer-cities"></g>
-                    <g id="layer-lines"></g> 
                     <g id="layer-mountains"></g>
+                    <!-- Eski label çizgileri kaldırıldı -->
                     <g id="layer-labels"></g> 
                     <g id="layer-effects"></g>
                 </g>
@@ -424,7 +433,7 @@
             <div id="status-msg" class="absolute bottom-16 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl shadow-2xl font-bold text-sm transition-all opacity-0 translate-y-4 pointer-events-none z-50 flex items-center gap-2 border-2"></div>
         </div>
 
-        <!-- Sidebar Stats (Right) - GÜNCELLENDİ: Daha ince -->
+        <!-- Sidebar Stats (Right) -->
         <aside class="stats-sidebar">
             <div class="stat-chip">
                 <i data-lucide="timer" class="stat-icon" style="color: var(--accent-warn)"></i>
@@ -591,8 +600,7 @@
                 score: 0, remaining: [], current: null, active: false, 
                 correct: 0, wrong: 0, isLightMode: false, secondsElapsed: 0, timerInterval: null
             },
-            drawnLabels: [], 
-
+            
             init: function() {
                 const url = (MAP_DATA_URL === 'tr.json') ? FALLBACK_URL : MAP_DATA_URL;
                 this.fetchMapData(url);
@@ -672,7 +680,6 @@
                     
                     const center = this.getCentroid(f.geometry);
                     if(center) {
-                        // ŞEHİR İSİMLERİ EKLENDİ
                         const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
                         
                         const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -681,7 +688,7 @@
                         
                         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                         text.setAttribute("x", center.x);
-                        text.setAttribute("y", center.y + 2.5); // Noktanın biraz altına
+                        text.setAttribute("y", center.y + 2.5); 
                         text.setAttribute("class", "city-label");
                         text.textContent = f.properties.name;
 
@@ -725,7 +732,9 @@
                 const layer = document.getElementById('layer-mountains');
                 layer.innerHTML = "";
                 this.state.remaining = [...mountainData];
-                this.drawnLabels = []; 
+                
+                // Eski label temizliği
+                document.getElementById('layer-labels').innerHTML = "";
 
                 mountainData.forEach((mData, index) => {
                     const p = this.project(mData.lon, mData.lat);
@@ -737,7 +746,6 @@
                     g.setAttribute("data-type", mData.type);
                     g.onclick = (e) => { e.stopPropagation(); this.checkAnswer(mData, g); };
 
-                    // YENİ: İçerik grubu (Shake buna uygulanacak)
                     const contentG = document.createElementNS("http://www.w3.org/2000/svg", "g");
                     contentG.setAttribute("class", "marker-content");
                     g.appendChild(contentG);
@@ -820,7 +828,8 @@
                         shape.style.fill = "var(--marker-found-fill)";
                     }
 
-                    this.addLabel(mountain);
+                    this.addLabel(mountain); // SADELEŞTİRİLMİŞ ETİKET EKLEME
+                    
                     this.state.score += 10; this.state.correct++;
                     this.spawnFloatingText("+10", el, "text-green-400");
                     this.state.remaining = this.state.remaining.filter(m => m.name !== mountain.name);
@@ -830,7 +839,6 @@
                 } else {
                     audioController.play('error');
                     
-                    // Shake efektini iç gruba uyguluyoruz
                     const content = el.querySelector('.marker-content');
                     if (content) {
                         content.classList.add('shake');
@@ -868,109 +876,41 @@
                 }
             },
 
+            // --- YENİ BASİTLEŞTİRİLMİŞ LABEL FONKSİYONU ---
             addLabel: function(mountain) {
-                const g = document.getElementById('layer-labels');
-                const lineLayer = document.getElementById('layer-lines');
+                const layer = document.getElementById('layer-labels');
                 const p = this.project(mountain.lon, mountain.lat);
-                const textHeight = 16;
-                
-                let labelY = p.y - 18; 
-                let labelX = p.x;
-                let isCustom = false; // Özel pozisyon var mı?
 
-                // --- ÖZEL KONUMLANDIRMA ---
-                if (mountain.name === "Küre Dağları") {
-                    labelX -= 30; // Sola kaydır
-                    isCustom = true;
-                } 
-                else if (mountain.name === "Kula Volkanları") {
-                    labelX += 45; // Sağa kaydır
-                    labelY = p.y; // Aynı hizada
-                    isCustom = true;
-                }
-                else if (["Kaz Dağları", "Madra Dağı", "Yunt Dağı", "Aydın Dağları"].includes(mountain.name)) {
-                    labelX -= 50; // Sola kaydır
-                    labelY = p.y; // Aynı hizada
-                    isCustom = true;
-                }
-                else if (mountain.name === "Süphan Dağı") {
-                    labelX += 30; // Sağa
-                    labelY = p.y + 25; // Aşağı
-                    isCustom = true;
-                }
-
-                const charWidth = 6.5; 
-                const estimateWidth = mountain.name.length * charWidth + 24; 
-                
-                // Eğer özel ayar yoksa çarpışma önleyiciyi çalıştır
-                if (!isCustom) {
-                    let maxTries = 15; let collision = true;
-                    while (collision && maxTries > 0) {
-                        collision = false;
-                        const newRect = { left: labelX - estimateWidth / 2, right: labelX + estimateWidth / 2, top: labelY - 7, bottom: labelY + 7 };
-                        for (let drawn of this.drawnLabels) {
-                            if (newRect.left < drawn.right && newRect.right > drawn.left && newRect.top < drawn.bottom && newRect.bottom > drawn.top) {
-                                labelY -= (textHeight + 5); collision = true; break; 
-                            }
-                        }
-                        if (!collision) {
-                            for (let remainingM of this.state.remaining) {
-                                if (remainingM.name === mountain.name) continue; 
-                                const pRem = this.project(remainingM.lon, remainingM.lat);
-                                const markerBox = { left: pRem.x - 12, right: pRem.x + 12, top: pRem.y - 12, bottom: pRem.y + 12 };
-                                if (newRect.left < markerBox.right && newRect.right > markerBox.left && newRect.top < markerBox.bottom && newRect.bottom > markerBox.top) {
-                                    labelY -= (textHeight + 6); collision = true; break; 
-                                }
-                            }
-                        }
-                        maxTries--;
-                    }
-                }
-                
-                // Çizgi çizimi (Mesafe varsa)
-                const dist = Math.sqrt(Math.pow(p.x - labelX, 2) + Math.pow(p.y - labelY, 2));
-                
-                if (dist > 18) {
-                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                    line.setAttribute("x1", p.x); 
-                    line.setAttribute("y1", p.y); 
-                    line.setAttribute("x2", labelX); 
-                    
-                    // Eğer dikey hizadaysa (yanyana)
-                    if (Math.abs(p.y - labelY) < 10) {
-                        line.setAttribute("y2", labelY);
-                    } else {
-                        // Altında/Üstünde ise
-                        line.setAttribute("y2", labelY + (labelY < p.y ? 8 : -8)); 
-                    }
-                    
-                    line.setAttribute("class", "label-connector");
-                    lineLayer.appendChild(line);
-                }
-
-                const positionGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-                positionGroup.setAttribute("transform", `translate(${labelX}, ${labelY})`); // DÜZELTME: p.x yerine labelX, labelY
-                const animGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-                animGroup.setAttribute("class", "label-animate");
-                
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                text.setAttribute("class", "map-label-text");
-                text.setAttribute("text-anchor", "middle"); text.setAttribute("dominant-baseline", "central");
-                text.setAttribute("x", "0"); text.setAttribute("y", "0.5"); 
-                text.textContent = mountain.name;
                 
-                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-                rect.setAttribute("class", "map-label-bg");
-                rect.setAttribute("height", textHeight); rect.setAttribute("y", -textHeight/2);
-                
-                animGroup.appendChild(rect); animGroup.appendChild(text);
-                positionGroup.appendChild(animGroup); g.appendChild(positionGroup);
-                
-                const realWidth = text.getComputedTextLength(); 
-                const boxWidth = realWidth + 16; 
-                rect.setAttribute("width", boxWidth); rect.setAttribute("x", -boxWidth / 2);
+                let labelX = p.x;
+                let labelY = p.y + 8; // Varsayılan: Dağın altı
 
-                this.drawnLabels.push({ left: labelX - boxWidth / 2, right: labelX + boxWidth / 2, top: labelY - 7, bottom: labelY + 7 });
+                // --- ÇAKIŞMA ÖNLEME (Manuel Ayarlar) ---
+                
+                // Tahtalı ve Binboğa yan yana olduğu için birini alta, birini üste alıyoruz.
+                if (mountain.name === "Tahtalı Dağları") {
+                    // Varsayılan (alt) kalabilir veya hafif sola kaydırılabilir
+                     labelY = p.y + 8; 
+                } 
+                else if (mountain.name === "Binboğa Dağları") {
+                    // Bunu dağın üzerine alalım
+                    labelY = p.y - 8; 
+                }
+                // Melendiz ve Hasan Dağı Çakışması
+                else if (mountain.name === "Melendiz Dağı") {
+                    labelY = p.y - 8; // Üste al (Daha kuzeyde)
+                }
+                else if (mountain.name === "Hasan Dağı") {
+                    labelY = p.y + 8; // Alta al (Daha güneyde)
+                }
+
+                text.setAttribute("x", labelX);
+                text.setAttribute("y", labelY); 
+                text.textContent = mountain.name;
+                text.setAttribute("class", "simple-label");
+
+                layer.appendChild(text);
             },
             
             spawnFloatingText: function(text, el, colorClass) {
