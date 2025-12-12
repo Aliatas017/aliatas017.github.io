@@ -35,7 +35,7 @@
             --accent-success: #4ade80;  
 
             /* UI Detayları */
-            --glass-bg: rgba(15, 17, 42, 0.95); 
+            --glass-bg: rgba(15, 17, 42, 0.85); /* Biraz daha şeffaf */
             --border-width: 2px;
             --radius-md: 12px;
             --radius-lg: 16px;
@@ -63,7 +63,7 @@
             --city-text: #64748b;
             --city-dot: #475569;
             
-            --label-bg-color: rgba(15, 23, 42, 0.95);
+            --label-bg-color: rgba(15, 23, 42, 0.9);
             --label-border-color: #38bdf8;
         }
 
@@ -85,7 +85,7 @@
             --accent-danger: #dc2626;   
             --accent-success: #15803d;  
 
-            --glass-bg: rgba(255, 255, 255, 0.95); 
+            --glass-bg: rgba(255, 255, 255, 0.85); 
             --card-hover-bg: #f8fafc;
 
             --map-bg: #e2e8f0;          
@@ -108,7 +108,7 @@
             --city-text: #94a3b8;
             --city-dot: #cbd5e1;
             
-            --label-bg-color: rgba(255, 255, 255, 0.95);
+            --label-bg-color: rgba(255, 255, 255, 0.85);
             --label-border-color: #0369a1;
         }
 
@@ -185,29 +185,46 @@
         .stat-label { font-size: 0.6rem; text-transform: uppercase; font-weight: 700; color: var(--text-secondary); }
         .stat-value { font-size: 1rem; font-weight: 800; line-height: 1.1; }
 
-        /* Soru Paneli */
+        /* Harita Container - GÜNCELLENDİ: Flex Col yapısı */
+        #map-container {
+            flex-grow: 1;
+            position: relative;
+            background-color: var(--map-bg);
+            background-image: radial-gradient(circle at 50% 50%, var(--map-grad-start) 0%, var(--map-grad-end) 100%);
+            overflow: hidden;
+            width: 100%;
+            /* Flex Column ile alt alta diziyoruz */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Soru Paneli - GÜNCELLENDİ: Harita container içinde, overlay değil akışta */
         #question-panel {
-            background: var(--panel-bg);
-            border: 3px solid var(--accent-primary);
+            background: var(--glass-bg); /* Şeffaflık ile harita zeminine uyum */
+            border: 2px solid var(--accent-primary); /* Daha ince border */
             border-radius: var(--radius-lg);
-            padding: 0.75rem 1.5rem;
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+            padding: 0.5rem 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
             display: flex;
             align-items: center;
             justify-content: center; 
             gap: 1.5rem;
             width: fit-content;
-            max-width: 90vw; 
-            /* Absolute positioning relative to map container */
-            position: absolute;
-            top: 10px; 
-            left: 50%;
-            transform: translateX(-50%);
+            max-width: 90%; 
+            
+            /* Responsive Boşluklar */
+            margin-top: 2vh;    /* Üstten boşluk */
+            margin-bottom: 1vh; /* Harita ile arasındaki boşluk */
+            
             z-index: 40;
             transition: all 0.3s;
+            flex-shrink: 0;
+            backdrop-filter: blur(4px); /* Arka planı biraz buzla */
         }
+        
         .text-content-wrapper { text-align: center; display: flex; flex-direction: column; align-items: center; }
-        .target-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-secondary); font-weight: 700; }
+        .target-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-secondary); font-weight: 700; }
         .target-name { font-size: clamp(1rem, 2.5vw, 1.5rem); font-weight: 900; color: var(--accent-primary); white-space: nowrap; }
 
         #hint-btn {
@@ -218,16 +235,6 @@
             transition: transform 0.1s;
         }
         #hint-btn:active { transform: scale(0.95); }
-
-        /* Harita */
-        #map-container {
-            flex-grow: 1;
-            position: relative;
-            background-color: var(--map-bg);
-            background-image: radial-gradient(circle at 50% 50%, var(--map-grad-start) 0%, var(--map-grad-end) 100%);
-            overflow: hidden;
-            width: 100%;
-        }
 
         .province-path {
             fill: var(--province-fill); stroke: var(--province-stroke); stroke-width: 0.5px;
@@ -254,12 +261,22 @@
         .plateau-marker[data-type="tabaka"] .plateau-shape { fill: var(--marker-tabaka); } 
         .plateau-marker.found .plateau-shape { fill: var(--marker-found-fill) !important; stroke: var(--marker-found-stroke); stroke-width: 2.5px; transform: scale(1.5); }
 
-        /* Labels */
-        .map-label-bg { fill: var(--label-bg-color); stroke: var(--label-border-color); stroke-width: 1.5px; rx: 4; }
-        .map-label-text { fill: var(--text-primary); font-weight: 800; font-size: 8.5px; pointer-events: none; text-anchor: middle; dominant-baseline: central; }
-        .label-connector { stroke: var(--text-secondary); stroke-dasharray: 2,2; stroke-width: 1.5px; }
+        /* Labels - MINIMAL REDESIGN */
+        .map-label-bg { 
+            fill: var(--label-bg-color); 
+            opacity: 0.9;
+            rx: 3; /* Daha küçük yuvarlatma */
+        }
+        .map-label-text { 
+            fill: var(--text-primary); 
+            font-weight: 700; 
+            font-size: 6.5px; /* Daha küçük font */
+            pointer-events: none; 
+            text-anchor: middle; 
+            dominant-baseline: central; 
+        }
         .label-animate { animation: labelPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 0; }
-        @keyframes labelPop { from { opacity: 0; transform: scale(0.8) translateY(5px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes labelPop { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 
         /* Legend */
         .legend-box {
@@ -268,6 +285,7 @@
             border-radius: var(--radius-md); padding: 0.8rem;
             display: flex; flex-direction: column; gap: 0.5rem;
             pointer-events: none; opacity: 0.8;
+            z-index: 50; /* Üstte kalsın */
         }
         .legend-row { display: flex; gap: 1rem; }
         .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; }
@@ -354,7 +372,7 @@
     </div>
 
     <!-- Header (Anasayfa ile Uyumlu) -->
-    <header class="border-b-2 border-[var(--panel-border)]">
+    <header class="border-b-2 border-[var(--panel-border)] shrink-0">
         <div class="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between relative bg-inherit">
             
             <!-- Sol: Logo & Nav -->
@@ -419,7 +437,7 @@
     <main class="flex-grow flex flex-col relative overflow-hidden">
         
         <!-- Stats Bar (Header'dan taşınanlar) -->
-        <div class="stats-bar z-10 shadow-sm">
+        <div class="stats-bar z-10 shadow-sm shrink-0">
             <div class="stat-chip">
                 <span class="stat-label">Süre</span>
                 <span class="stat-value" style="color: var(--accent-warn)" id="timer">00:00</span>
@@ -440,7 +458,7 @@
 
         <!-- Map Area -->
         <div id="map-container">
-            <!-- Soru Paneli (Overlay) -->
+            <!-- Soru Paneli (TEKRAR İÇERİ ALINDI, AMA OVERLAY DEĞİL AKIŞTA) -->
             <div id="question-panel" class="opacity-0 pointer-events-none">
                 <div class="text-content-wrapper">
                     <div class="target-label">HEDEF BÖLGE</div>
@@ -452,11 +470,10 @@
             </div>
 
             <!-- SVG Map -->
-            <svg id="game-map" width="100%" height="100%" viewBox="0 0 1000 450" preserveAspectRatio="xMidYMid meet">
+            <svg id="game-map" width="100%" height="100%" viewBox="0 0 1000 450" preserveAspectRatio="xMidYMid meet" class="flex-grow w-full">
                 <g id="map-content">
                     <g id="layer-provinces"></g>
                     <g id="layer-cities"></g>
-                    <g id="layer-lines"></g> 
                     <g id="layer-plateaus"></g>
                     <g id="layer-labels"></g> 
                     <g id="layer-effects"></g>
@@ -520,7 +537,7 @@
     </div>
 
     <!-- Footer (Anasayfa ile Uyumlu) -->
-    <footer class="border-t border-[var(--panel-border)] z-50">
+    <footer class="border-t border-[var(--panel-border)] z-50 shrink-0">
         <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-2">
             <div class="text-[10px] font-medium" style="color: var(--text-secondary)">
                 &copy; 2024 Coğrafya Oyunları.
@@ -974,65 +991,34 @@
 
             addLabel: function(plateau) {
                 const g = document.getElementById('layer-labels');
-                const lineLayer = document.getElementById('layer-lines');
+                // Remove collision and line logic for minimalism
                 const p = this.project(plateau.lon, plateau.lat);
-                const textHeight = 16;
-                let labelY = p.y - 18; let labelX = p.x;
-                const charWidth = 7.5; const estimateWidth = plateau.name.length * charWidth + 24; 
-                let maxTries = 15; let collision = true;
-
-                while (collision && maxTries > 0) {
-                    collision = false;
-                    const newRect = { left: labelX - estimateWidth / 2, right: labelX + estimateWidth / 2, top: labelY - 7, bottom: labelY + 7 };
-                    for (let drawn of this.drawnLabels) {
-                        if (newRect.left < drawn.right && newRect.right > drawn.left && newRect.top < drawn.bottom && newRect.bottom > drawn.top) {
-                            labelY -= (textHeight + 5); collision = true; break; 
-                        }
-                    }
-                    if (!collision) {
-                        for (let remainingPlato of this.state.remaining) {
-                            if (remainingPlato.name === plateau.name) continue; 
-                            const pRem = this.project(remainingPlato.lon, remainingPlato.lat);
-                            const markerBox = { left: pRem.x - 18, right: pRem.x + 18, top: pRem.y - 18, bottom: pRem.y + 18 };
-                            if (newRect.left < markerBox.right && newRect.right > markerBox.left && newRect.top < markerBox.bottom && newRect.bottom > markerBox.top) {
-                                labelY -= (textHeight + 6); collision = true; break; 
-                            }
-                        }
-                    }
-                    maxTries--;
-                }
                 
-                if (p.y - labelY > 15) {
-                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                    line.setAttribute("x1", p.x); line.setAttribute("y1", p.y - 8); 
-                    line.setAttribute("x2", p.x); line.setAttribute("y2", labelY + 8); 
-                    line.setAttribute("class", "label-connector");
-                    lineLayer.appendChild(line);
-                }
-
                 const positionGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-                positionGroup.setAttribute("transform", `translate(${p.x}, ${labelY})`);
+                // Label'ı marker'ın hemen altına minimal şekilde yerleştiriyoruz
+                positionGroup.setAttribute("transform", `translate(${p.x}, ${p.y + 12})`); 
+                
                 const animGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
                 animGroup.setAttribute("class", "label-animate");
                 
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("class", "map-label-text");
-                text.setAttribute("text-anchor", "middle"); text.setAttribute("dominant-baseline", "central");
                 text.setAttribute("x", "0"); text.setAttribute("y", "0.5"); 
                 text.textContent = plateau.name;
                 
+                // Minimal arka plan kutucuğu (pill shape)
+                const charWidth = 4.5; 
+                const boxWidth = plateau.name.length * charWidth + 8; 
+                
                 const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
                 rect.setAttribute("class", "map-label-bg");
-                rect.setAttribute("height", textHeight); rect.setAttribute("y", -textHeight/2);
+                rect.setAttribute("width", boxWidth);
+                rect.setAttribute("height", 10);
+                rect.setAttribute("x", -boxWidth / 2);
+                rect.setAttribute("y", -4.5);
                 
                 animGroup.appendChild(rect); animGroup.appendChild(text);
                 positionGroup.appendChild(animGroup); g.appendChild(positionGroup);
-                
-                const realWidth = text.getComputedTextLength(); 
-                const boxWidth = realWidth + 24; 
-                rect.setAttribute("width", boxWidth); rect.setAttribute("x", -boxWidth / 2);
-
-                this.drawnLabels.push({ left: labelX - boxWidth / 2, right: labelX + boxWidth / 2, top: labelY - 7, bottom: labelY + 7 });
             },
             
             spawnFloatingText: function(text, el, colorClass) {
