@@ -834,9 +834,6 @@
                 modal.style.setProperty('--theme-color', color);
                 modal.classList.remove('opacity-0', 'pointer-events-none');
                 card.classList.remove('scale-90'); card.classList.add('scale-100');
-                
-                // --- REMOVED SNOW SCATTERING EFFECT FOR INFO CARD ---
-                // Clean opening without extra visual noise
             },
 
             closeInfo: function() {
@@ -874,7 +871,7 @@
                 if(displayName === "Mercan (Munzur)") displayName = "Munzur";
                 if(displayName === "Buzul (Cilo)") displayName = "Cilo";
 
-                const x = data.visX; 
+                let x = data.visX; 
                 let y = data.visY - 14; 
                 
                 // Collision Detection / Smart Positioning
@@ -892,13 +889,24 @@
                 if (displayName === "Bey") y = data.visY + 14; 
                 else if (displayName === "Dedegöl") y = data.visY + 14;
                 else if (displayName === "Aladağlar") y = data.visY + 14;
-                else if (displayName === "Bolkar") y = data.visY - 14;
+                else if (displayName === "Bolkar") y = data.visY + 16; // CHANGED: Alt tarafa
+                else if (displayName === "Tendürek") y = data.visY + 16; // CHANGED: Alt tarafa
                 else if (displayName === "Bingöl") y = data.visY + 14;
+                else if (displayName === "Davraz") { // CHANGED: Sol tarafa
+                     x = data.visX - 12;
+                     y = data.visY + 4; 
+                }
                 else if (tooClose) y = data.visY + 14; // Flip to bottom if overlap
 
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("class", "map-label-text");
                 text.setAttribute("x", x); text.setAttribute("y", y);
+                
+                // Specific alignment for Davraz to ensure it stays to the left
+                if (displayName === "Davraz") {
+                    text.style.textAnchor = "end";
+                }
+
                 text.textContent = displayName;
                 layer.appendChild(text);
                 
