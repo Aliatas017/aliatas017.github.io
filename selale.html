@@ -29,9 +29,7 @@
             --accent-danger: #f87171;   
             --accent-success: #4ade80;  
 
-            /* UI Detayları */
-            --glass-bg: rgba(15, 23, 42, 0.85); 
-            
+            --glass-bg: rgba(15, 23, 42, 0.95); 
             --map-bg: #0f172a;          
             --map-border: #1e293b;      
             --map-grad-start: #1e293b;
@@ -41,7 +39,7 @@
             --province-stroke: #475569; 
             --province-hover: #334155;
 
-            /* MARKER RENKLERİ */
+            /* MARKER RENKLERİ (NEON) */
             --region-karadeniz: #00e676;  /* Neon Yeşil */
             --region-akdeniz: #ff3d00;    /* Neon Kırmızı */
             --region-dogu: #2979ff;       /* Neon Mavi */
@@ -53,11 +51,9 @@
             --city-text: #64748b;
             --city-dot: #475569;
             
-            /* LABEL STYLES */
-            --label-bg-color: rgba(15, 23, 42, 0.9); 
-            --label-border-color: #38bdf8; 
-            --radius-lg: 16px;
-            --radius-md: 12px;
+            /* LABEL STYLES - MINIMALIST DIRECT TEXT */
+            --label-text-color: #ffffff;
+            --label-stroke-color: #020617; /* Arka plan rengiyle aynı kontur */
         }
 
         body.light-mode {
@@ -69,9 +65,6 @@
             --text-secondary: #475569;  
             --text-label: #0f172a;      
             --accent-primary: #0284c7;
-            
-            --glass-bg: rgba(255, 255, 255, 0.85);
-
             --map-bg: #e2e8f0;          
             --map-border: #94a3b8;      
             --map-grad-start: #f8fafc;
@@ -80,6 +73,7 @@
             --province-stroke: #94a3b8; 
             --province-hover: #f1f5f9;
             
+            /* Light Mode Colors */
             --region-karadeniz: #00c853; 
             --region-akdeniz: #dd2c00;
             --region-dogu: #2962ff;
@@ -89,8 +83,9 @@
             --marker-found-stroke: #f0f9ff;
             --city-text: #94a3b8;
             --city-dot: #cbd5e1;
-            --label-bg-color: rgba(255, 255, 255, 0.85);
-            --label-border-color: #0369a1;
+            
+            --label-text-color: #0f172a;
+            --label-stroke-color: #ffffff;
         }
 
         body { 
@@ -145,32 +140,17 @@
         .stat-label { font-size: 0.6rem; text-transform: uppercase; font-weight: 700; color: var(--text-secondary); }
         .stat-value { font-size: 1rem; font-weight: 800; line-height: 1.1; }
 
-        /* --- QUESTION PANEL --- */
         #question-panel {
-            position: absolute;
-            top: 2%; 
-            left: 50%;
-            transform: translateX(-50%);
-            
-            background: var(--glass-bg); 
-            border: 2px solid var(--accent-primary);
+            background: var(--panel-bg);
+            border: 3px solid var(--accent-primary);
             border-radius: var(--radius-lg);
-            padding: 0.5rem 1.5rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 1.5rem;
-            
-            width: fit-content; 
-            max-width: 90%; 
-            
-            z-index: 40; 
-            transition: all 0.3s;
-            backdrop-filter: blur(8px);
+            padding: 0.75rem 1.5rem;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+            display: flex; align-items: center; justify-content: center; gap: 1.5rem;
+            width: fit-content; max-width: 90vw; 
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            z-index: 40; transition: all 0.3s;
         }
-        
         .target-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-secondary); font-weight: 700; }
         .target-name { font-size: clamp(1rem, 2.5vw, 1.5rem); font-weight: 900; color: var(--accent-primary); white-space: nowrap; }
 
@@ -185,13 +165,10 @@
 
         /* --- MAP & MARKERS --- */
         #map-container {
-            flex-grow: 1; 
-            position: relative;
+            flex-grow: 1; position: relative;
             background-color: var(--map-bg);
             background-image: radial-gradient(circle at 50% 50%, var(--map-grad-start) 0%, var(--map-grad-end) 100%);
-            overflow: hidden; 
-            width: 100%;
-            height: 100%;
+            overflow: hidden; width: 100%;
         }
 
         .province-path {
@@ -222,22 +199,27 @@
             transform: scale(1.3); 
         }
 
-        /* --- ULTRA MINIMALIST LABELS --- */
-        .map-label-bg { 
-            fill: var(--label-bg-color); 
-            opacity: 0.9;
-            rx: 3; /* Daha küçük yuvarlatma */
-        }
+        /* --- ULTRA MINIMALIST DIRECT LABELS --- */
         .map-label-text { 
-            fill: var(--text-primary); 
-            font-weight: 700; 
-            font-size: 6.5px; /* Daha küçük font */
+            fill: var(--label-text-color); 
+            font-weight: 800; /* Ekstra kalın */
+            font-size: 8px; /* Okunabilir boyut */
             pointer-events: none; 
             text-anchor: middle; 
-            dominant-baseline: central; 
+            dominant-baseline: central;
+            
+            /* Kontur Efekti (Halo) */
+            stroke: var(--label-stroke-color);
+            stroke-width: 2.5px;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            paint-order: stroke; 
+            
+            opacity: 0;
+            animation: fadeIn 0.4s ease-out forwards;
         }
-        .label-animate { animation: labelPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 0; }
-        @keyframes labelPop { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Legend */
         .legend-box {
@@ -272,41 +254,12 @@
         #game-over-modal { background-color: rgba(0,0,0,0.8); backdrop-filter: blur(8px); }
         .modal-content { background: var(--panel-bg); border: 2px solid var(--panel-border); border-radius: var(--radius-lg); padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
 
-        /* --- INFO MODAL & NEW MODERN EFFECT --- */
+        /* --- INFO MODAL --- */
         #info-modal {
             background-color: rgba(2, 6, 23, 0.85);
             backdrop-filter: blur(16px);
             transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             perspective: 1000px;
-        }
-        
-        /* Kartın arkasındaki yeni pulse efekti container'ı */
-        #modal-backdrop-effect {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 300px; height: 400px; /* Kart boyutuyla yaklaşık */
-            pointer-events: none; z-index: -1;
-        }
-
-        /* Pulse halkaları */
-        #modal-backdrop-effect::before,
-        #modal-backdrop-effect::after {
-            content: ''; position: absolute; inset: 0;
-            border-radius: 32px;
-            border: 2px solid var(--theme-color);
-            opacity: 0;
-            transform: scale(0.8);
-        }
-
-        #info-modal.active #modal-backdrop-effect::before {
-            animation: pulseRing 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
-        }
-        #info-modal.active #modal-backdrop-effect::after {
-            animation: pulseRing 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) 0.2s forwards;
-        }
-
-        @keyframes pulseRing {
-            0% { transform: scale(0.9); opacity: 0.8; border-width: 4px; }
-            100% { transform: scale(1.6); opacity: 0; border-width: 0px; }
         }
         
         #info-card {
@@ -327,6 +280,7 @@
             pointer-events: none; mix-blend-mode: overlay;
         }
 
+        #info-modal.active { opacity: 1; pointer-events: auto; }
         #info-modal.active #info-card { transform: scale(1) translateY(0) rotateX(0deg); opacity: 1; }
         #info-modal:not(.active) { opacity: 0; pointer-events: none; }
 
@@ -439,7 +393,6 @@
         </div>
 
         <div id="map-container">
-            <!-- Soru Paneli (Overlay Mode) -->
             <div id="question-panel" class="opacity-0 pointer-events-none">
                 <div class="text-content-wrapper">
                     <div class="target-label">HEDEF ŞELALE</div>
@@ -475,9 +428,6 @@
     
     <!-- Info Modal -->
     <div id="info-modal" class="fixed inset-0 z-[70] flex items-center justify-center p-4">
-        <!-- Background pulse effect -->
-        <div id="modal-backdrop-effect"></div>
-        
         <div id="info-card" class="rounded-3xl p-0 max-w-sm w-full relative">
              <div class="card-glow-strip"></div>
              <div class="absolute -right-8 -top-8 opacity-10 rotate-12 pointer-events-none" style="color: var(--theme-color)">
@@ -854,7 +804,7 @@
             showInfo: function(waterfall) {
                 clearInterval(this.state.timerInterval);
                 audioController.play('achievement');
-                // CONFETTI KALDIRILDI
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, zIndex: 200 });
                 document.getElementById('info-title').innerText = waterfall.name;
                 document.getElementById('info-type').innerText = waterfall.region.toUpperCase();
                 document.getElementById('info-desc').innerText = waterfall.desc;
@@ -889,38 +839,36 @@
                 }
             },
 
-            // --- MINIMAL LABEL PLACEMENT ALGORITHM (Updated) ---
+            // --- SMART LABEL PLACEMENT ALGORITHM (Updated) ---
             addLabel: function(waterfall) {
-                const g = document.getElementById('layer-labels');
-                // Use visual coordinates since markers might be shifted
-                const labelX = waterfall.visX;
-                const labelY = waterfall.visY;
-                
-                const positionGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-                // Etiketi marker'ın hemen altına minimal şekilde yerleştiriyoruz (+12px)
-                positionGroup.setAttribute("transform", `translate(${labelX}, ${labelY + 12})`); 
-                
-                const animGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-                animGroup.setAttribute("class", "label-animate");
-                
+                const layer = document.getElementById('layer-labels');
+                let displayName = waterfall.name.replace(" Şelalesi", "").replace(" Şelaleleri", "");
+
+                // Manual short names if needed
+                if (displayName.includes("Tatlıca")) displayName = "Erfelek";
+
+                // Default position (Top)
+                const x = waterfall.visX;
+                let y = waterfall.visY - 9;
+
+                // Manual Overrides
+                if (displayName === "Samandere") y = waterfall.visY + 8; // Bottom
+                else if (displayName === "Ilıca") y = waterfall.visY - 9; // Top
+                else if (displayName === "Erfelek") y = waterfall.visY - 9; // Top
+                else if (displayName === "Kurşunlu") { x -= 25; y = waterfall.visY; } // Left
+                else if (displayName === "Düden") { y = waterfall.visY + 8; } // Bottom
+                else if (displayName === "Manavgat") { x += 25; y = waterfall.visY; } // Right
+                else if (displayName === "Gelintülü") { y = waterfall.visY - 9; } // Top
+                else if (displayName === "Bulut") { y = waterfall.visY + 8; } // Bottom
+                else if (displayName === "Tortum") { y = waterfall.visY - 9; }
+
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("class", "map-label-text");
-                text.setAttribute("x", "0"); text.setAttribute("y", "0.5"); 
-                text.textContent = waterfall.name;
+                text.setAttribute("x", x); 
+                text.setAttribute("y", y);
+                text.textContent = displayName;
                 
-                // Minimal arka plan kutucuğu (pill shape)
-                const charWidth = 4.5; 
-                const boxWidth = waterfall.name.length * charWidth + 8; 
-                
-                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-                rect.setAttribute("class", "map-label-bg");
-                rect.setAttribute("width", boxWidth);
-                rect.setAttribute("height", 10);
-                rect.setAttribute("x", -boxWidth / 2);
-                rect.setAttribute("y", -4.5);
-                
-                animGroup.appendChild(rect); animGroup.appendChild(text);
-                positionGroup.appendChild(animGroup); g.appendChild(positionGroup);
+                layer.appendChild(text);
             },
             
             spawnFloatingText: function(text, el, colorClass) {
