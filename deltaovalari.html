@@ -172,6 +172,8 @@
             background-color: var(--map-bg);
             background-image: radial-gradient(circle at 50% 50%, var(--map-grad-start) 0%, var(--map-grad-end) 100%);
             overflow: hidden; width: 100%;
+            /* Harita içeriğinin sığması için padding */
+            padding-top: 0; 
         }
 
         .province-path {
@@ -309,6 +311,24 @@
             animation: spin 10s linear infinite;
         }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* Yeni Başarı Efekti - Sparkles/Particles */
+        .sparkle-effect {
+            position: absolute;
+            width: 6px; height: 6px;
+            background: var(--theme-color);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--theme-color);
+            pointer-events: none;
+            opacity: 0;
+            z-index: 21; /* Kartın üzerinde */
+        }
+
+        @keyframes sparkle-float {
+            0% { transform: translate(0, 0) scale(0); opacity: 0; }
+            30% { opacity: 1; transform: translate(var(--tx), var(--ty)) scale(1.2); }
+            100% { transform: translate(var(--end-x), var(--end-y)) scale(0); opacity: 0; }
+        }
     </style>
 </head>
 <body class="h-screen flex flex-col">
@@ -877,11 +897,42 @@
             showInfo: function(delta) {
                 clearInterval(this.state.timerInterval);
                 audioController.play('achievement');
-                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, zIndex: 200 });
+                
+                // Show floating particles instead of confetti
+                const card = document.getElementById('info-card');
+                for(let i=0; i<15; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'sparkle-effect';
+                    
+                    // Random start positions around card center
+                    const startX = Math.random() * 50 - 25; 
+                    const startY = Math.random() * 50 - 25; 
+                    
+                    // Random end positions (float up and out)
+                    const endX = (Math.random() - 0.5) * 200; 
+                    const endY = -100 - Math.random() * 100;
+                    
+                    dot.style.setProperty('--tx', `${startX}px`);
+                    dot.style.setProperty('--ty', `${startY}px`);
+                    dot.style.setProperty('--end-x', `${endX}px`);
+                    dot.style.setProperty('--end-y', `${endY}px`);
+                    
+                    // Set color based on region
+                    if (delta.region === "karadeniz") dot.style.background = "#00e676";
+                    else if (delta.region === "akdeniz") dot.style.background = "#ff3d00";
+                    else dot.style.background = "#ffea00";
+                    
+                    dot.style.left = "50%"; dot.style.top = "50%";
+                    dot.style.animation = `sparkle-float ${1 + Math.random()}s ease-out forwards`;
+                    
+                    card.appendChild(dot);
+                    setTimeout(() => dot.remove(), 2000);
+                }
+
                 document.getElementById('info-title').innerText = delta.name;
                 document.getElementById('info-type').innerText = delta.region.toUpperCase();
                 document.getElementById('info-desc').innerText = delta.desc;
-                const card = document.getElementById('info-card');
+                
                 card.classList.remove('info-theme-karadeniz', 'info-theme-akdeniz', 'info-theme-ege');
                 if(delta.region) card.classList.add('info-theme-' + delta.region);
                 document.getElementById('info-modal').classList.add('active');
@@ -923,8 +974,8 @@
                 // --- Manuel Kaydırmalar (Çakışma Önleme) ---
                 if (displayName === "Bafra") y = delta.visY + 8; // Alt
                 else if (displayName === "Çarşamba") y = delta.visY - 9; // Üst
-                else if (displayName === "Meriç") y = delta.visY + 8; // Alt (Düzeltme: Panelden kaçmak için)
-                else if (displayName === "Sakarya") y = delta.visY + 8; // Alt (Düzeltme: Panelden kaçmak için)
+                else if (displayName === "Meriç") y = delta.visY + 8; // Alt
+                else if (displayName === "Sakarya") y = delta.visY + 8; // Alt
                 
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("class", "map-label-text");
