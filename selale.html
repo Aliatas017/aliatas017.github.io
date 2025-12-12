@@ -169,6 +169,7 @@
             background-color: var(--map-bg);
             background-image: radial-gradient(circle at 50% 50%, var(--map-grad-start) 0%, var(--map-grad-end) 100%);
             overflow: hidden; width: 100%;
+            padding-top: 60px; /* Safe space for question panel */
         }
 
         .province-path {
@@ -183,6 +184,7 @@
         .marker-content { transform-origin: center; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
         
         .marker-shape {
+            /* Fill color is set via Inline JS Style to prevent black issue */
             stroke: var(--bg-body); 
             stroke-width: 1.5px; 
             transition: fill 0.3s, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -307,6 +309,24 @@
             animation: spin 10s linear infinite;
         }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* Yeni Başarı Efekti - Sparkles/Particles */
+        .sparkle-effect {
+            position: absolute;
+            width: 6px; height: 6px;
+            background: var(--theme-color);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--theme-color);
+            pointer-events: none;
+            opacity: 0;
+            z-index: 21; /* Kartın üzerinde */
+        }
+
+        @keyframes sparkle-float {
+            0% { transform: translate(0, 0) scale(0); opacity: 0; }
+            30% { opacity: 1; transform: translate(var(--tx), var(--ty)) scale(1.2); }
+            100% { transform: translate(var(--end-x), var(--end-y)) scale(0); opacity: 0; }
+        }
     </style>
 </head>
 <body class="h-screen flex flex-col">
@@ -578,6 +598,7 @@
                 lucide.createIcons();
                 this.updateThemeIcon();
                 document.body.addEventListener('click', () => audioController.init(), { once: true });
+                window.addEventListener('resize', () => { if(this.svg) this.loadMap(this.mapData); });
             },
 
             toggleTheme: function() {
@@ -597,6 +618,7 @@
 
             fetchMapData: function(url) {
                 fetch(url).then(r => r.json()).then(data => {
+                    this.mapData = data; 
                     this.loadMap(data);
                     document.getElementById('loading-overlay').style.display = 'none';
                     this.start();
@@ -626,17 +648,36 @@
                 this.svg = document.getElementById('game-map');
                 const layerProvinces = document.getElementById('layer-provinces');
                 const layerCities = document.getElementById('layer-cities');
+                
+                layerProvinces.innerHTML = '';
+                layerCities.innerHTML = '';
+                document.getElementById('layer-markers').innerHTML = '';
+                document.getElementById('layer-labels').innerHTML = '';
+                document.getElementById('layer-lines').innerHTML = '';
+
+                this.geoBounds = { minLon: 180, maxLon: -180, minLat: 90, maxLat: -90 };
 
                 data.features.forEach(f => this.scanCoords(f.geometry.coordinates));
                 waterfallData.forEach(d => this.scanCoords([[d.lon, d.lat]]));
-                this.geoBounds.minLat -= 0.5;
+                
+                const isMobile = window.innerWidth < 768;
+                const bottomPadding = isMobile ? 2.5 : 1.5; 
+                this.geoBounds.minLat -= bottomPadding;
 
-                const lonSpan = this.geoBounds.maxLon - this.geoBounds.minLon;
+                const topReserved = isMobile ? 80 : 60; 
+                const bottomReserved = isMobile ? 60 : 40; 
+                
                 const latSpan = this.geoBounds.maxLat - this.geoBounds.minLat;
+                const lonSpan = this.geoBounds.maxLon - this.geoBounds.minLon;
                 const padding = 20;
-                this.scale = Math.min((this.viewBox.w - 2 * padding) / lonSpan, (this.viewBox.h - 2 * padding) / latSpan);
+                
+                const availableHeight = this.viewBox.h - topReserved - bottomReserved;
+                const scaleW = (this.viewBox.w - 2 * padding) / lonSpan;
+                const scaleH = (availableHeight) / latSpan;
+                
+                this.scale = Math.min(scaleW, scaleH);
                 this.offsetX = (this.viewBox.w - lonSpan * this.scale) / 2;
-                this.offsetY = (this.viewBox.h - latSpan * this.scale) / 2;
+                this.offsetY = this.viewBox.h - topReserved - (latSpan * this.scale);
 
                 data.features.forEach(f => {
                     const d = this.createPathD(f.geometry);
@@ -691,8 +732,8 @@
                 this.drawnLabels = []; 
 
                 // Spacing logic (Iterative)
-                waterfallData.forEach(d => { const p = this.project(d.lon, d.lat); d.visX = p.x; d.visY = p.y; d.origX = p.x; d.origY = p.y; });
-                const iterations = 10; const minDist = 22;
+                waterfallData.forEach(d => { const p = this.project(d.lon, d.lat); d.visX = p.x; d.visY = p.y; });
+                const iterations = 10; const minDist = 20; 
                 
                 for(let iter=0; iter<iterations; iter++) {
                     for (let i = 0; i < waterfallData.length; i++) {
@@ -727,7 +768,7 @@
                     
                     const shape = document.createElementNS("http://www.w3.org/2000/svg", "path");
                     shape.setAttribute("class", "marker-shape");
-                    shape.setAttribute("d", "M 0,-6 L 6,0 L 0,6 L -6,0 Z");
+                    shape.setAttribute("d", "M 0,-6 L 6,0 L 0,6 L -6,0 Z"); // Diamond shape
                     
                     // --- COLOR FIX: Apply inline style to ensure visibility ---
                     let fillColor = "#ffffff";
@@ -736,7 +777,6 @@
                     else if (wData.region === "dogu") fillColor = getComputedStyle(document.documentElement).getPropertyValue('--region-dogu');
                     else if (wData.region === "ic") fillColor = getComputedStyle(document.documentElement).getPropertyValue('--region-ic');
                     
-                    // Fallback using direct variable reference in JS for safety if computed fails initially
                     if (!fillColor || fillColor.trim() === '') {
                          if (wData.region === "karadeniz") fillColor = "#00e676";
                          else if (wData.region === "akdeniz") fillColor = "#ff3d00";
@@ -804,13 +844,41 @@
             showInfo: function(waterfall) {
                 clearInterval(this.state.timerInterval);
                 audioController.play('achievement');
-                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, zIndex: 200 });
+                
+                // Show floating particles instead of confetti
+                const card = document.getElementById('info-card');
+                for(let i=0; i<15; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'sparkle-effect';
+                    
+                    const startX = Math.random() * 50 - 25; 
+                    const startY = Math.random() * 50 - 25; 
+                    const endX = (Math.random() - 0.5) * 200; 
+                    const endY = -100 - Math.random() * 100;
+                    
+                    dot.style.setProperty('--tx', `${startX}px`);
+                    dot.style.setProperty('--ty', `${startY}px`);
+                    dot.style.setProperty('--end-x', `${endX}px`);
+                    dot.style.setProperty('--end-y', `${endY}px`);
+                    
+                    if (waterfall.region === "karadeniz") dot.style.background = "#00e676";
+                    else if (waterfall.region === "akdeniz") dot.style.background = "#ff3d00";
+                    else if (waterfall.region === "dogu") dot.style.background = "#2979ff";
+                    else if (waterfall.region === "ic") dot.style.background = "#ffea00";
+                    
+                    dot.style.left = "50%"; dot.style.top = "50%";
+                    dot.style.animation = `sparkle-float ${1 + Math.random()}s ease-out forwards`;
+                    
+                    card.appendChild(dot);
+                    setTimeout(() => dot.remove(), 2000);
+                }
+                
                 document.getElementById('info-title').innerText = waterfall.name;
                 document.getElementById('info-type').innerText = waterfall.region.toUpperCase();
                 document.getElementById('info-desc').innerText = waterfall.desc;
-                const card = document.getElementById('info-card');
-                card.classList.remove('info-theme-karadeniz', 'info-theme-akdeniz', 'info-theme-dogu', 'info-theme-ic');
-                if(waterfall.region) card.classList.add('info-theme-' + waterfall.region);
+                const cardEl = document.getElementById('info-card');
+                cardEl.classList.remove('info-theme-karadeniz', 'info-theme-akdeniz', 'info-theme-dogu', 'info-theme-ic');
+                if(waterfall.region) cardEl.classList.add('info-theme-' + waterfall.region);
                 document.getElementById('info-modal').classList.add('active');
             },
 
@@ -839,27 +907,23 @@
                 }
             },
 
-            // --- SMART LABEL PLACEMENT ALGORITHM (Updated) ---
             addLabel: function(waterfall) {
                 const layer = document.getElementById('layer-labels');
                 let displayName = waterfall.name.replace(" Şelalesi", "").replace(" Şelaleleri", "");
 
-                // Manual short names if needed
                 if (displayName.includes("Tatlıca")) displayName = "Erfelek";
 
-                // Default position (Top)
                 const x = waterfall.visX;
                 let y = waterfall.visY - 9;
 
-                // Manual Overrides
-                if (displayName === "Samandere") y = waterfall.visY + 8; // Bottom
-                else if (displayName === "Ilıca") y = waterfall.visY - 9; // Top
-                else if (displayName === "Erfelek") y = waterfall.visY - 9; // Top
-                else if (displayName === "Kurşunlu") { x -= 25; y = waterfall.visY; } // Left
-                else if (displayName === "Düden") { y = waterfall.visY + 8; } // Bottom
-                else if (displayName === "Manavgat") { x += 25; y = waterfall.visY; } // Right
-                else if (displayName === "Gelintülü") { y = waterfall.visY - 9; } // Top
-                else if (displayName === "Bulut") { y = waterfall.visY + 8; } // Bottom
+                if (displayName === "Samandere") y = waterfall.visY + 8;
+                else if (displayName === "Ilıca") y = waterfall.visY - 9;
+                else if (displayName === "Erfelek") y = waterfall.visY - 9;
+                else if (displayName === "Kurşunlu") { y = waterfall.visY + 8; } 
+                else if (displayName === "Düden") { y = waterfall.visY - 9; }
+                else if (displayName === "Manavgat") { y = waterfall.visY + 8; } 
+                else if (displayName === "Gelintülü") { y = waterfall.visY - 9; }
+                else if (displayName === "Bulut") { y = waterfall.visY + 8; }
                 else if (displayName === "Tortum") { y = waterfall.visY - 9; }
 
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
