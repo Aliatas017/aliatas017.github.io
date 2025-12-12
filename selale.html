@@ -29,7 +29,9 @@
             --accent-danger: #f87171;   
             --accent-success: #4ade80;  
 
-            --glass-bg: rgba(15, 23, 42, 0.95); 
+            /* UI Detayları */
+            --glass-bg: rgba(15, 23, 42, 0.85); 
+            
             --map-bg: #0f172a;          
             --map-border: #1e293b;      
             --map-grad-start: #1e293b;
@@ -51,9 +53,11 @@
             --city-text: #64748b;
             --city-dot: #475569;
             
-            /* LABEL STYLES - MINIMALIST */
-            --label-bg-color: rgba(15, 23, 42, 0.85); 
-            --label-border-color: rgba(14, 165, 233, 0.5); 
+            /* LABEL STYLES */
+            --label-bg-color: rgba(15, 23, 42, 0.9); 
+            --label-border-color: #38bdf8; 
+            --radius-lg: 16px;
+            --radius-md: 12px;
         }
 
         body.light-mode {
@@ -65,6 +69,9 @@
             --text-secondary: #475569;  
             --text-label: #0f172a;      
             --accent-primary: #0284c7;
+            
+            --glass-bg: rgba(255, 255, 255, 0.85);
+
             --map-bg: #e2e8f0;          
             --map-border: #94a3b8;      
             --map-grad-start: #f8fafc;
@@ -83,7 +90,7 @@
             --city-text: #94a3b8;
             --city-dot: #cbd5e1;
             --label-bg-color: rgba(255, 255, 255, 0.85);
-            --label-border-color: rgba(2, 132, 199, 0.4);
+            --label-border-color: #0369a1;
         }
 
         body { 
@@ -138,17 +145,32 @@
         .stat-label { font-size: 0.6rem; text-transform: uppercase; font-weight: 700; color: var(--text-secondary); }
         .stat-value { font-size: 1rem; font-weight: 800; line-height: 1.1; }
 
+        /* --- QUESTION PANEL --- */
         #question-panel {
-            background: var(--panel-bg);
-            border: 3px solid var(--accent-primary);
+            position: absolute;
+            top: 2%; 
+            left: 50%;
+            transform: translateX(-50%);
+            
+            background: var(--glass-bg); 
+            border: 2px solid var(--accent-primary);
             border-radius: var(--radius-lg);
-            padding: 0.75rem 1.5rem;
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
-            display: flex; align-items: center; justify-content: center; gap: 1.5rem;
-            width: fit-content; max-width: 90vw; 
-            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
-            z-index: 40; transition: all 0.3s;
+            padding: 0.5rem 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 1.5rem;
+            
+            width: fit-content; 
+            max-width: 90%; 
+            
+            z-index: 40; 
+            transition: all 0.3s;
+            backdrop-filter: blur(8px);
         }
+        
         .target-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-secondary); font-weight: 700; }
         .target-name { font-size: clamp(1rem, 2.5vw, 1.5rem); font-weight: 900; color: var(--accent-primary); white-space: nowrap; }
 
@@ -163,10 +185,13 @@
 
         /* --- MAP & MARKERS --- */
         #map-container {
-            flex-grow: 1; position: relative;
+            flex-grow: 1; 
+            position: relative;
             background-color: var(--map-bg);
             background-image: radial-gradient(circle at 50% 50%, var(--map-grad-start) 0%, var(--map-grad-end) 100%);
-            overflow: hidden; width: 100%;
+            overflow: hidden; 
+            width: 100%;
+            height: 100%;
         }
 
         .province-path {
@@ -200,26 +225,19 @@
         /* --- ULTRA MINIMALIST LABELS --- */
         .map-label-bg { 
             fill: var(--label-bg-color); 
-            stroke: var(--label-border-color); 
-            stroke-width: 0.5px; /* İnceltildi */
-            rx: 2; /* Daha hafif köşe yuvarlama */
+            opacity: 0.9;
+            rx: 3; /* Daha küçük yuvarlatma */
         }
         .map-label-text { 
             fill: var(--text-primary); 
-            font-weight: 500; /* Daha hafif font */
-            font-size: 6px; /* Font boyutu küçültüldü */
+            font-weight: 700; 
+            font-size: 6.5px; /* Daha küçük font */
             pointer-events: none; 
             text-anchor: middle; 
             dominant-baseline: central; 
         }
-        .label-connector { 
-            stroke: var(--text-secondary); 
-            stroke-dasharray: 1,1; /* Daha sık nokta */
-            stroke-width: 0.5px; /* Çizgi inceltildi */
-            opacity: 0.5;
-        }
         .label-animate { animation: labelPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 0; }
-        @keyframes labelPop { from { opacity: 0; transform: scale(0.8) translateY(5px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes labelPop { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 
         /* Legend */
         .legend-box {
@@ -254,12 +272,41 @@
         #game-over-modal { background-color: rgba(0,0,0,0.8); backdrop-filter: blur(8px); }
         .modal-content { background: var(--panel-bg); border: 2px solid var(--panel-border); border-radius: var(--radius-lg); padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
 
-        /* --- INFO MODAL --- */
+        /* --- INFO MODAL & NEW MODERN EFFECT --- */
         #info-modal {
             background-color: rgba(2, 6, 23, 0.85);
             backdrop-filter: blur(16px);
             transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             perspective: 1000px;
+        }
+        
+        /* Kartın arkasındaki yeni pulse efekti container'ı */
+        #modal-backdrop-effect {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 300px; height: 400px; /* Kart boyutuyla yaklaşık */
+            pointer-events: none; z-index: -1;
+        }
+
+        /* Pulse halkaları */
+        #modal-backdrop-effect::before,
+        #modal-backdrop-effect::after {
+            content: ''; position: absolute; inset: 0;
+            border-radius: 32px;
+            border: 2px solid var(--theme-color);
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        #info-modal.active #modal-backdrop-effect::before {
+            animation: pulseRing 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+        }
+        #info-modal.active #modal-backdrop-effect::after {
+            animation: pulseRing 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) 0.2s forwards;
+        }
+
+        @keyframes pulseRing {
+            0% { transform: scale(0.9); opacity: 0.8; border-width: 4px; }
+            100% { transform: scale(1.6); opacity: 0; border-width: 0px; }
         }
         
         #info-card {
@@ -280,7 +327,6 @@
             pointer-events: none; mix-blend-mode: overlay;
         }
 
-        #info-modal.active { opacity: 1; pointer-events: auto; }
         #info-modal.active #info-card { transform: scale(1) translateY(0) rotateX(0deg); opacity: 1; }
         #info-modal:not(.active) { opacity: 0; pointer-events: none; }
 
@@ -393,6 +439,7 @@
         </div>
 
         <div id="map-container">
+            <!-- Soru Paneli (Overlay Mode) -->
             <div id="question-panel" class="opacity-0 pointer-events-none">
                 <div class="text-content-wrapper">
                     <div class="target-label">HEDEF ŞELALE</div>
@@ -428,6 +475,9 @@
     
     <!-- Info Modal -->
     <div id="info-modal" class="fixed inset-0 z-[70] flex items-center justify-center p-4">
+        <!-- Background pulse effect -->
+        <div id="modal-backdrop-effect"></div>
+        
         <div id="info-card" class="rounded-3xl p-0 max-w-sm w-full relative">
              <div class="card-glow-strip"></div>
              <div class="absolute -right-8 -top-8 opacity-10 rotate-12 pointer-events-none" style="color: var(--theme-color)">
@@ -804,7 +854,7 @@
             showInfo: function(waterfall) {
                 clearInterval(this.state.timerInterval);
                 audioController.play('achievement');
-                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, zIndex: 200 });
+                // CONFETTI KALDIRILDI
                 document.getElementById('info-title').innerText = waterfall.name;
                 document.getElementById('info-type').innerText = waterfall.region.toUpperCase();
                 document.getElementById('info-desc').innerText = waterfall.desc;
@@ -839,97 +889,38 @@
                 }
             },
 
-            // --- SMART LABEL PLACEMENT ALGORITHM (Updated) ---
+            // --- MINIMAL LABEL PLACEMENT ALGORITHM (Updated) ---
             addLabel: function(waterfall) {
                 const g = document.getElementById('layer-labels');
-                const lineLayer = document.getElementById('layer-lines');
+                // Use visual coordinates since markers might be shifted
+                const labelX = waterfall.visX;
+                const labelY = waterfall.visY;
                 
-                // Minimalist dimensions
-                const charWidth = 3.8; 
-                const textHeight = 9; 
-                const padding = 6;
-                const boxWidth = (waterfall.name.length * charWidth) + padding;
-                const boxHeight = textHeight;
-                
-                const dist = 25;
-                const candidates = [
-                    { x: 0, y: -dist }, { x: 0, y: dist }, { x: dist, y: 0 }, { x: -dist, y: 0 },
-                    { x: dist, y: -dist }, { x: -dist, y: -dist }, { x: dist, y: dist }, { x: -dist, y: dist }
-                ];
-
-                let bestPos = candidates[0];
-                let minCollision = Infinity;
-
-                for (let pos of candidates) {
-                    const absX = waterfall.visX + pos.x;
-                    const absY = waterfall.visY + pos.y;
-                    
-                    let left = absX - boxWidth/2;
-                    let right = absX + boxWidth/2;
-                    let top = absY - boxHeight/2;
-                    let bottom = absY + boxHeight/2;
-
-                    let collisionScore = 0;
-                    for (let drawn of this.drawnLabels) {
-                        if (!(right < drawn.left || left > drawn.right || bottom < drawn.top || top > drawn.bottom)) {
-                            collisionScore += 100; 
-                        }
-                    }
-                    for (let w of waterfallData) {
-                        const mLeft = w.visX - 8; const mRight = w.visX + 8;
-                        const mTop = w.visY - 8; const mBottom = w.visY + 8;
-                        if (!(right < mLeft || left > mRight || bottom < mTop || top > mBottom)) {
-                            collisionScore += 50; 
-                        }
-                    }
-
-                    if (collisionScore < minCollision) {
-                        minCollision = collisionScore;
-                        bestPos = pos;
-                    }
-                    if (collisionScore === 0) break; 
-                }
-
-                // --- MANUEL DÜZELTMELER (Manual Overrides for Northern Waterfalls) ---
-                const northernWaterfalls = ["Ilıca Şelalesi", "Tatlıca/Erfelek", "Samandere Şelalesi"];
-                if (northernWaterfalls.includes(waterfall.name)) {
-                    bestPos = { x: 0, y: 35 }; // Aşağıya zorla
-                }
-
-                const labelX = waterfall.visX + bestPos.x;
-                const labelY = waterfall.visY + bestPos.y;
-                
-                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                line.setAttribute("class", "label-connector");
-                line.setAttribute("x1", waterfall.visX); line.setAttribute("y1", waterfall.visY);
-                line.setAttribute("x2", labelX); line.setAttribute("y2", labelY);
-                lineLayer.appendChild(line);
-
-                const posGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-                posGroup.setAttribute("transform", `translate(${labelX}, ${labelY})`);
+                const positionGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                // Etiketi marker'ın hemen altına minimal şekilde yerleştiriyoruz (+12px)
+                positionGroup.setAttribute("transform", `translate(${labelX}, ${labelY + 12})`); 
                 
                 const animGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
                 animGroup.setAttribute("class", "label-animate");
                 
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("class", "map-label-text");
-                text.setAttribute("x", 0); text.setAttribute("y", 0.5);
+                text.setAttribute("x", "0"); text.setAttribute("y", "0.5"); 
                 text.textContent = waterfall.name;
+                
+                // Minimal arka plan kutucuğu (pill shape)
+                const charWidth = 4.5; 
+                const boxWidth = waterfall.name.length * charWidth + 8; 
                 
                 const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
                 rect.setAttribute("class", "map-label-bg");
-                rect.setAttribute("width", boxWidth); rect.setAttribute("height", boxHeight);
-                rect.setAttribute("x", -boxWidth/2); rect.setAttribute("y", -boxHeight/2);
+                rect.setAttribute("width", boxWidth);
+                rect.setAttribute("height", 10);
+                rect.setAttribute("x", -boxWidth / 2);
+                rect.setAttribute("y", -4.5);
                 
                 animGroup.appendChild(rect); animGroup.appendChild(text);
-                posGroup.appendChild(animGroup); g.appendChild(posGroup);
-
-                this.drawnLabels.push({ 
-                    left: labelX - boxWidth/2 - 2, 
-                    right: labelX + boxWidth/2 + 2, 
-                    top: labelY - boxHeight/2 - 2, 
-                    bottom: labelY + boxHeight/2 + 2 
-                });
+                positionGroup.appendChild(animGroup); g.appendChild(positionGroup);
             },
             
             spawnFloatingText: function(text, el, colorClass) {
