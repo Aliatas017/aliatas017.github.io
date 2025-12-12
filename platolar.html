@@ -185,7 +185,7 @@
         .stat-label { font-size: 0.6rem; text-transform: uppercase; font-weight: 700; color: var(--text-secondary); }
         .stat-value { font-size: 1rem; font-weight: 800; line-height: 1.1; }
 
-        /* Harita Container - GÜNCELLENDİ: Flex Col yapısı */
+        /* Harita Container - GÜNCELLENDİ: Max boyut için */
         #map-container {
             flex-grow: 1;
             position: relative;
@@ -193,19 +193,22 @@
             background-image: radial-gradient(circle at 50% 50%, var(--map-grad-start) 0%, var(--map-grad-end) 100%);
             overflow: hidden;
             width: 100%;
-            /* Flex Column ile alt alta diziyoruz */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            height: 100%; /* Kapsayıcıyı doldur */
         }
 
-        /* Soru Paneli - GÜNCELLENDİ: Harita container içinde, overlay değil akışta */
+        /* Soru Paneli - GÜNCELLENDİ: Overlay Mode */
         #question-panel {
-            background: var(--glass-bg); /* Şeffaflık ile harita zeminine uyum */
-            border: 2px solid var(--accent-primary); /* Daha ince border */
+            position: absolute;
+            top: 2%; /* Üstten biraz boşluk */
+            left: 50%;
+            transform: translateX(-50%);
+            
+            background: var(--glass-bg); 
+            border: 2px solid var(--accent-primary); 
             border-radius: var(--radius-lg);
             padding: 0.5rem 1.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); /* Daha belirgin gölge */
+            
             display: flex;
             align-items: center;
             justify-content: center; 
@@ -213,14 +216,9 @@
             width: fit-content;
             max-width: 90%; 
             
-            /* Responsive Boşluklar */
-            margin-top: 2vh;    /* Üstten boşluk */
-            margin-bottom: 1vh; /* Harita ile arasındaki boşluk */
-            
             z-index: 40;
             transition: all 0.3s;
-            flex-shrink: 0;
-            backdrop-filter: blur(4px); /* Arka planı biraz buzla */
+            backdrop-filter: blur(8px);
         }
         
         .text-content-wrapper { text-align: center; display: flex; flex-direction: column; align-items: center; }
