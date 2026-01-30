@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#09090b">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Mobil Kütüphane V2</title>
+    <title>Mobil Kütüphane V3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -15,6 +15,7 @@
             font-family: 'Plus Jakarta Sans', sans-serif; 
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: none;
+            font-size: 16px; /* Base font size increased */
         }
 
         .hide-scroll::-webkit-scrollbar { display: none; }
@@ -30,6 +31,9 @@
         .viewer-closed { transform: scale(0.95); opacity: 0; pointer-events: none; }
 
         .cat-active { background: #6366f1; color: white; border-color: #6366f1; }
+        
+        /* Input Focus Ring Fix */
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #6366f1; }
     </style>
     <script>
         tailwind.config = { 
@@ -38,6 +42,9 @@
                 extend: { 
                     colors: { 
                         dark: { 950: '#09090b', 900: '#121215', 800: '#1c1c21', 700: '#27272a' } 
+                    },
+                    spacing: {
+                        '18': '4.5rem',
                     }
                 } 
             } 
@@ -47,88 +54,87 @@
 <body class="bg-dark-950 text-gray-200 h-[100dvh] flex flex-col overflow-hidden relative">
 
     <!-- HEADER -->
-    <header class="flex-none px-5 pt-6 pb-2 bg-dark-950 z-20">
-        <div class="flex justify-between items-center mb-4">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-violet-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
-                    <i data-lucide="library" class="w-5 h-5"></i>
+    <header class="flex-none px-5 pt-8 pb-3 bg-dark-950 z-20">
+        <div class="flex justify-between items-center mb-5">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-gradient-to-tr from-indigo-600 to-violet-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
+                    <i data-lucide="library" class="w-7 h-7"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-white leading-none tracking-tight">Kütüphanem</h1>
-                    <span class="text-[10px] font-medium text-gray-500 uppercase tracking-widest">Mobil Pro</span>
+                    <h1 class="text-2xl font-bold text-white leading-none tracking-tight">Kütüphanem</h1>
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-widest mt-1 block">Mobil Pro</span>
                 </div>
             </div>
-            <button onclick="toggleSettings()" class="p-2.5 bg-dark-800 rounded-full text-gray-400 hover:text-white border border-dark-700 active:scale-95 transition-transform">
-                <i data-lucide="settings-2" class="w-5 h-5"></i>
+            <button onclick="toggleSettings()" class="w-12 h-12 bg-dark-800 rounded-2xl text-gray-400 hover:text-white border border-dark-700 active:scale-95 transition-transform flex items-center justify-center">
+                <i data-lucide="settings-2" class="w-6 h-6"></i>
             </button>
         </div>
 
         <!-- SEARCH -->
         <div class="relative group">
-            <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-indigo-500 transition-colors"></i>
-            <input type="text" id="searchInput" placeholder="Notlarda ara..." class="w-full bg-dark-900 border border-dark-700 rounded-2xl py-3.5 pl-10 pr-4 text-sm text-white placeholder-gray-600 focus:border-indigo-500 focus:outline-none transition-all focus:bg-dark-800">
+            <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-indigo-500 transition-colors"></i>
+            <input type="text" id="searchInput" placeholder="Notlarda ara..." class="w-full bg-dark-900 border border-dark-700 rounded-2xl py-4 pl-12 pr-4 text-base text-white placeholder-gray-500 transition-all focus:bg-dark-800 shadow-sm">
         </div>
     </header>
 
     <!-- CATEGORY TABS -->
-    <div class="flex-none px-4 py-3 border-b border-dark-800/50 bg-dark-950/95 backdrop-blur z-10">
-        <div id="categoryList" class="flex gap-2.5 overflow-x-auto hide-scroll pb-1">
+    <div class="flex-none px-5 py-3 border-b border-dark-800/50 bg-dark-950/95 backdrop-blur z-10">
+        <div id="categoryList" class="flex gap-3 overflow-x-auto hide-scroll pb-1">
             <!-- JS populates here -->
         </div>
     </div>
 
     <!-- MAIN CONTENT -->
-    <main id="contentArea" class="flex-1 overflow-y-auto p-4 space-y-3 pb-28 scroll-smooth">
+    <main id="contentArea" class="flex-1 overflow-y-auto p-5 space-y-4 pb-32 scroll-smooth">
         <!-- JS populates items here -->
     </main>
 
-    <!-- FAB (Add Button) -->
-    <div class="fixed bottom-6 right-6 z-30">
-        <button onclick="openModal()" class="w-14 h-14 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-xl shadow-indigo-600/40 active:scale-90 transition-transform border-2 border-dark-950">
-            <i data-lucide="plus" class="w-7 h-7"></i>
+    <!-- FAB (Add Button) - BIGGER -->
+    <div class="fixed bottom-8 right-6 z-30">
+        <button onclick="openModal()" class="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-xl shadow-indigo-600/40 active:scale-90 transition-transform border-2 border-dark-950">
+            <i data-lucide="plus" class="w-8 h-8"></i>
         </button>
     </div>
 
     <!-- === DETAIL VIEW (LAUNCHPAD) === -->
-    <!-- iframe yerine bu ekran açılacak -->
-    <div id="detailView" class="fixed inset-0 z-[60] bg-dark-950/95 backdrop-blur-xl viewer-closed viewer-transition flex flex-col items-center justify-center p-6">
+    <div id="detailView" class="fixed inset-0 z-[60] bg-dark-950/95 backdrop-blur-xl viewer-closed viewer-transition flex flex-col items-center justify-center p-4">
         
         <!-- Close Button -->
-        <button onclick="closeDetail()" class="absolute top-6 right-6 p-2 bg-dark-800 rounded-full text-gray-400 hover:text-white border border-dark-700 active:scale-90 transition-transform">
-            <i data-lucide="x" class="w-6 h-6"></i>
+        <button onclick="closeDetail()" class="absolute top-6 right-6 p-3 bg-dark-800 rounded-full text-gray-400 hover:text-white border border-dark-700 active:scale-90 transition-transform z-50">
+            <i data-lucide="x" class="w-7 h-7"></i>
         </button>
 
         <!-- Card Content -->
-        <div class="w-full max-w-sm bg-dark-900 border border-dark-700 p-6 rounded-3xl shadow-2xl relative overflow-hidden">
+        <div class="w-full bg-dark-900 border border-dark-700 p-6 rounded-[2rem] shadow-2xl relative overflow-hidden flex flex-col items-center">
             <!-- Background Glow -->
-            <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+            <div class="absolute top-0 right-0 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
             
-            <div class="relative z-10 text-center flex flex-col items-center">
-                <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-white shadow-lg mb-5">
-                    <i data-lucide="link" class="w-8 h-8"></i>
+            <div class="relative z-10 text-center flex flex-col items-center w-full">
+                <div class="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center text-white shadow-lg mb-6">
+                    <i data-lucide="link" class="w-10 h-10"></i>
                 </div>
                 
-                <span id="detailCategory" class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-3 py-1 rounded-full mb-3">KATEGORİ</span>
+                <span id="detailCategory" class="text-xs font-bold text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-4 py-1.5 rounded-full mb-4">KATEGORİ</span>
                 
-                <h2 id="detailTitle" class="text-xl font-bold text-white mb-4 leading-tight">Başlık Buraya</h2>
+                <h2 id="detailTitle" class="text-2xl font-bold text-white mb-6 leading-tight px-2">Başlık Buraya</h2>
                 
-                <div id="detailNoteBox" class="w-full bg-dark-800/50 rounded-xl p-4 border border-dark-700/50 text-left mb-6">
-                    <p class="text-xs text-gray-500 uppercase font-bold mb-1 flex items-center gap-1"><i data-lucide="sticky-note" class="w-3 h-3"></i> Notlar</p>
-                    <p id="detailNote" class="text-sm text-gray-300 italic">Not yok...</p>
+                <div id="detailNoteBox" class="w-full bg-dark-800/50 rounded-2xl p-5 border border-dark-700/50 text-left mb-8">
+                    <p class="text-xs text-gray-500 uppercase font-bold mb-2 flex items-center gap-2"><i data-lucide="sticky-note" class="w-4 h-4"></i> Notlar</p>
+                    <p id="detailNote" class="text-base text-gray-300 leading-relaxed">Not yok...</p>
                 </div>
 
-                <!-- Launch Button -->
-                <a id="detailLinkBtn" href="#" target="_blank" onclick="closeDetail()" class="w-full py-4 bg-white text-black font-bold rounded-xl flex items-center justify-center gap-2 shadow-xl active:scale-95 transition-transform hover:bg-gray-200">
+                <!-- Launch Button - HUGE -->
+                <a id="detailLinkBtn" href="#" target="_blank" onclick="closeDetail()" class="w-full py-5 bg-white text-black text-lg font-bold rounded-2xl flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-transform hover:bg-gray-100 mb-4">
                     <span>Canvas'ı Başlat</span>
-                    <i data-lucide="external-link" class="w-4 h-4"></i>
+                    <i data-lucide="external-link" class="w-6 h-6"></i>
                 </a>
                 
-                <div class="mt-4 flex gap-3 w-full">
-                    <button id="detailCompleteBtn" onclick="" class="flex-1 py-2.5 bg-dark-800 text-emerald-400 font-medium rounded-xl border border-dark-700 active:scale-95 text-xs flex items-center justify-center gap-1">
-                        <i data-lucide="check" class="w-3 h-3"></i> Bitirdim
+                <div class="flex gap-4 w-full">
+                    <button id="detailCompleteBtn" onclick="" class="flex-1 py-4 bg-dark-800 text-emerald-400 font-bold rounded-2xl border border-dark-700 active:scale-95 text-sm flex items-center justify-center gap-2">
+                        <i data-lucide="check" class="w-5 h-5"></i> Bitirdim
                     </button>
-                    <button onclick="deleteCurrentItem()" class="flex-1 py-2.5 bg-dark-800 text-red-400 font-medium rounded-xl border border-dark-700 active:scale-95 text-xs flex items-center justify-center gap-1">
-                        <i data-lucide="trash" class="w-3 h-3"></i> Sil
+                    <button onclick="deleteCurrentItem()" class="flex-1 py-4 bg-dark-800 text-red-400 font-bold rounded-2xl border border-dark-700 active:scale-95 text-sm flex items-center justify-center gap-2">
+                        <i data-lucide="trash" class="w-5 h-5"></i> Sil
                     </button>
                 </div>
             </div>
@@ -137,49 +143,49 @@
 
     <!-- === ADD ITEM SHEET === -->
     <div id="modalBackdrop" class="fixed inset-0 bg-black/80 z-40 hidden transition-opacity" onclick="closeModal()"></div>
-    <div id="modalSheet" class="fixed bottom-0 left-0 right-0 bg-dark-900 rounded-t-3xl z-50 sheet-closed sheet-transition max-h-[90vh] flex flex-col border-t border-dark-700 shadow-2xl">
-        <div class="w-12 h-1.5 bg-dark-700 rounded-full mx-auto mt-3 mb-1"></div>
-        <div class="p-6 overflow-y-auto pb-8">
-            <h3 id="modalTitle" class="text-lg font-bold text-white mb-6 flex items-center gap-2"><i data-lucide="plus-circle" class="w-5 h-5 text-indigo-500"></i> Yeni İçerik Ekle</h3>
-            <form id="itemForm" class="space-y-4">
+    <div id="modalSheet" class="fixed bottom-0 left-0 right-0 bg-dark-900 rounded-t-[2rem] z-50 sheet-closed sheet-transition max-h-[90vh] flex flex-col border-t border-dark-700 shadow-2xl">
+        <div class="w-16 h-1.5 bg-dark-700 rounded-full mx-auto mt-4 mb-2"></div>
+        <div class="p-6 overflow-y-auto pb-10">
+            <h3 id="modalTitle" class="text-xl font-bold text-white mb-6 flex items-center gap-3"><i data-lucide="plus-circle" class="w-6 h-6 text-indigo-500"></i> Yeni İçerik Ekle</h3>
+            <form id="itemForm" class="space-y-5">
                 <input type="hidden" id="editItemId">
                 
                 <div>
                     <label class="text-xs font-bold text-gray-500 uppercase ml-1">Başlık</label>
-                    <input type="text" id="inputTitle" required class="w-full mt-1.5 px-4 py-3.5 bg-dark-800 border border-dark-700 rounded-xl text-white focus:border-indigo-500 outline-none transition-all placeholder-gray-600">
+                    <input type="text" id="inputTitle" required class="w-full mt-2 px-5 py-4 bg-dark-800 border border-dark-700 rounded-2xl text-white text-lg focus:border-indigo-500 transition-colors placeholder-gray-600">
                 </div>
 
                 <div>
                     <label class="text-xs font-bold text-gray-500 uppercase ml-1">Link (URL)</label>
                     <div class="relative">
-                        <i data-lucide="link" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
-                        <input type="url" id="inputUrl" required class="w-full mt-1.5 pl-10 pr-4 py-3.5 bg-dark-800 border border-dark-700 rounded-xl text-white focus:border-indigo-500 outline-none transition-all placeholder-gray-600">
+                        <i data-lucide="link" class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
+                        <input type="url" id="inputUrl" required class="w-full mt-2 pl-12 pr-5 py-4 bg-dark-800 border border-dark-700 rounded-2xl text-white text-lg focus:border-indigo-500 transition-colors placeholder-gray-600">
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="text-xs font-bold text-gray-500 uppercase ml-1">Kategori</label>
                         <div class="relative">
-                            <select id="inputMainCategory" onchange="populateSubSelect(this.value)" class="w-full mt-1.5 px-3 py-3.5 bg-dark-800 border border-dark-700 rounded-xl text-white outline-none appearance-none"></select>
-                            <i data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none mt-0.5"></i>
+                            <select id="inputMainCategory" onchange="populateSubSelect(this.value)" class="w-full mt-2 px-4 py-4 bg-dark-800 border border-dark-700 rounded-2xl text-white text-base appearance-none"></select>
+                            <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none mt-1"></i>
                         </div>
                     </div>
                     <div>
                         <label class="text-xs font-bold text-gray-500 uppercase ml-1">Alt Konu</label>
                         <div class="relative">
-                            <select id="inputSubCategory" class="w-full mt-1.5 px-3 py-3.5 bg-dark-800 border border-dark-700 rounded-xl text-white outline-none appearance-none"></select>
-                            <i data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none mt-0.5"></i>
+                            <select id="inputSubCategory" class="w-full mt-2 px-4 py-4 bg-dark-800 border border-dark-700 rounded-2xl text-white text-base appearance-none"></select>
+                            <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none mt-1"></i>
                         </div>
                     </div>
                 </div>
 
                 <div>
                     <label class="text-xs font-bold text-gray-500 uppercase ml-1">Not</label>
-                    <textarea id="inputNote" rows="2" class="w-full mt-1.5 px-4 py-3.5 bg-dark-800 border border-dark-700 rounded-xl text-white focus:border-indigo-500 outline-none resize-none placeholder-gray-600"></textarea>
+                    <textarea id="inputNote" rows="3" class="w-full mt-2 px-5 py-4 bg-dark-800 border border-dark-700 rounded-2xl text-white text-lg focus:border-indigo-500 transition-colors resize-none placeholder-gray-600"></textarea>
                 </div>
 
-                <button type="submit" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl active:scale-95 transition-transform shadow-lg shadow-indigo-600/20 mt-4">
+                <button type="submit" class="w-full py-5 bg-indigo-600 text-white text-lg font-bold rounded-2xl active:scale-95 transition-transform shadow-lg shadow-indigo-600/30 mt-4">
                     Kaydet
                 </button>
             </form>
@@ -188,25 +194,28 @@
 
     <!-- === SETTINGS SHEET === -->
     <div id="settingsBackdrop" class="fixed inset-0 bg-black/80 z-40 hidden transition-opacity" onclick="toggleSettings()"></div>
-    <div id="settingsSheet" class="fixed bottom-0 left-0 right-0 bg-dark-900 rounded-t-3xl z-50 sheet-closed sheet-transition max-h-[85vh] flex flex-col border-t border-dark-700">
-        <div class="w-12 h-1.5 bg-dark-700 rounded-full mx-auto mt-3"></div>
-        <div class="p-6 flex-1 overflow-y-auto">
-            <h3 class="text-lg font-bold text-white mb-4">Ayarlar & Kategoriler</h3>
-            <div class="space-y-3 mb-6">
-                <button onclick="openCatModal('main')" class="w-full py-3.5 bg-dark-800 border border-dark-700 text-white rounded-xl font-medium flex items-center justify-center gap-2 active:bg-dark-700">
-                    <i data-lucide="folder-plus" class="w-4 h-4 text-indigo-400"></i> Ana Kategori Ekle
+    <div id="settingsSheet" class="fixed bottom-0 left-0 right-0 bg-dark-900 rounded-t-[2rem] z-50 sheet-closed sheet-transition max-h-[85vh] flex flex-col border-t border-dark-700">
+        <div class="w-16 h-1.5 bg-dark-700 rounded-full mx-auto mt-4"></div>
+        <div class="p-6 flex-1 overflow-y-auto pb-10">
+            <h3 class="text-xl font-bold text-white mb-6">Yönetim Paneli</h3>
+            
+            <div class="space-y-4 mb-8">
+                <button onclick="openCatModal('main')" class="w-full py-4 bg-dark-800 border border-dark-700 text-white rounded-2xl font-semibold flex items-center justify-center gap-3 active:bg-dark-700 text-lg">
+                    <i data-lucide="folder-plus" class="w-6 h-6 text-indigo-400"></i> Ana Kategori Ekle
                 </button>
-                <button onclick="openCatModal('sub')" class="w-full py-3.5 bg-dark-800 border border-dark-700 text-white rounded-xl font-medium flex items-center justify-center gap-2 active:bg-dark-700">
-                    <i data-lucide="plus" class="w-4 h-4 text-gray-400"></i> Alt Kategori Ekle
+                <button onclick="openCatModal('sub')" class="w-full py-4 bg-dark-800 border border-dark-700 text-white rounded-2xl font-semibold flex items-center justify-center gap-3 active:bg-dark-700 text-lg">
+                    <i data-lucide="plus" class="w-6 h-6 text-gray-400"></i> Alt Kategori Ekle
                 </button>
             </div>
+
             <div class="h-px bg-dark-800 my-6"></div>
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="downloadBackup()" class="py-4 bg-dark-800 rounded-xl text-xs font-bold text-emerald-400 flex flex-col items-center gap-2 active:scale-95 border border-dark-700">
-                    <i data-lucide="download" class="w-5 h-5"></i> Yedeği İndir
+
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="downloadBackup()" class="py-5 bg-dark-800 rounded-2xl text-sm font-bold text-emerald-400 flex flex-col items-center gap-2 active:scale-95 border border-dark-700">
+                    <i data-lucide="download" class="w-6 h-6"></i> Yedeği İndir
                 </button>
-                <button onclick="document.getElementById('importFile').click()" class="py-4 bg-dark-800 rounded-xl text-xs font-bold text-blue-400 flex flex-col items-center gap-2 active:scale-95 border border-dark-700">
-                    <i data-lucide="upload" class="w-5 h-5"></i> Yükle
+                <button onclick="document.getElementById('importFile').click()" class="py-5 bg-dark-800 rounded-2xl text-sm font-bold text-blue-400 flex flex-col items-center gap-2 active:scale-95 border border-dark-700">
+                    <i data-lucide="upload" class="w-6 h-6"></i> Yükle
                 </button>
                 <input type="file" id="importFile" class="hidden" accept=".json" onchange="restoreBackup(this)">
             </div>
@@ -224,7 +233,7 @@
         let categories = JSON.parse(localStorage.getItem('ck_cats_mobile')) || defaultCategories;
         let items = JSON.parse(localStorage.getItem('ck_items_mobile')) || [];
         let activeMainId = 'all';
-        let currentDetailId = null; // Track current open detail item
+        let currentDetailId = null;
 
         function init() {
             lucide.createIcons();
@@ -239,14 +248,14 @@
             renderItems();
         }
 
-        // TABS
+        // TABS - Larger Buttons
         function renderCategoryTabs() {
             const listEl = document.getElementById('categoryList');
             listEl.innerHTML = '';
             categories.forEach(cat => {
                 const isActive = activeMainId === cat.id;
                 const btn = document.createElement('button');
-                btn.className = `flex-none px-5 py-2.5 rounded-full text-xs font-bold border transition-all ${
+                btn.className = `flex-none px-6 py-3 rounded-full text-sm font-bold border transition-all active:scale-95 ${
                     isActive 
                     ? 'cat-active shadow-lg shadow-indigo-500/30' 
                     : 'bg-dark-900 border-dark-700 text-gray-400'
@@ -257,7 +266,7 @@
             });
         }
 
-        // LIST
+        // LIST - Bigger Cards
         function renderItems() {
             const container = document.getElementById('contentArea');
             const searchVal = document.getElementById('searchInput').value.toLowerCase();
@@ -270,7 +279,7 @@
             });
 
             if (filtered.length === 0) {
-                container.innerHTML = `<div class="flex flex-col items-center justify-center h-64 text-gray-700"><i data-lucide="ghost" class="w-12 h-12 mb-3 opacity-30"></i><p class="text-sm font-medium">İçerik yok</p></div>`;
+                container.innerHTML = `<div class="flex flex-col items-center justify-center h-80 text-gray-700"><i data-lucide="ghost" class="w-16 h-16 mb-4 opacity-30"></i><p class="text-lg font-medium">İçerik yok</p></div>`;
                 lucide.createIcons(); return;
             }
 
@@ -281,22 +290,21 @@
 
                 const card = document.createElement('div');
                 card.onclick = (e) => {
-                    // Prevent opening detail if clicking buttons
                     if(e.target.closest('button')) return;
                     openDetailView(item);
                 };
-                card.className = `relative bg-dark-800 rounded-2xl p-5 border border-dark-700 active:scale-[0.98] transition-all shadow-sm ${isDone ? 'opacity-50 grayscale' : 'hover:border-indigo-500/50'}`;
+                card.className = `relative bg-dark-800 rounded-3xl p-6 border border-dark-700 active:scale-[0.98] transition-all shadow-sm ${isDone ? 'opacity-50 grayscale' : 'hover:border-indigo-500/50'}`;
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wide bg-dark-900 px-2 py-1 rounded border border-dark-700">
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wide bg-dark-900 px-3 py-1.5 rounded-lg border border-dark-700/50 truncate max-w-[70%]">
                             ${mainCat?.name} ${subCatName ? '/ ' + subCatName : ''}
                         </span>
-                        <div class="flex gap-2">
-                            <button onclick="editItem(${item.id})" class="text-gray-500 p-1 bg-dark-900 rounded-md border border-dark-700"><i data-lucide="pencil" class="w-3 h-3"></i></button>
+                        <div class="flex gap-3">
+                            <button onclick="editItem(${item.id})" class="text-gray-400 p-1.5 bg-dark-900 rounded-lg border border-dark-700"><i data-lucide="pencil" class="w-5 h-5"></i></button>
                         </div>
                     </div>
-                    <h3 class="text-white font-bold text-base mb-1 leading-snug ${isDone ? 'line-through' : ''}">${item.title}</h3>
-                    <p class="text-xs text-gray-500 line-clamp-1 mb-0">${item.note || 'Not yok'}</p>
+                    <h3 class="text-white font-bold text-xl mb-2 leading-snug ${isDone ? 'line-through' : ''}">${item.title}</h3>
+                    <p class="text-sm text-gray-500 line-clamp-1 mb-0">${item.note || 'Not yok'}</p>
                 `;
                 container.appendChild(card);
             });
@@ -315,21 +323,18 @@
             document.getElementById('detailNote').textContent = item.note || 'Bu içerik için not eklenmemiş.';
             document.getElementById('detailLinkBtn').href = item.url;
             
-            // Toggle btn state
             const toggleBtn = document.getElementById('detailCompleteBtn');
             const isDone = item.status === 'completed';
-            toggleBtn.className = `flex-1 py-2.5 font-medium rounded-xl border active:scale-95 text-xs flex items-center justify-center gap-1 ${isDone ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-dark-800 text-emerald-400 border-dark-700'}`;
-            toggleBtn.innerHTML = isDone ? '<i data-lucide="rotate-ccw" class="w-3 h-3"></i> Geri Al' : '<i data-lucide="check" class="w-3 h-3"></i> Bitirdim';
+            toggleBtn.className = `flex-1 py-4 font-bold rounded-2xl border active:scale-95 text-sm flex items-center justify-center gap-2 ${isDone ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-dark-800 text-emerald-400 border-dark-700'}`;
+            toggleBtn.innerHTML = isDone ? '<i data-lucide="rotate-ccw" class="w-5 h-5"></i> Geri Al' : '<i data-lucide="check" class="w-5 h-5"></i> Bitirdim';
             toggleBtn.onclick = () => { toggleStatus(item.id); closeDetail(); };
 
-            view.classList.remove('viewer-closed');
-            view.classList.add('viewer-open');
+            view.classList.remove('viewer-closed'); view.classList.add('viewer-open');
         }
 
         function closeDetail() {
             const view = document.getElementById('detailView');
-            view.classList.remove('viewer-open');
-            view.classList.add('viewer-closed');
+            view.classList.remove('viewer-open'); view.classList.add('viewer-closed');
         }
 
         function deleteCurrentItem() {
@@ -355,12 +360,12 @@
                 mainSelect.value = item.mainId;
                 populateSubSelect(item.mainId);
                 document.getElementById('inputSubCategory').value = item.subId;
-                document.getElementById('modalTitle').innerHTML = '<i data-lucide="pencil" class="w-5 h-5 text-indigo-500"></i> Düzenle';
+                document.getElementById('modalTitle').innerHTML = '<i data-lucide="pencil" class="w-6 h-6 text-indigo-500"></i> Düzenle';
             } else {
                 form.reset();
                 document.getElementById('editItemId').value = '';
-                populateSubSelect(categories[1]?.id || categories[0].id); // Skip 'all'
-                document.getElementById('modalTitle').innerHTML = '<i data-lucide="plus-circle" class="w-5 h-5 text-indigo-500"></i> Yeni İçerik Ekle';
+                populateSubSelect(categories[1]?.id || categories[0].id);
+                document.getElementById('modalTitle').innerHTML = '<i data-lucide="plus-circle" class="w-6 h-6 text-indigo-500"></i> Yeni İçerik Ekle';
             }
             backdrop.classList.remove('hidden');
             setTimeout(() => { sheet.classList.remove('sheet-closed'); sheet.classList.add('sheet-open'); }, 10);
