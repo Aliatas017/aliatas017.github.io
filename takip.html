@@ -398,8 +398,12 @@
             contentFilter.subId = 'all';
             
             // OPTIMIZATION: Only update Sidebar and Grid, do NOT re-render the whole page (search bar etc)
-            document.getElementById('content-sidebar').innerHTML = getSidebarHTML();
-            document.getElementById('test-grid').innerHTML = getGridHTML();
+            const sidebarEl = document.getElementById('content-sidebar');
+            if (sidebarEl) sidebarEl.innerHTML = getSidebarHTML();
+            
+            const gridEl = document.getElementById('test-grid');
+            if (gridEl) gridEl.innerHTML = getGridHTML();
+            
             // Re-apply search filter logic immediately
             handleSearch(contentFilter.search);
         };
@@ -408,8 +412,12 @@
             contentFilter.subId = id; 
             
             // OPTIMIZATION: Only update Sidebar and Grid
-            document.getElementById('content-sidebar').innerHTML = getSidebarHTML();
-            document.getElementById('test-grid').innerHTML = getGridHTML();
+            const sidebarEl = document.getElementById('content-sidebar');
+            if (sidebarEl) sidebarEl.innerHTML = getSidebarHTML();
+            
+            const gridEl = document.getElementById('test-grid');
+            if (gridEl) gridEl.innerHTML = getGridHTML();
+            
             // Re-apply search filter logic immediately
             handleSearch(contentFilter.search);
         };
@@ -568,7 +576,7 @@
             }).join('') || '<p class="text-text-muted text-sm p-6 text-center">Henüz aktivite yok.</p>';
 
             container.innerHTML = `
-                <div class="animate-fade-in">
+                <div class="animate-fade-in pb-10">
                     <div class="mb-8">
                         <h2 class="text-3xl font-bold tracking-tight text-white font-display">Genel Bakış</h2>
                     </div>
@@ -597,7 +605,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                         <div class="lg:col-span-2 glass-panel rounded-2xl p-6">
                             <h3 class="font-bold text-white mb-6 text-sm flex items-center gap-2 uppercase tracking-wide">
                                 Ders Bazlı Başarı
@@ -616,6 +624,22 @@
                              </div>
                         </div>
                     </div>
+
+                    <!-- Veri Yönetimi Paneli -->
+                    <div class="glass-panel rounded-2xl p-6 border border-red-500/20">
+                        <h3 class="font-bold text-white mb-6 text-sm flex items-center gap-2 uppercase tracking-wide text-red-400">
+                            <span class="material-symbols-rounded">settings</span> Veri Yönetimi
+                        </h3>
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <button onclick="resetProgress()" class="flex-1 bg-red-500/10 hover:bg-red-500/20 text-red-200 border border-red-500/30 py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
+                                <span class="material-symbols-rounded text-lg">history</span> İlerlemeyi Sıfırla
+                            </button>
+                            <button onclick="deleteAllData()" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-red-500/20">
+                                <span class="material-symbols-rounded text-lg">delete_forever</span> Tüm Kütüphaneyi Sil
+                            </button>
+                        </div>
+                        <p class="text-xs text-text-muted mt-3 text-center opacity-70">Dikkat: Bu işlemler geri alınamaz.</p>
+                    </div>
                 </div>`;
         }
 
@@ -624,7 +648,7 @@
             return `
                 <div class="flex justify-between items-center px-2 pb-4 mb-2 border-b border-border-dark">
                     <h3 class="font-bold text-white text-sm uppercase tracking-wider">Filtrele</h3>
-                    <button onclick="openModal('category')" class="text-white bg-card-dark hover:bg-neutral-700 transition-colors text-xs font-bold py-1.5 px-3 rounded-lg border border-border-dark">+ Ekle</button>
+                    <button onclick="openModal('category')" class="text-white bg-card-dark hover:bg-neutral-700 transition-colors text-xs font-bold py-1.5 px-3 rounded-lg border border-border-dark">+ Ders Ekle</button>
                 </div>
                 <div class="space-y-2">
                     <button onclick="toggleCategory('all')" class="w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all ${contentFilter.catId === 'all' ? 'bg-card-dark text-white border border-border-dark' : 'text-text-muted hover:bg-surface-dark hover:text-white'}">
@@ -637,8 +661,8 @@
                                     ${c.name}
                                 </button>
                                 <div class="flex items-center pr-3 gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onclick="openModal('subcategory', '${c.id}')" class="text-text-muted hover:text-white p-1.5"><span class="material-symbols-rounded text-sm">add</span></button>
-                                    <button onclick="deleteItem('categories', '${c.id}')" class="text-text-muted hover:text-red-400 p-1.5"><span class="material-symbols-rounded text-sm">delete</span></button>
+                                    <button onclick="openModal('subcategory', '${c.id}')" class="text-text-muted hover:text-white p-1.5" title="Konu Ekle"><span class="material-symbols-rounded text-sm">add</span></button>
+                                    <button onclick="deleteItem('categories', '${c.id}')" class="text-text-muted hover:text-red-400 p-1.5" title="Dersi Sil"><span class="material-symbols-rounded text-sm">delete</span></button>
                                 </div>
                             </div>
                             ${contentFilter.catId === c.id ? `
@@ -724,13 +748,23 @@
             const sidebarHtmlContent = getSidebarHTML();
             const cardsHtmlContent = getGridHTML();
             
+            // Updated layout for mobile responsiveness
             container.innerHTML = `
-                <div class="flex h-full animate-fade-in gap-8 overflow-hidden w-full">
-                    <div id="content-sidebar" class="w-72 shrink-0 glass-panel flex flex-col gap-3 overflow-y-auto no-scrollbar rounded-2xl m-6 mr-0 p-5 border border-border-dark h-[calc(100vh-3rem)]">
+                <div class="flex h-full animate-fade-in gap-0 lg:gap-8 overflow-hidden w-full flex-col lg:flex-row">
+                    <!-- Sidebar: Hidden on mobile, flex on desktop -->
+                    <div id="content-sidebar" class="hidden lg:flex w-72 shrink-0 glass-panel flex-col gap-3 overflow-y-auto no-scrollbar rounded-2xl m-6 mr-0 p-5 border border-border-dark h-[calc(100vh-3rem)]">
                         ${sidebarHtmlContent}
                     </div>
-                    <div class="flex-1 flex flex-col h-full overflow-hidden pt-6 pb-0 pr-6">
-                        <div class="flex justify-between items-center mb-8 shrink-0 gap-6">
+                    
+                    <div class="flex-1 flex flex-col h-full overflow-hidden pt-6 pb-0 px-4 lg:pr-6 lg:pl-0">
+                        <!-- Mobile Filter Button -->
+                        <div class="lg:hidden mb-4 flex gap-2 overflow-x-auto pb-2 shrink-0">
+                             <button onclick="openModal('mobile-filters')" class="bg-card-dark border border-border-dark text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap active:scale-95 transition-transform">
+                                <span class="material-symbols-rounded text-base">filter_list</span> Ders & Konu Seç
+                             </button>
+                        </div>
+
+                        <div class="flex justify-between items-center mb-6 shrink-0 gap-4 lg:gap-6">
                             <div class="relative flex-1 max-w-xl group">
                                 <span class="material-symbols-rounded absolute left-4 top-3.5 text-text-muted text-xl">search</span>
                                 <!-- Live Search Input -->
@@ -740,8 +774,8 @@
                                        value="${contentFilter.search}" 
                                        class="w-full input-immersive rounded-xl py-3.5 pl-14 pr-4 text-base focus:bg-card-dark placeholder:text-gray-600">
                             </div>
-                            <button onclick="openModal('global-test-json')" class="bg-white hover:bg-gray-200 text-black border border-transparent px-6 py-3.5 rounded-xl text-sm font-bold flex items-center gap-2 shrink-0 transition-all shadow-lg hover:scale-105">
-                                <span class="material-symbols-rounded text-xl">add</span> Yeni Test
+                            <button onclick="openModal('global-test-json')" class="bg-white hover:bg-gray-200 text-black border border-transparent px-4 lg:px-6 py-3.5 rounded-xl text-sm font-bold flex items-center gap-2 shrink-0 transition-all shadow-lg hover:scale-105">
+                                <span class="material-symbols-rounded text-xl">add</span> <span class="hidden md:inline">Yeni Test</span>
                             </button>
                         </div>
                         <div class="flex-1 overflow-y-auto no-scrollbar pb-20 relative">
@@ -1062,7 +1096,10 @@
             
             currentEditingId = type === 'subcategory' ? subId : id;
 
-            if (type === 'global-test-json') {
+            if (type === 'mobile-filters') {
+                title.innerText = 'Ders ve Konu Filtrele';
+                body.innerHTML = getSidebarHTML();
+            } else if (type === 'global-test-json') {
                 title.innerText = id ? 'Testi Düzenle' : 'Yeni Test Oluştur';
                 let selCat = contentFilter.catId !== 'all' ? contentFilter.catId : '';
                 let selSub = contentFilter.subId !== 'all' ? contentFilter.subId : '';
@@ -1083,8 +1120,8 @@
                 body.innerHTML = `
                     <form onsubmit="handleSubmit(event, 'global-test-json')" class="space-y-5">
                         <div class="grid grid-cols-2 gap-4">
-                            <div><label class="text-[10px] font-bold text-text-muted uppercase block mb-1.5 ml-1">Kategori</label><select id="modal-cat-select" onchange="filterSubcatsInModal()" class="w-full input-immersive rounded-lg p-2.5 text-xs"><option value="">Seçiniz</option>${catOpts}</select></div>
-                            <div><label class="text-[10px] font-bold text-text-muted uppercase block mb-1.5 ml-1">Alt Kategori</label><select name="subId" id="modal-sub-select" required class="w-full input-immersive rounded-lg p-2.5 text-xs disabled:opacity-50"><option value="">Önce kategori...</option></select></div>
+                            <div><label class="text-[10px] font-bold text-text-muted uppercase block mb-1.5 ml-1">Ders</label><select id="modal-cat-select" onchange="filterSubcatsInModal()" class="w-full input-immersive rounded-lg p-2.5 text-xs"><option value="">Seçiniz</option>${catOpts}</select></div>
+                            <div><label class="text-[10px] font-bold text-text-muted uppercase block mb-1.5 ml-1">Konu</label><select name="subId" id="modal-sub-select" required class="w-full input-immersive rounded-lg p-2.5 text-xs disabled:opacity-50"><option value="">Önce ders seçiniz...</option></select></div>
                         </div>
                         <div><label class="text-[10px] font-bold text-text-muted uppercase block mb-1.5 ml-1">Test Başlığı</label><input name="title" value="${testData?.title || ''}" required class="w-full input-immersive rounded-lg p-2.5 text-xs font-semibold" placeholder="Örn: Tarih Deneme 1"></div>
                         <div>
@@ -1103,18 +1140,18 @@
                 setTimeout(() => filterSubcatsInModal(selSub), 100);
 
             } else if (type === 'category') {
-                title.innerText = 'Kategori Yönetimi';
-                body.innerHTML = `<form onsubmit="handleSubmit(event, 'category')" class="space-y-4"><div><label class="text-[10px] text-text-muted font-bold uppercase block mb-1.5 ml-1">Kategori Adı</label><input name="name" required class="w-full input-immersive rounded-lg p-2.5 text-sm"></div><button class="w-full bg-white hover:bg-neutral-200 text-black py-2.5 rounded-lg font-bold text-xs shadow-lg">Kaydet</button></form>`;
+                title.innerText = 'Ders Yönetimi';
+                body.innerHTML = `<form onsubmit="handleSubmit(event, 'category')" class="space-y-4"><div><label class="text-[10px] text-text-muted font-bold uppercase block mb-1.5 ml-1">Ders Adı</label><input name="name" required class="w-full input-immersive rounded-lg p-2.5 text-sm"></div><button class="w-full bg-white hover:bg-neutral-200 text-black py-2.5 rounded-lg font-bold text-xs shadow-lg">Kaydet</button></form>`;
             } else if (type === 'subcategory') {
-                title.innerText = 'Alt Kategori Ekle';
-                body.innerHTML = `<form onsubmit="handleSubmit(event, 'subcategory')" class="space-y-4"><input type="hidden" name="catId" value="${id}"><div><label class="text-[10px] text-text-muted font-bold uppercase block mb-1.5 ml-1">Alt Kategori Adı</label><input name="name" required class="w-full input-immersive rounded-lg p-2.5 text-sm"></div><button class="w-full bg-white hover:bg-neutral-200 text-black py-2.5 rounded-lg font-bold text-xs shadow-lg">Kaydet</button></form>`;
+                title.innerText = 'Konu Ekle';
+                body.innerHTML = `<form onsubmit="handleSubmit(event, 'subcategory')" class="space-y-4"><input type="hidden" name="catId" value="${id}"><div><label class="text-[10px] text-text-muted font-bold uppercase block mb-1.5 ml-1">Konu Adı</label><input name="name" required class="w-full input-immersive rounded-lg p-2.5 text-sm"></div><button class="w-full bg-white hover:bg-neutral-200 text-black py-2.5 rounded-lg font-bold text-xs shadow-lg">Kaydet</button></form>`;
             }
         }
 
         window.filterSubcatsInModal = (preSelectId = null) => {
             const catId = document.getElementById('modal-cat-select').value;
             const subSel = document.getElementById('modal-sub-select');
-            if (!catId) { subSel.innerHTML = '<option value="">Önce kategori...</option>'; subSel.disabled = true; return; }
+            if (!catId) { subSel.innerHTML = '<option value="">Önce ders seçiniz...</option>'; subSel.disabled = true; return; }
             const subs = subcategories.filter(s => s.catId === catId);
             subSel.innerHTML = subs.length ? subs.map(s => `<option value="${s.id}" ${s.id === preSelectId ? 'selected' : ''}>${s.name}</option>`).join('') : '<option value="">Yok</option>';
             subSel.disabled = !subs.length;
@@ -1182,6 +1219,38 @@
             if(!confirm("Bu öğeyi kalıcı olarak silmek istiyor musunuz?")) return;
             await deleteDoc(doc(db, `artifacts/${appId}/users/${currentUser.uid}`, col, id));
             showToast("Öğe Silindi");
+        }
+
+        window.resetProgress = async () => {
+            if(!confirm("DİKKAT: Çözdüğünüz tüm testlerin sonuçları silinecek ve ilerlemeniz sıfırlanacak. Bu işlem geri alınamaz. Devam edilsin mi?")) return;
+            const path = `artifacts/${appId}/users/${currentUser.uid}`;
+            const promises = results.map(r => deleteDoc(doc(db, path, 'results', r.id)));
+            try {
+                await Promise.all(promises);
+                showToast("İlerleme Başarıyla Sıfırlandı");
+            } catch(e) {
+                console.error(e);
+                showToast("Hata oluştu", "error");
+            }
+        }
+
+        window.deleteAllData = async () => {
+            if(!confirm("KRİTİK UYARI: Hesabınızdaki TÜM Dersler, Konular, Testler ve Sonuçlar kalıcı olarak SİLİNECEK. Kütüphaneniz tamamen boşaltılacak.\n\nEmin misiniz?")) return;
+            
+            const path = `artifacts/${appId}/users/${currentUser.uid}`;
+            try {
+                const p1 = results.map(x => deleteDoc(doc(db, path, 'results', x.id)));
+                const p2 = questions.map(x => deleteDoc(doc(db, path, 'questions', x.id)));
+                const p3 = tests.map(x => deleteDoc(doc(db, path, 'tests', x.id)));
+                const p4 = subcategories.map(x => deleteDoc(doc(db, path, 'subcategories', x.id)));
+                const p5 = categories.map(x => deleteDoc(doc(db, path, 'categories', x.id)));
+                
+                await Promise.all([...p1, ...p2, ...p3, ...p4, ...p5]);
+                showToast("Tüm Veriler Silindi ve Kütüphane Temizlendi");
+            } catch(e) {
+                console.error(e);
+                showToast("Silme işlemi sırasında hata oluştu", "error");
+            }
         }
 
         window.showToast = (title, type = "success") => {
